@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useCallback } from 'react'
 import type { Subject } from '../types/types'
 import type { CalendarEvent } from './Eventmodal'
 import EventModal from './Eventmodal'
-import './UpcomingSidebar.css'
+import './Upcomingsidebar.css'
 import { CalendarCircle, CloseCircle, Copy, Edit, ArrowLeft2, ArrowRight2, Calendar } from 'iconsax-react'
 
 interface Props {
