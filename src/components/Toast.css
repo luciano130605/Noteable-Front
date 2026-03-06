@@ -1,0 +1,136 @@
+.toast-container {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    pointer-events: none;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    backdrop-filter: blur(12px);
+    border: 1px solid transparent;
+    cursor: pointer;
+    pointer-events: all;
+    min-width: 240px;
+    max-width: 360px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+    transform: translateX(110%);
+    opacity: 0;
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.22s ease;
+}
+
+.toast--visible {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast--success {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #4ade80;
+}
+
+.toast--error {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+    color: #f87171;
+}
+
+.toast--warning {
+    background: rgba(245, 158, 11, 0.15);
+    border-color: rgba(245, 158, 11, 0.35);
+    color: #fbbf24;
+}
+
+.toast--info {
+    background: rgba(99, 102, 241, 0.15);
+    border-color: rgba(99, 102, 241, 0.35);
+    color: #a5b4fc;
+}
+
+.toast__icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: currentColor;
+    font-weight: 700;
+}
+
+.toast__msg {
+    color: var(--text, #e2e8f0);
+    flex: 1;
+}
+
+/* ── Confirm Dialog ── */
+.confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.15s ease;
+}
+
+.confirm-dialog {
+    background: var(--surface, #1a1a2e);
+    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
+    border-radius: 14px;
+    padding: 1.5rem;
+    min-width: 300px;
+    max-width: 420px;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.confirm-dialog__msg {
+    margin: 0 0 1.25rem;
+    color: var(--text, #e2e8f0);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.confirm-dialog__actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0
+    }
+
+    to {
+        opacity: 1
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(12px) scale(0.97);
+        opacity: 0
+    }
+
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1
+    }
+}

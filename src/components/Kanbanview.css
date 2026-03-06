@@ -1,0 +1,360 @@
+/* ══════════════════════════════════════════════
+   KANBAN VIEW
+══════════════════════════════════════════════ */
+
+@keyframes kb-col-in {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes kb-card-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0) scale(1);
+    }
+}
+
+.kb {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 0 0 32px;
+    min-height: 0;
+    flex: 1;
+}
+
+/* ── progress strip ── */
+.kb__strip {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 2px;
+}
+
+.kb__strip-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 99px;
+    position: relative;
+    overflow: visible;
+}
+
+.kb__strip-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #6366f1, #4ade80);
+    border-radius: 99px;
+    transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.kb__strip-sep {
+    position: absolute;
+    top: -3px;
+    width: 1px;
+    height: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    transform: translateX(-50%);
+}
+
+.kb__strip-pct {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #404060;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+}
+
+/* ── board ── */
+.kb__board {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    align-items: start;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    /* allow horizontal scroll on small screens */
+    min-width: 0;
+}
+
+/* ── column ── */
+.kb__col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    animation: kb-col-in 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+.kb__col:nth-child(1) {
+    animation-delay: 0ms
+}
+
+.kb__col:nth-child(2) {
+    animation-delay: 40ms
+}
+
+.kb__col:nth-child(3) {
+    animation-delay: 80ms
+}
+
+.kb__col:nth-child(4) {
+    animation-delay: 120ms
+}
+
+.kb__col:nth-child(5) {
+    animation-delay: 160ms
+}
+
+.kb__col-header {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0 2px 6px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.kb__col-line {
+    width: 3px;
+    height: 14px;
+    border-radius: 99px;
+    background: var(--col-accent, #6366f1);
+    flex-shrink: 0;
+}
+
+.kb__col-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color: #404060;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kb__col-count {
+    font-size: 0.62rem;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: #404060;
+    padding: 1px 6px;
+    border-radius: 99px;
+    flex-shrink: 0;
+}
+
+.kb__col-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-height: 40px;
+}
+
+.kb__col-empty {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.06);
+    font-size: 1.1rem;
+    padding: 14px 0;
+    letter-spacing: 2px;
+}
+
+/* ── card ── */
+.kb-card {
+    background: #12121a;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition:
+        transform 0.15s cubic-bezier(0.34, 1.4, 0.64, 1),
+        box-shadow 0.15s ease,
+        background 0.15s ease;
+    animation: kb-card-in 0.25s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+}
+
+.kb-card:hover {
+    transform: translateY(-2px) scale(1.01);
+    background: #17172a;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.kb-card:active {
+    transform: scale(0.98);
+    transition-duration: 0.06s;
+}
+
+/* status glow on hover */
+.kb-card--approved:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(74, 222, 128, 0.08);
+}
+
+.kb-card--in_progress:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(167, 139, 250, 0.1);
+}
+
+.kb-card--pending_final:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(251, 191, 36, 0.08);
+}
+
+.kb-card--available:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(56, 189, 248, 0.08);
+}
+
+.kb-card--failed_final:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 14px rgba(251, 146, 60, 0.08);
+}
+
+.kb-card--locked {
+    opacity: 0.45;
+}
+
+.kb-card--locked:hover {
+    opacity: 0.7;
+}
+
+.kb-card__band {
+    width: 3px;
+    flex-shrink: 0;
+}
+
+.kb-card__body {
+    flex: 1;
+    padding: 8px 9px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.kb-card__name {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: #c8c8e8;
+    line-height: 1.3;
+    /* two-line clamp */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.kb-card__code {
+    font-size: 0.6rem;
+    font-weight: 600;
+    color: #2e2e4a;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+}
+
+.kb-card__meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.kb-card__year {
+    font-size: 0.59rem;
+    color: #2e2e4a;
+    font-weight: 600;
+}
+
+.kb-card__grade {
+    font-size: 0.8rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-left: auto;
+}
+
+.kb-card__date {
+    font-size: 0.59rem;
+    color: #fbbf24;
+    font-weight: 600;
+    margin-left: auto;
+}
+
+.kb-card__attempts {
+    font-size: 0.59rem;
+    color: #fb923c;
+    font-weight: 700;
+    margin-left: auto;
+}
+
+.kb-card-wrapper {
+    transition: transform 0.15s ease;
+}
+
+.kb-card-wrapper--over {
+    transform: translateY(2px);
+    border-top: 2px solid rgba(99, 102, 241, 0.6);
+    border-radius: 2px;
+}
+
+/* ── toolbar ── */
+.kb__toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 2px;
+}
+
+.kb__sort-btn {
+    all: unset;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #475569;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+
+.kb__sort-btn:hover {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.25);
+    color: #a5b4fc;
+}
+
+.kb-card-wrapper--dragging {
+    opacity: 0.4;
+}
+
+.kb-card--dragging {
+    opacity: 0.4;
+    cursor: grabbing;
+}
+
+.kb-card {
+    cursor: grab;
+}
+
+/* ── responsive: scroll horizontal en pantallas chicas ── */
+@media (max-width: 900px) {
+    .kb__board {
+        grid-template-columns: repeat(5, minmax(140px, 1fr));
+    }
+}

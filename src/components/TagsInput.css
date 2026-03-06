@@ -1,0 +1,82 @@
+/* ═══════════════════════════════════════════════════════
+   TAGS INPUT — chips estilo dark/indigo
+═══════════════════════════════════════════════════════ */
+
+.tags-input {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 7px 10px;
+  cursor: text;
+  min-height: 40px;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+
+.tags-input--focused {
+  border-color: var(--accent, #6366f1);
+  background: rgba(99, 102, 241, 0.07);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* ─── Chip ──────────────────────────────────────────────── */
+.tags-input__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(99, 102, 241, 0.18);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #a5b4fc;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 3px 8px 3px 9px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.tags-input__chip:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+/* ─── Chip remove button ────────────────────────────────── */
+.tags-input__chip-remove {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  font-size: 0.85rem;
+  line-height: 1;
+  color: #6366f1;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.12s, color 0.12s, background 0.12s;
+}
+
+.tags-input__chip-remove:hover {
+  opacity: 1;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+}
+
+/* ─── Inline input ──────────────────────────────────────── */
+.tags-input__input {
+  all: unset;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.85rem;
+  color: #d0d0e8;
+  flex: 1;
+  min-width: 100px;
+}
+
+.tags-input__input::placeholder {
+  color: #2a2a42;
+}

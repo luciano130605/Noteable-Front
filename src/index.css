@@ -1,0 +1,18 @@
+  :root {
+    --bg: #0B1215;
+    --card: #1D1F21;
+    --surface: #1D1F21;
+    --border: #27272a;
+    --text: #f7fcfe;
+    --muted: #a5a5a5;
+    --accent: #9FE7F5;
+    --accent2: #38bdf8;
+    --accent3: #f472b6;
+    --approved: #22c55e;
+    --pending-final: #facc15;
+    --in-progress: #38bdf8;
+    --available: #a5b4fc;
+    --locked: #a5a5a5;
+    --shadow: 0 4px 16px rgba(124, 58, 237, 0.18);
+    --shadow-lg: 0 8px 32px rgba(124, 58, 237, 0.28);
+  }

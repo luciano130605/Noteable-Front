@@ -1,0 +1,283 @@
+:root {
+    /* Base */
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --surface: #16161f;
+    --border: rgba(255, 255, 255, 0.07);
+
+    /* Texto */
+    --text: #e8e8f4;
+    --muted: #454560;
+
+    /* Acento principal — indigo coherente con Calendar */
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+
+    --approved: #4ade80;
+    --pending-final: #fbbf24;
+    --in-progress: #a78bfa;
+    --retaking: #a78bfa;
+    --available: #38bdf8;
+    --failed-final: #fb923c;
+    --free: #475569;
+    --locked: #f43f5e;
+    /* Sombras */
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+
+    /* Radio */
+    --radius-md: 10px;
+    --radius-lg: 16px;
+}
+
+
+.siu-importer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.siu-importer-modal {
+    background: #13131f;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+}
+
+.siu-importer-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.siu-importer-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #e2e8f0;
+}
+
+.siu-importer-subtitle {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-top: 2px;
+}
+
+.siu-importer-body {
+    flex: 1;
+    overflow: auto;
+    padding: 18px 22px;
+}
+
+.siu-importer-footer {
+    padding: 14px 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.siu-dropzone {
+    border: 2px dashed rgba(99, 102, 241, 0.35);
+    border-radius: 12px;
+    padding: 40px 24px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(99, 102, 241, 0.04);
+    transition: border-color 0.15s, background 0.15s;
+}
+
+.siu-dropzone:hover {
+    border-color: rgba(99, 102, 241, 0.6);
+    background: rgba(99, 102, 241, 0.08);
+}
+
+.siu-dropzone-icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+}
+
+.siu-dropzone-text {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+.siu-dropzone-link {
+    color: #818cf8;
+    text-decoration: underline;
+}
+
+.siu-dropzone-hint {
+    font-size: 0.72rem;
+    color: #475569;
+    margin-top: 8px;
+}
+
+.siu-hidden-input {
+    display: none;
+}
+
+.siu-error {
+    margin-top: 14px;
+    padding: 10px 14px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 10px;
+    font-size: 0.78rem;
+    color: #f87171;
+}
+
+.siu-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.siu-preview-card {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+}
+
+.siu-preview-name {
+    font-size: 0.82rem;
+    color: #e2e8f0;
+    font-weight: 500;
+}
+
+.siu-preview-meta {
+    font-size: 0.7rem;
+    color: #475569;
+    margin-top: 2px;
+}
+
+.siu-preview-date {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.siu-grade {
+    font-size: 0.82rem;
+    font-weight: 700;
+    min-width: 28px;
+    text-align: right;
+}
+
+.grade-high {
+    color: #4ade80;
+}
+
+.grade-mid {
+    color: #fbbf24;
+}
+
+.grade-low {
+    color: #f87171;
+}
+
+.siu-badge {
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.badge-promo {
+    background: rgba(99, 102, 241, 0.15);
+    color: #818cf8;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge-exam {
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+}
+
+.btn {
+    padding: 7px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
+.btn--primary {
+    background: var(--accent);
+    border: none;
+    color: var(--text);
+    font-weight: bold;
+}
+
+
+.btn--success {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+}
+
+.btn--success:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.siu-instructions {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 10px;
+    font-size: 0.76rem;
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.siu-instructions-title {
+    font-weight: 600;
+    color: #e2e8f0;
+    margin-bottom: 6px;
+}
+
+.siu-instructions-note {
+    margin-bottom: 10px;
+}
+
+.siu-instructions-list {
+    margin: 0;
+    padding-left: 18px;
+}
+
+.siu-highlight {
+    color: #94a3b8;
+    font-weight: 600;
+}

@@ -1,0 +1,705 @@
+/* ══════════════════════════════════════════════
+   UPCOMING SIDEBAR
+══════════════════════════════════════════════ */
+
+.usb {
+  width: 230px;
+  flex-shrink: 0;
+  background: #0f0f13;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 20px 14px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.usb::-webkit-scrollbar {
+  width: 3px;
+}
+
+.usb::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+}
+
+/* ── Header ── */
+.usb__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.usb__header-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #404060;
+}
+
+.usb__header-count {
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.28);
+  color: #a5b4fc;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 99px;
+  letter-spacing: 0.04em;
+}
+
+/* ── Mini stats ── */
+.usb__stats {
+  display: flex;
+  padding-bottom: 15px;
+  gap: 4px;
+}
+
+.usb__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 4px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.usb__stat--today {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.22);
+}
+
+.usb__stat--urgent {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.22);
+}
+
+.usb__stat-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #c0c0e0;
+  line-height: 1;
+}
+
+.usb__stat--today .usb__stat-val {
+  color: #f87171;
+}
+
+.usb__stat--urgent .usb__stat-val {
+  color: #fbbf24;
+}
+
+.usb__stat-lbl {
+  font-size: 0.58rem;
+  color: #303050;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ── Next Up card ── */
+.usb__next {
+  position: relative;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  min-height: 72px;
+}
+
+.usb__next-band {
+  width: 3px;
+  background: var(--nb, #6366f1);
+  flex-shrink: 0;
+  border-radius: 12px 0 0 12px;
+}
+
+.usb__next-body {
+  flex: 1;
+  bottom: 10px;
+  padding: 10px 10px 10px 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.usb__next-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #404060;
+}
+
+.usb__next-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #d0d0f0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.usb__next-sub {
+  font-size: 0.7rem;
+  color: var(--nb, #6366f1);
+  opacity: 0.85;
+  font-weight: 500;
+}
+
+.usb__next-date {
+  font-size: 0.65rem;
+  color: #303050;
+  text-transform: capitalize;
+  margin-top: 2px;
+}
+
+.usb__next-days {
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  padding: 10px 8px;
+  opacity: 0.7;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ── Timeline ── */
+.usb__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 10px;
+}
+
+.usb__timeline--past {
+  opacity: 0.5;
+}
+
+/* Date separator */
+.usb__date-sep {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.usb__date-sep:first-child {
+  margin-top: 0;
+}
+
+.usb__date-sep span {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #303050;
+  white-space: nowrap;
+}
+
+.usb__date-sep::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* Item */
+.usb__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 9px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+  cursor: default;
+}
+
+.usb__item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.07);
+}
+
+/* Urgency variants */
+.usb__item--today {
+  background: rgba(239, 68, 68, 0.07);
+  border-color: rgba(239, 68, 68, 0.18) !important;
+}
+
+.usb__item--urgent {
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.usb__item-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+
+.usb__item-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.usb__item-title {
+  font-size: 0.79rem;
+  font-weight: 600;
+  color: #b0b0d0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.usb__item--past .usb__item-title {
+  color: #404060;
+}
+
+.usb__item-sub {
+  font-size: 0.67rem;
+  color: #404060;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usb__item-importance {
+  font-size: 0.62rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  margin-top: 1px;
+}
+
+/* Badge */
+.usb__item-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: 0.02em;
+}
+
+.usb__item-badge--today {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.usb__item-badge--urgent {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.usb__item-badge--soon {
+  background: rgba(99, 102, 241, 0.12);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.usb__item-badge--normal {
+  background: rgba(255, 255, 255, 0.04);
+  color: #444466;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.usb__item-badge--past {
+  background: transparent;
+  color: #303050;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* Empty state */
+.usb__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 0;
+  color: #252540;
+  font-size: 0.76rem;
+  text-align: center;
+  border: 1px dashed rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+}
+
+.usb__empty-icon {
+  font-size: 1.4rem;
+  opacity: 0.5;
+}
+
+/* Past section */
+.usb__past {
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  padding-top: 10px;
+}
+
+.usb__past-summary {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: #2e2e4a;
+  cursor: pointer;
+  user-select: none;
+  padding: 4px 2px;
+  list-style: none;
+  transition: color 0.15s;
+}
+
+.usb__past-summary:hover {
+  color: #444460;
+}
+
+.usb__past-summary::-webkit-details-marker {
+  display: none;
+}
+
+.usb__past-summary::before {
+  content: '› ';
+  padding-right: 5px;
+
+}
+
+.usb__past-summary::before {
+  content: '›';
+  padding-right: 5px;
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+details[open] .usb__past-summary::before {
+  transform: rotate(90deg);
+}
+
+/* ── Context Menu ── */
+.usb__ctx-menu {
+  position: fixed;
+  z-index: 9999;
+  min-width: 200px;
+  background: #1a1a26;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: ctx-in 0.12s cubic-bezier(0.2, 0, 0, 1.1);
+}
+
+@keyframes ctx-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.usb__ctx-header {
+  padding: 6px 10px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.usb__ctx-title {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #c8c8e0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.usb__ctx-date {
+  font-size: 0.65rem;
+  color: #444460;
+}
+
+.usb__ctx-btn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.8rem;
+  color: #888899;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+  box-sizing: border-box;
+}
+
+.usb__ctx-btn:hover {
+  background: rgba(99, 102, 241, 0.15);
+  color: #c8c8e0;
+}
+
+.usb__ctx-btn--danger {
+  color: #f87171;
+}
+
+.usb__ctx-btn--danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+}
+
+/* ─────────────────────────────────────────────────────────
+   AGREGAR / MERGEAR estos estilos en tu UpcomingSidebar.css
+   ───────────────────────────────────────────────────────── */
+
+/* ── BASE: transición de ancho en el aside ── */
+.usb {
+  position: relative;
+  width: 280px;
+  /* tu ancho normal */
+  min-width: 280px;
+  transition:
+    width 320ms cubic-bezier(0.4, 0, 0.2, 1),
+    min-width 320ms cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  /* oculta contenido durante animación */
+}
+
+.usb--collapsed {
+  width: 48px;
+  min-width: 48px;
+}
+
+/* ── CONTENIDO principal: fade out/in ── */
+.usb__content {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+  pointer-events: auto;
+}
+
+.usb--collapsed .usb__content {
+  opacity: 0;
+  transform: translateX(12px);
+  pointer-events: none;
+  position: absolute;
+  /* saca del flujo para no ocupar espacio */
+  visibility: hidden;
+}
+
+/* ── TOGGLE BUTTON ── */
+.usb__toggle {
+  position: absolute;
+  top: 10px !important;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text);
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+/* Cuando está expandido, el btn va al borde derecho del panel */
+.usb:not(.usb--collapsed) .usb__toggle {
+  left: auto;
+  right: 10px;
+  transform: none;
+  top: 14px;
+}
+
+.usb__toggle:hover {
+  color: var(--usb-accent, #4f46e5);
+
+}
+
+.usb__toggle:active {
+  transform: scale(0.92);
+}
+
+/* Icono con su propia transición de rotación */
+.usb__toggle-icon {
+  display: flex;
+
+  align-items: center;
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Badge de urgentes sobre el toggle cuando colapsado */
+.usb__toggle-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  pointer-events: none;
+  animation: usb-badge-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes usb-badge-pop {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ── STRIP VERTICAL (visible cuando colapsado) ── */
+.usb__collapsed-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding-top: 52px;
+  /* deja espacio para el toggle */
+  padding-bottom: 16px;
+  height: 100%;
+
+  animation: usb-strip-in 220ms 120ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes usb-strip-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.usb__collapsed-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--usb-muted, #94a3b8);
+  user-select: none;
+}
+
+.usb__collapsed-next {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.usb__collapsed-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--nb, #6366f1) 20%, transparent);
+  animation: usb-pulse 2s ease-in-out infinite;
+}
+
+@keyframes usb-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--nb, #6366f1) 20%, transparent);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--nb, #6366f1) 8%, transparent);
+  }
+}
+
+.usb__collapsed-days {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--nb, #6366f1);
+  letter-spacing: 0.04em;
+}
+
+.usb__collapsed-counts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.usb__collapsed-pill {
+  font-size: 10px;
+  font-weight: 700;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.usb__collapsed-pill--today {
+  background: color-mix(in srgb, #ef4444 15%, transparent);
+  color: #ef4444;
+}
+
+.usb__collapsed-pill--urgent {
+  background: color-mix(in srgb, #f59e0b 15%, transparent);
+  color: #f59e0b;
+}
