@@ -287,12 +287,12 @@ function SettingsPanel({
           <button type="button"
             className={`sbjset__chip${settings.roundingMode === 'round' ? ' active' : ''}`}
             onClick={() => set('roundingMode', 'round')}>
-            Redondea ↑
+            Redondea
           </button>
           <button type="button"
             className={`sbjset__chip${settings.roundingMode === 'floor' ? ' active' : ''}`}
             onClick={() => set('roundingMode', 'floor')}>
-            Con decimal
+            Decimal
           </button>
         </div>
       </div>
@@ -332,7 +332,7 @@ function SettingsPanel({
       <div className="sbjset__preview">
         <span>
           {settings.parcialCount === 1 ? '1 parcial' : `${settings.parcialCount} parciales`}
-          {' · '}promedio {settings.roundingMode === 'round' ? 'redondeado ↑' : 'con decimal'}
+          {' · '}promedio {settings.roundingMode === 'round' ? 'redondeado' : 'con decimal'}
           {' · '}{settings.finalAttempts} intentos de final
           {' · '}libre ≥ {settings.freeExamMinGrade}
         </span>
@@ -752,7 +752,7 @@ export default function SubjectModal({
                   Ajustes de cursada
                 </span>
                 <span className="sbjset-toggle__summary">
-                  {settings.parcialCount}P · {settings.roundingMode === 'round' ? 'redondea ↑' : 'decimal'} · {settings.finalAttempts} intentos · libre ≥{settings.freeExamMinGrade}
+                  {settings.parcialCount}P · {settings.roundingMode === 'round' ? 'redondea ' : 'decimal'} · {settings.finalAttempts} intentos · libre ≥ {settings.freeExamMinGrade}
                 </span>
                 {settingsOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
               </button>
