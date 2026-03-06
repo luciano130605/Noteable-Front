@@ -1,7 +1,7 @@
 import { X, Download } from 'lucide-react'
 import * as XLSX from 'xlsx'
 import Xls from '../Icon/Xls'
-import './SiuImporter.css'
+import './Siuimporter.css'
 
 export interface ExportSubject {
     name: string

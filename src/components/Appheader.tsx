@@ -13,7 +13,7 @@ import {
 import type { Career, CareerConfig } from '../hooks/Usecareers'
 import type { UserPreferences } from '../../supabase/Supabase'
 import { DEFAULT_PREFERENCES } from '../../supabase/Supabase'
-import './AppHeader.css'
+import './Appheader.css'
 import { Eye, Bell, BellOff, EyeOff, TrashIcon, Loader, X, CheckCircle } from 'lucide-react'
 import CharAverage from '../Icon/CharAverage'
 import CloudDown from '../Icon/CloudDown'

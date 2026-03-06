@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { CircleCheckBig, X } from 'lucide-react'
 import { CopySuccess, Copy, Link, Book } from 'iconsax-react'
-import './NotionWidgetTutorial.css'
+import './Notionwidgettutorial.css'
 
 interface Props {
     userId: string

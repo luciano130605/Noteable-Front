@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import './EventModal.css'
+import './Eventmodal.css'
 import { Location, Edit, Trash, Danger, Calendar } from 'iconsax-react'
 import { X, Loader, CheckCircle } from 'lucide-react'
 import { toast } from "../hooks/Usetoast"

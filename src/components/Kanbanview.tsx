@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import type { Subject } from '../types/types'
 import { STATUS_CONFIG } from '../../src/assets/constants'
 import { getEffectiveStatus } from '../App'
-import './KanbanView.css'
+import './Kanbanview.css'
 import { DetailModal } from './SubjectCard'
 import { Copy, Edit, InfoCircle, Trash } from 'iconsax-react'
 

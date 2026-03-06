@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { X } from 'lucide-react'
 import type { Subject } from '../types/types'
-import './AnalyticsModal.css'
+import './Analyticsmodal.css'
 import { TrendDown, TrendUp } from 'iconsax-react'
 import CharAverage from '../Icon/CharAverage'
 import PinLocation from '../Icon/PinLocation'
