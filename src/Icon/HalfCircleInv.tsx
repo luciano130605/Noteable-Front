@@ -1,16 +1,14 @@
 import { type SVGProps, useId } from "react";
 
 type HalfCircleIconProps = {
-    size?: number;
-    strokeColor?: string;
-    fillColor?: string;
-    side?: "left" | "right";
-} & Omit<SVGProps<SVGSVGElement>, "color">;
+    size?: string | number
+    color?: string
+    side?: "left" | "right"
+} & SVGProps<SVGSVGElement>;
 
 export default function HalfCircleIcon({
     size = 24,
-    strokeColor = "currentColor",
-    fillColor = "currentColor",
+    color = "currentColor",
     side = "left",
     ...rest
 }: HalfCircleIconProps) {
@@ -18,40 +16,20 @@ export default function HalfCircleIcon({
 
     return (
         <svg
-            xmlns="http://www.w3.org/2000/svg"
             width={size}
             height={size}
             viewBox="0 0 24 24"
-            fill="none"
-            stroke={strokeColor}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            stroke={color}
             {...rest}
         >
             <defs>
                 <clipPath id={clipId}>
-                    <rect
-                        x={side === "left" ? 12 : 0}
-                        y="0"
-                        width="12"
-                        height="24"
-                    />
+                    <rect x={side === "left" ? 12 : 0} y="0" width="12" height="24" />
                 </clipPath>
             </defs>
 
-            {/* Mitad rellena */}
-            <circle
-                cx="12"
-                cy="12"
-                r="10"
-                fill={fillColor}
-                stroke="none"
-                clipPath={`url(#${clipId})`}
-            />
-
-            {/* Contorno completo */}
-            <circle cx="12" cy="12" r="10" fill="none" />
+            <circle cx="12" cy="12" r="10" fill={color} clipPath={`url(#${clipId})`} />
+            <circle cx="12" cy="12" r="10" fill="none" stroke={color} strokeWidth="2" />
         </svg>
     );
 }

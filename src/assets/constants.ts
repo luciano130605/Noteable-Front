@@ -1,7 +1,6 @@
 import type { StatusConfig, FilterOption, SubjectStatus } from '../types/types'
-import { TickCircle, CalendarCircle, CloseCircle, Warning2, Unlock, LockCircle, InfoCircle, RepeatCircle } from "iconsax-react"
+import { TickCircle, CalendarCircle, RepeatCircle, InfoCircle } from "iconsax-react"
 import HalfCircleInv from "../Icon/HalfCircleInv"
-import HalfCircle from "../Icon/HalfCircle"
 import unlockIcon from "../Icon/Unlock"
 import Lock from "../Icon/Lock"
 
@@ -19,14 +18,14 @@ export const STATUS_CONFIG: Record<SubjectStatus, StatusConfig> = {
   },
   available: {
     label: 'Habilitada',
-    color: '#38bdf8',          // celeste — "lista, esperando su turno"
+    color: '#38bdf8',          
     bg: 'rgba(56,189,248,0.10)',
     borderColor: '#0ea5e9',
     icon: unlockIcon,
   },
   in_progress: {
     label: 'En cursada',
-    color: '#6fbbc6',          // violeta — activa
+    color: '#6fbbc6',         
     bg: 'rgba(167,139,250,0.12)',
     borderColor: '#6fbbc6',
     icon: HalfCircleInv,
@@ -40,21 +39,21 @@ export const STATUS_CONFIG: Record<SubjectStatus, StatusConfig> = {
   },
   pending_final: {
     label: 'Final pendiente',
-    color: '#fbbf24',          // amarillo — atención, acción requerida
+    color: '#fbbf24',          
     bg: 'rgba(251,191,36,0.12)',
     borderColor: '#d97706',
     icon: CalendarCircle,
   },
   approved: {
     label: 'Aprobada',
-    color: '#4ade80',          // verde — éxito
+    color: '#4ade80',       
     bg: 'rgba(74,222,128,0.12)',
     borderColor: '#16a34a',
     icon: TickCircle,
   },
   failed_final: {
     label: 'Final desaprobado',
-    color: '#fb923c',          // naranja — advertencia, recuperable
+    color: '#fb923c',         
     bg: 'rgba(251,146,60,0.10)',
     borderColor: '#ea580c',
     icon: InfoCircle,
@@ -62,7 +61,7 @@ export const STATUS_CONFIG: Record<SubjectStatus, StatusConfig> = {
   free: {
     label: 'Libre',
     color: '#475569',
-    bg: 'rgba(71,85,105,0.10)',        // rosa-rojo — crítico, difiere del naranja
+    bg: 'rgba(71,85,105,0.10)',     
     borderColor: '#334155',
   },
 }

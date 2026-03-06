@@ -78,7 +78,7 @@ export interface StatusConfig {
     color: string
     bg: string
     borderColor: string
-    icon: typeof Icon
+    icon?: typeof Icon
 }
 
 export interface FilterOption {

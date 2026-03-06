@@ -1,7 +1,7 @@
 import { type SVGProps } from "react";
 
 type HalfCircleIconProps = {
-    size?: number;
+    size?: string | number
     strokeColor?: string;
     fillColor?: string;
     side?: "left" | "right";

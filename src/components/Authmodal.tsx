@@ -171,7 +171,7 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
                 university_lon: universityLon,
                 career_name: careerName.trim(),
                 career_total_years: totalYears,
-                career_total_subjects: parseInt(totalSubjects) || 0,
+                career_total_subjects: parseInt(totalSubjects, 10) || 0,
                 career_current_year: currentYear,
                 career_current_semester: currentSemester,
             })
