@@ -1165,7 +1165,6 @@
         background: rgba(99, 102, 241, 0.15);
         border-color: rgba(99, 102, 241, 0.5);
         color: #818cf8;
-        transform: scale(1.1);
     }
 
     .btnHs:active {

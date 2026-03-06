@@ -834,7 +834,13 @@ export default function App() {
       )}
 
       {showAuth && (
-        <AuthModal onClose={() => setShowAuth(false)} onSignInWithOAuth={signInWithOAuth} onSignIn={signIn} onSignUp={signUp} onSignInWithMagicLink={signInWithMagicLink} />
+        <AuthModal
+          onClose={() => setShowAuth(false)}
+          onSignInWithOAuth={signInWithOAuth}
+          onSignIn={signIn}
+          onSignUp={signUp as any}
+          onSignInWithMagicLink={signInWithMagicLink}
+        />
       )}
 
       {showShortcuts && (

@@ -27,6 +27,9 @@ export function useAuth() {
 
     const loadProfile = useCallback(async (userId: string) => {
         try {
+            const { data: { user: authUser } } = await supabase.auth.getUser()
+            const meta = authUser?.user_metadata ?? {}
+
             const { data } = await supabase
                 .from('profiles')
                 .select('*')
@@ -35,26 +38,62 @@ export function useAuth() {
 
             if (data) {
                 const profile = data as DbProfile
+
                 if (!profile.preferences) {
                     profile.preferences = DEFAULT_PREFERENCES
                 }
 
-                if (!profile.university) {
-                    const { data: { user } } = await supabase.auth.getUser()
-                    const metaUniversity = user?.user_metadata?.university
-                    if (metaUniversity) {
-                        await supabase
-                            .from('profiles')
-                            .update({ university: metaUniversity })
-                            .eq('id', userId)
-                        profile.university = metaUniversity
+                const profileUpdates: Record<string, unknown> = {}
+                if (!profile.university && meta.university) {
+                    profileUpdates.university = meta.university
+                    profile.university = meta.university
+                }
+                if (!profile.full_name && meta.full_name) {
+                    profileUpdates.full_name = meta.full_name
+                    profile.full_name = meta.full_name
+                }
+                if (Object.keys(profileUpdates).length > 0) {
+                    await supabase.from('profiles').update(profileUpdates).eq('id', userId)
+                }
+
+                if (meta.career_name?.trim()) {
+                    const { data: existingCareers } = await supabase
+                        .from('careers')
+                        .select('id')
+                        .eq('user_id', userId)
+                        .limit(1)
+
+                    if (!existingCareers || existingCareers.length === 0) {
+                        const careerConfig = {
+                            totalSubjects: meta.career_total_subjects ?? 0,
+                            totalYears: meta.career_total_years ?? 5,
+                            extraSemesters: 0,
+                            currentYear: meta.career_current_year ?? 1,
+                            currentSemester: meta.career_current_semester ?? 1,
+                            semesterDates: {
+                                s1: { start: '', end: '' },
+                                s2: { start: '', end: '' },
+                                annual: { start: '', end: '' },
+                            },
+                        }
+                        const { data: newCareer } = await supabase
+                            .from('careers')
+                            .insert({ user_id: userId, name: meta.career_name.trim(), config: careerConfig })
+                            .select()
+                            .single()
+
+                        if (newCareer) {
+                            await supabase
+                                .from('profiles')
+                                .update({ active_career_id: newCareer.id })
+                                .eq('id', userId)
+                            profile.active_career_id = newCareer.id
+                        }
                     }
                 }
+
                 return profile
             }
-
-            const { data: { user } } = await supabase.auth.getUser()
-            const meta = user?.user_metadata ?? {}
 
             const { data: created } = await supabase
                 .from('profiles')
@@ -63,9 +102,36 @@ export function useAuth() {
                     preferences: DEFAULT_PREFERENCES,
                     full_name: meta.full_name ?? '',
                     university: meta.university ?? '',
+                    university_lat: meta.university_lat ?? null,
+                    university_lon: meta.university_lon ?? null,
                 })
                 .select()
                 .single()
+
+            if (meta.career_name?.trim() && created) {
+                const careerConfig = {
+                    totalSubjects: meta.career_total_subjects ?? 0,
+                    totalYears: meta.career_total_years ?? 5,
+                    extraSemesters: 0,
+                    currentYear: meta.career_current_year ?? 1,
+                    currentSemester: meta.career_current_semester ?? 1,
+                    semesterDates: {
+                        s1: { start: '', end: '' },
+                        s2: { start: '', end: '' },
+                        annual: { start: '', end: '' },
+                    },
+                }
+                const { data: newCareer } = await supabase
+                    .from('careers')
+                    .insert({ user_id: userId, name: meta.career_name.trim(), config: careerConfig })
+                    .select()
+                    .single()
+
+                if (newCareer) {
+                    await supabase.from('profiles').update({ active_career_id: newCareer.id }).eq('id', userId)
+                        ; (created as any).active_career_id = newCareer.id
+                }
+            }
 
             return created ?? null
 

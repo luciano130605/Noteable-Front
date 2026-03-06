@@ -17,10 +17,40 @@
     border-radius: 22px;
     width: 100%;
     max-width: 420px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 40px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.04);
     animation: modal-in 0.22s cubic-bezier(0.2, 0, 0, 1.1);
     overflow: hidden;
     position: relative;
+}
+
+.auth-modal__header {
+    flex-shrink: 0;
+}
+
+.auth-modal__body {
+    padding: 24px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.auth-modal__body::-webkit-scrollbar {
+    width: 4px;
+}
+
+.auth-modal__body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.auth-modal__body::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.3);
+    border-radius: 4px;
 }
 
 /* Header gradient band */
@@ -130,6 +160,8 @@
 
 .auth-modal__field {
     display: flex;
+    padding-top: 10px;
+    padding-bottom: 10px;
     flex-direction: column;
     gap: 5px;
 }
@@ -304,6 +336,37 @@
     text-overflow: ellipsis;
 }
 
+.auth-modal__chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.auth-modal__chip {
+    all: unset;
+    font-family: 'DM Sans', sans-serif;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #454560;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.auth-modal__chip:hover {
+    border-color: rgba(99, 102, 241, 0.4);
+    color: #a5b4fc;
+}
+
+.auth-modal__chip.active {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: rgba(99, 102, 241, 0.5);
+    color: #a5b4fc;
+    font-weight: 600;
+}
+
 .auth-modal__field .evm-loc-hint {
     margin-top: 5px;
     font-size: 0.73rem;
@@ -383,7 +446,6 @@
 
 .auth-modal__submit:hover:not(:disabled) {
     opacity: 0.9;
-    transform: translateY(-1px);
 }
 
 .auth-modal__submit:disabled {
@@ -780,4 +842,229 @@
 .auth-modal__social-btn--google:hover {
     background: rgba(255, 255, 255, 0.30);
     border-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* ── Stepper ── */
+.auth-modal__stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.auth-modal__step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    color: #3e3e5e;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-modal__step.active {
+    color: #a5b4fc;
+}
+
+.auth-modal__step.done {
+    color: #10b981;
+}
+
+.auth-modal__step-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 1.5px solid currentColor;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    background: transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.auth-modal__step.active .auth-modal__step-dot {
+    background: rgba(99, 102, 241, 0.2);
+    border-color: #6366f1;
+}
+
+.auth-modal__step.done .auth-modal__step-dot {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: #10b981;
+}
+
+.auth-modal__step-line {
+    flex: 1;
+    max-width: 40px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── Career section ── */
+.auth-modal__career-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(99, 102, 241, 0.05);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 14px;
+    padding: 14px;
+}
+
+.auth-modal__career-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-modal__career-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.auth-modal__career-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #a5b4fc;
+}
+
+.auth-modal__career-sub {
+    font-size: 0.7rem;
+    color: #3e3e5e;
+    margin-top: 2px;
+}
+
+.auth-modal__career-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 7px 10px;
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.2);
+    border-radius: 8px;
+    font-size: 0.74rem;
+    color: #818cf8;
+    font-weight: 500;
+}
+
+/* ── Step 2 actions ── */
+.auth-modal__step2-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.auth-modal__back-btn {
+    all: unset;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    color: #454560;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.auth-modal__career-section .evm-location-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #ffffff0a;
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.auth-modal__career-section .evm-location-field--typing {
+    border-color: rgba(99, 102, 241, 0.4);
+    background: rgba(99, 102, 241, 0.05);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.08);
+}
+
+.auth-modal__career-section .evm-location-field--valid {
+    border-color: rgba(16, 185, 129, 0.5);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.auth-modal__career-section .evm-location-bare-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: #c8c8e0;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    min-width: 0;
+}
+
+.auth-modal__career-section .evm-location-bare-input::placeholder {
+    color: #252538;
+}
+
+.auth-modal__career-section .evm-loc-check {
+    color: #10b981;
+    flex-shrink: 0;
+}
+
+.auth-modal__career-section .evm-loc-clear {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #454560;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+}
+
+.auth-modal__career-section .evm-loc-clear:hover {
+    color: #c8c8e0;
+}
+
+.auth-modal__submit--flex {
+    flex: 1;
+}
+
+/* ── Success screen ── */
+.auth-modal__success-full {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 24px 0 8px;
+    text-align: center;
+}
+
+.auth-modal__success-icon {
+    font-size: 2.8rem;
+    line-height: 1;
+}
+
+.auth-modal__success-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #e8e8f4;
+}
+
+.auth-modal__success-text {
+    font-size: 0.82rem;
+    color: #454560;
+    line-height: 1.5;
+    margin: 0;
+    max-width: 280px;
 }
