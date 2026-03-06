@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import './AuthModal.css'
+import './Authmodal.css'
 import { Danger, Eye, EyeSlash, Link2, Location } from 'iconsax-react'
 import {
     CheckCircle, Mail, X, Loader, Check,
