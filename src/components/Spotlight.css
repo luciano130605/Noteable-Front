@@ -76,18 +76,11 @@
     max-height: 360px;
     overflow-y: auto;
     padding: 0.35rem;
-
-    /* Scroll suave */
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-
-    /* Evita layout shift cuando aparece scrollbar */
     scrollbar-gutter: stable;
-
-    /* Firefox */
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
-
     position: relative;
 }
 
@@ -130,16 +123,12 @@
 
 .spotlight__list::before {
     top: 0;
-    background: linear-gradient(to bottom,
-            var(--surface, #1a1a2e),
-            transparent);
+    background: linear-gradient(to bottom, var(--surface, #1a1a2e), transparent);
 }
 
 .spotlight__list::after {
     bottom: 0;
-    background: linear-gradient(to top,
-            var(--surface, #1a1a2e),
-            transparent);
+    background: linear-gradient(to top, var(--surface, #1a1a2e), transparent);
 }
 
 .spotlight__item {
@@ -223,4 +212,151 @@
     padding: 0.1rem 0.35rem;
     font-size: 0.68rem;
     font-family: inherit;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+
+/* ── Mobile (≤ 768px): bottom sheet en lugar de centrado arriba ── */
+@media (max-width: 768px) {
+    .spotlight-overlay {
+        /* Alinear al fondo, como bottom sheet */
+        align-items: flex-end;
+        justify-content: stretch;
+        padding-top: 0;
+    }
+
+    .spotlight {
+        /* Ocupa todo el ancho, con bordes redondeados arriba */
+        width: 100%;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+        /* Animación desde abajo */
+        animation: spotlightUp 0.22s cubic-bezier(0.34, 1.3, 0.64, 1);
+        /* Altura máxima para no tapar todo */
+        max-height: 85dvh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @keyframes spotlightUp {
+        from {
+            transform: translateY(24px);
+            opacity: 0;
+        }
+
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* Drag handle decorativo */
+    .spotlight::before {
+        content: '';
+        display: block;
+        width: 36px;
+        height: 4px;
+        border-radius: 2px;
+        background: rgba(255, 255, 255, 0.12);
+        margin: 10px auto 0;
+        flex-shrink: 0;
+    }
+
+    /* Input más grande y táctil */
+    .spotlight__input-wrap {
+        padding: 0.75rem 1rem;
+        gap: 0.6rem;
+    }
+
+    .spotlight__input {
+        font-size: 1rem;
+        /* evita zoom en iOS */
+    }
+
+    /* Ocultar hint de teclado ESC — no aplica en mobile */
+    .spotlight__esc {
+        display: none;
+    }
+
+    /* Lista crece para ocupar espacio disponible */
+    .spotlight__list {
+        flex: 1;
+        max-height: none;
+        /* controlled by parent max-height */
+        /* Scrollbar invisible en mobile */
+        scrollbar-width: none;
+    }
+
+    .spotlight__list::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* item-left debe poder achicarse para que el badge no se corte */
+    .spotlight__item-left {
+        min-width: 0;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .spotlight__item {
+        padding: 0.75rem 0.85rem;
+        gap: 0.75rem;
+    }
+
+    .spotlight__item-dot {
+        width: 9px;
+        height: 9px;
+    }
+
+    .spotlight__item-name {
+        font-size: 0.92rem;
+        max-width: none;
+        /* ellipsis cuando el nombre es largo */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        /* necesario para que ellipsis funcione en flex */
+    }
+
+    .spotlight__item-meta {
+        font-size: 0.76rem;
+    }
+
+    .spotlight__item-badge {
+        font-size: 0.68rem;
+        padding: 0.18rem 0.5rem;
+    }
+
+    /* Footer: ocultar atajos de teclado, no tienen sentido en mobile */
+    .spotlight__footer {
+        display: none;
+    }
+}
+
+/* ── Portrait muy chico (≤ 380px) ── */
+@media (max-width: 380px) {
+    .spotlight {
+        max-height: 90dvh;
+    }
+
+    .spotlight__item-name {
+        font-size: 0.85rem;
+    }
+
+    .spotlight__item-badge {
+        display: none;
+        /* en pantallas muy chicas el badge se va */
+    }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+
+    .spotlight,
+    .spotlight-overlay {
+        animation: none !important;
+    }
 }

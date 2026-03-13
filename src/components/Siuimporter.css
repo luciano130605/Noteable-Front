@@ -1,78 +1,63 @@
-:root {
-    /* Base */
-    --bg: #0a0a0f;
-    --card: #13131a;
-    --surface: #16161f;
-    --border: rgba(255, 255, 255, 0.07);
-
-    /* Texto */
-    --text: #e8e8f4;
-    --muted: #454560;
-
-    /* Acento principal — indigo coherente con Calendar */
-    --accent: #6366f1;
-    --accent2: #818cf8;
-    --accent3: #f472b6;
-
-    --approved: #4ade80;
-    --pending-final: #fbbf24;
-    --in-progress: #a78bfa;
-    --retaking: #a78bfa;
-    --available: #38bdf8;
-    --failed-final: #fb923c;
-    --free: #475569;
-    --locked: #f43f5e;
-    /* Sombras */
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
-
-    /* Radio */
-    --radius-md: 10px;
-    --radius-lg: 16px;
-}
-
+/* ═══════════════════════════════════
+   SIU IMPORTER
+═══════════════════════════════════ */
 
 .siu-importer-overlay {
     position: fixed;
     inset: 0;
     z-index: 200;
-    background: rgba(0, 0, 0, 0.6);
+
+    background: rgba(0, 0, 0, 0.55);
     backdrop-filter: blur(4px);
+
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
 .siu-importer-modal {
-    background: #13131f;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
     width: 560px;
     max-height: 80vh;
+
     display: flex;
     flex-direction: column;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+    background: var(--card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+
+    box-shadow: var(--shadow-menu);
 }
+
+/* ═══════════════════════════════════
+   HEADER
+═══════════════════════════════════ */
 
 .siu-importer-header {
     padding: 18px 22px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
     display: flex;
     align-items: center;
     justify-content: space-between;
+
+    border-bottom: 1px solid var(--border-faint);
 }
 
 .siu-importer-title {
     font-size: 0.95rem;
     font-weight: 700;
-    color: #e2e8f0;
+    color: var(--text);
 }
 
 .siu-importer-subtitle {
     font-size: 0.72rem;
-    color: #64748b;
     margin-top: 2px;
+    color: var(--text-tertiary);
 }
+
+/* ═══════════════════════════════════
+   BODY
+═══════════════════════════════════ */
 
 .siu-importer-body {
     flex: 1;
@@ -82,25 +67,34 @@
 
 .siu-importer-footer {
     padding: 14px 22px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+
+    border-top: 1px solid var(--border-faint);
 }
 
+/* ═══════════════════════════════════
+   DROPZONE
+═══════════════════════════════════ */
+
 .siu-dropzone {
-    border: 2px dashed rgba(99, 102, 241, 0.35);
+    border: 2px dashed var(--accent-border);
     border-radius: 12px;
+
     padding: 40px 24px;
     text-align: center;
+
     cursor: pointer;
-    background: rgba(99, 102, 241, 0.04);
-    transition: border-color 0.15s, background 0.15s;
+
+    background: var(--accent-bg);
+    transition: all .15s ease;
 }
 
 .siu-dropzone:hover {
-    border-color: rgba(99, 102, 241, 0.6);
-    background: rgba(99, 102, 241, 0.08);
+    border-color: var(--accent-border-strong);
+    background: var(--accent-bg-hover);
 }
 
 .siu-dropzone-icon {
@@ -110,34 +104,44 @@
 
 .siu-dropzone-text {
     font-size: 0.85rem;
-    color: #94a3b8;
     font-weight: 500;
+    color: var(--text-secondary);
 }
 
 .siu-dropzone-link {
-    color: #818cf8;
+    color: var(--accent2);
     text-decoration: underline;
 }
 
 .siu-dropzone-hint {
     font-size: 0.72rem;
-    color: #475569;
     margin-top: 8px;
+    color: var(--muted);
 }
 
 .siu-hidden-input {
     display: none;
 }
 
+/* ═══════════════════════════════════
+   ERROR
+═══════════════════════════════════ */
+
 .siu-error {
     margin-top: 14px;
     padding: 10px 14px;
-    background: rgba(239, 68, 68, 0.08);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-    border-radius: 10px;
+
+    background: var(--danger-bg);
+    border: 1px solid var(--danger-border);
+    border-radius: var(--radius-md);
+
     font-size: 0.78rem;
-    color: #f87171;
+    color: var(--danger);
 }
+
+/* ═══════════════════════════════════
+   PREVIEW
+═══════════════════════════════════ */
 
 .siu-preview {
     display: flex;
@@ -149,28 +153,30 @@
     display: grid;
     grid-template-columns: 1fr auto auto auto;
     align-items: center;
+
     gap: 10px;
     padding: 10px 14px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
+
+    background: var(--grade-preview-bg);
+    border: 1px solid var(--grade-preview-border);
+    border-radius: var(--radius-md);
 }
 
 .siu-preview-name {
     font-size: 0.82rem;
-    color: #e2e8f0;
     font-weight: 500;
+    color: var(--text);
 }
 
 .siu-preview-meta {
     font-size: 0.7rem;
-    color: #475569;
     margin-top: 2px;
+    color: var(--grade-row-color);
 }
 
 .siu-preview-date {
     font-size: 0.72rem;
-    color: #64748b;
+    color: var(--muted);
 }
 
 .siu-grade {
@@ -180,92 +186,113 @@
     text-align: right;
 }
 
+/* grades */
+
 .grade-high {
-    color: #4ade80;
+    color: var(--approved);
 }
 
 .grade-mid {
-    color: #fbbf24;
+    color: var(--regular-color);
 }
 
 .grade-low {
-    color: #f87171;
+    color: var(--danger);
 }
+
+/* ═══════════════════════════════════
+   BADGES
+═══════════════════════════════════ */
 
 .siu-badge {
     font-size: 0.65rem;
     padding: 2px 7px;
+
     border-radius: 6px;
     white-space: nowrap;
 }
 
 .badge-promo {
-    background: rgba(99, 102, 241, 0.15);
-    color: #818cf8;
-    border: 1px solid rgba(99, 102, 241, 0.3);
+    background: var(--accent-bg);
+    border: 1px solid var(--accent-border);
+    color: var(--accent2);
 }
 
 .badge-exam {
-    background: rgba(52, 211, 153, 0.1);
-    color: #34d399;
-    border: 1px solid rgba(52, 211, 153, 0.25);
+    background: var(--success-bg);
+    border: 1px solid var(--success-border);
+    color: var(--success);
 }
+
+/* ═══════════════════════════════════
+   BUTTONS
+═══════════════════════════════════ */
 
 .btn {
     padding: 7px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.15s;
-    white-space: nowrap;
-    letter-spacing: 0.01em;
+
     display: inline-flex;
     align-items: center;
     gap: 5px;
+
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 500;
+
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+
+    cursor: pointer;
+    white-space: nowrap;
+
+    transition: all .15s ease;
 }
 
 
 .btn--primary {
     background: var(--accent);
     border: none;
-    color: var(--text);
-    font-weight: bold;
+    color: #fff;
+    font-weight: 600;
 }
-
 
 .btn--success {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     border: none;
     color: #fff;
-    font-weight: 600;
-    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+
+    box-shadow: 0 4px 14px rgba(99, 102, 241, .3);
 }
 
 .btn--success:hover {
-    opacity: 0.9;
     transform: translateY(-1px);
+    opacity: .9;
 }
+
+/* ═══════════════════════════════════
+   INSTRUCTIONS
+═══════════════════════════════════ */
 
 .siu-instructions {
     margin-top: 18px;
     padding: 14px 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 10px;
+
+    background: var(--surface-faint);
+    border: 1px solid var(--border-faint);
+    border-radius: var(--radius-md);
+
     font-size: 0.76rem;
-    color: #64748b;
     line-height: 1.7;
+    color: var(--text-tertiary);
 }
 
 .siu-instructions-title {
     font-weight: 600;
-    color: #e2e8f0;
     margin-bottom: 6px;
+    color: var(--text);
 }
 
 .siu-instructions-note {
@@ -278,6 +305,57 @@
 }
 
 .siu-highlight {
-    color: #94a3b8;
     font-weight: 600;
+    color: var(--text-secondary);
+}
+
+/* ═══════════════════════════════════
+   MOBILE
+═══════════════════════════════════ */
+
+@media (max-width: 600px) {
+
+    .siu-importer-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .siu-importer-modal {
+        width: 100%;
+        max-height: 95dvh;
+
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+    }
+
+    .siu-importer-header {
+        padding: 16px 18px 14px;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .siu-importer-body {
+        padding: 14px 16px;
+    }
+
+    .siu-importer-footer {
+        padding: 12px 16px 28px;
+        flex-direction: column-reverse;
+    }
+
+    .siu-importer-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .siu-preview-card {
+        grid-template-columns: 1fr auto auto;
+    }
+
+    .siu-preview-date {
+        display: none;
+    }
+
+    .siu-dropzone {
+        padding: 28px 16px;
+    }
 }

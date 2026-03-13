@@ -243,7 +243,7 @@ function CorrInput({ tags, onChange }: { tags: string[]; onChange: (v: string[])
           <button type="button" onClick={e => { e.stopPropagation(); onChange(tags.filter(t => t !== tag)) }}>×</button>
         </span>
       ))}
-      <input ref={ref} className="corr-input__field" value={input} onChange={handleChange}
+      <input ref={ref} className="form-control" value={input} onChange={handleChange}
         onKeyDown={handleKey} onBlur={() => add(input)}
         placeholder={tags.length === 0 ? '1.2.1' : ''} maxLength={5} />
     </div>
@@ -811,7 +811,7 @@ export default function SubjectModal({
                     <div className="modal__section-title">
                       <span className="modal__section-icon"><Ranking size={16} /></span>
                       Notas de cursada
-                      <span style={{ fontSize: '0.65rem', color: '#3e3e5e', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                      <span className='Calculan' style={{ fontSize: '0.65rem', color: '#3e3e5e', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
                         · se calculan cuando cerrás el cuatrimestre
                       </span>
                     </div>

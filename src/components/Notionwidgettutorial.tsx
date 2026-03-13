@@ -10,20 +10,20 @@ interface Props {
 
 const STEPS = [
     {
-        emoji: <Link size={24} color="#e2e8f0" />,
+        emoji: <Link size={24} color='currentColor' />,
         title: 'Copiá tu URL personal',
         description: 'Cada usuario tiene una URL única que muestra su progreso en tiempo real.',
         action: 'copy' as const,
     },
     {
-        emoji: <Book size={24} color="#e2e8f0" />,
+        emoji: <Book size={24} color='currentColor' />,
         title: 'Abrí tu página en Notion',
-        description: 'Escribí /embed en cualquier página de Notion y pegá tu URL cuando te lo pida.',
+        description: 'Escribí /Insertar en cualquier página de Notion y pegá tu URL cuando te lo pida.',
         action: 'info' as const,
         hint: 'También funciona en cualquier sitio que soporte iframes.',
     },
     {
-        emoji: <CircleCheckBig size={24} color="#e2e8f0" />,
+        emoji: <CircleCheckBig size={24} color='currentColor' />,
         title: '¡Listo! Tu widget está activo',
         description: 'Se actualiza automáticamente cada vez que cargás la página. Mostrá tu progreso, materias en cursada y próximos exámenes.',
         action: 'done' as const,
@@ -86,8 +86,8 @@ export default function NotionWidgetTutorial({ userId, onClose }: Props) {
                             <div
                                 key={i}
                                 className={`nwt-dot ${i === step ? 'nwt-dot--active'
-                                        : i < step ? 'nwt-dot--done'
-                                            : 'nwt-dot--pending'
+                                    : i < step ? 'nwt-dot--done'
+                                        : 'nwt-dot--pending'
                                     }`}
                             />
                         ))}
@@ -149,12 +149,12 @@ export default function NotionWidgetTutorial({ userId, onClose }: Props) {
                     </span>
                     <div className="nwt-footer__actions">
                         {step > 0 && (
-                            <button className="btn" onClick={() => setStep(s => s - 1)}>
+                            <button className="nwt-btn-back" onClick={() => setStep(s => s - 1)}>
                                 Atrás
                             </button>
                         )}
                         <button
-                            className={`btn btn--primary`}
+                            className={`nwt-btn-next ${isLast ? 'nwt-btn-next--done' : 'nwt-btn-next--default'}`}
                             onClick={handleNext}
                         >
                             {isLast ? 'Entendido' : 'Siguiente'}

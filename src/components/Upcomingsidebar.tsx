@@ -1,9 +1,10 @@
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import type { Subject } from '../types/types'
 import type { CalendarEvent } from './Eventmodal'
 import EventModal from './Eventmodal'
 import './Upcomingsidebar.css'
 import { CalendarCircle, CloseCircle, Copy, Edit, ArrowLeft2, ArrowRight2, Calendar } from 'iconsax-react'
+import { X } from 'lucide-react'
 
 interface Props {
   subjects: Subject[]
@@ -12,6 +13,8 @@ interface Props {
   onEditSubject: (id: string) => void
   onRemoveEvent: (date: string, title: string) => void
   onUpdateEvent: (old: CalendarEvent, updated: CalendarEvent) => void
+  onMobileClose?: () => void
+  mobileOpen?: boolean
 }
 
 interface TimelineItem {
@@ -130,6 +133,18 @@ function buildItems(calendarEvents: CalendarEvent[], subjects: Subject[]): Timel
   })
 }
 
+function useIsMobile(breakpoint = 768): boolean {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= breakpoint)
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width: ${breakpoint}px)`)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    setIsMobile(mq.matches)
+    return () => mq.removeEventListener('change', handler)
+  }, [breakpoint])
+  return isMobile
+}
+
 export default function UpcomingSidebar({
   subjects,
   calendarEvents,
@@ -137,10 +152,21 @@ export default function UpcomingSidebar({
   onEditSubject,
   onRemoveEvent,
   onUpdateEvent,
+  onMobileClose,
+  mobileOpen: mobileOpenProp,
 }: Props) {
   const [ctxMenu, setCtxMenu] = useState<ContextMenu | null>(null)
   const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpenLocal, setMobileOpenLocal] = useState(false)
+  const mobileOpen = mobileOpenProp ?? mobileOpenLocal
+  const setMobileOpen = (v: boolean | ((prev: boolean) => boolean)) => {
+    const next = typeof v === 'function' ? v(mobileOpen) : v
+    setMobileOpenLocal(next)
+    if (!next) onMobileClose?.()
+  }
+  const isMobile = useIsMobile()
+  const sidebarRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     if (!ctxMenu) return
@@ -153,6 +179,22 @@ export default function UpcomingSidebar({
       document.removeEventListener('keydown', onKey)
     }
   }, [ctxMenu])
+
+  useEffect(() => {
+    if (!isMobile || !mobileOpen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileOpen(false) }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [isMobile, mobileOpen])
+
+  useEffect(() => {
+    if (isMobile && mobileOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => { document.body.style.overflow = '' }
+  }, [isMobile, mobileOpen])
 
   const handleContextMenu = useCallback((e: React.MouseEvent, item: TimelineItem) => {
     e.preventDefault()
@@ -171,7 +213,6 @@ export default function UpcomingSidebar({
 
   const upcoming = items.filter(i => i.daysLeft >= 0)
   const past = items.filter(i => i.daysLeft < 0).slice(0, 5)
-
   const todayCount = items.filter(i => i.daysLeft === 0).length
   const urgentCount = items.filter(i => i.daysLeft > 0 && i.daysLeft <= 7).length
   const nextItem = upcoming[0]
@@ -232,177 +273,219 @@ export default function UpcomingSidebar({
     }] : []),
   ] : []
 
+  const isCollapsed = !isMobile && collapsed
+  const isDrawerOpen = isMobile && mobileOpen
+
   return (
-    <aside className={`usb${collapsed ? ' usb--collapsed' : ''}`}>
-
-      <button
-        className="usb__toggle"
-        onClick={() => setCollapsed(c => !c)}
-        title={collapsed ? 'Expandir panel' : 'Colapsar panel'}
-        aria-label={collapsed ? 'Expandir panel' : 'Colapsar panel'}
-      >
-        <span className="usb__toggle-icon">
-          {collapsed ? <ArrowRight2 size={14} color="currentColor" /> : <ArrowLeft2 size={14} color="currentColor" />}
-        </span>
-        {collapsed && urgentCount > 0 && (
-          <span className="usb__toggle-badge">{urgentCount}</span>
-        )}
-      </button>
-
-      {collapsed && (
-        <div className="usb__collapsed-strip">
-          <span className="usb__collapsed-label">Próximos</span>
-          {nextItem && (
-            <div
-              className="usb__collapsed-next"
-              style={{ '--nb': nextItem.color ?? '#6366f1' } as React.CSSProperties}
-            >
-              <div className="usb__collapsed-dot" style={{ background: nextItem.color ?? '#6366f1' }} />
-              <span className="usb__collapsed-days">
-                {nextItem.daysLeft === 0 ? 'HOY' : `+${nextItem.daysLeft}d`}
-              </span>
-            </div>
-          )}
-          <div className="usb__collapsed-counts">
-            {todayCount > 0 && <span className="usb__collapsed-pill usb__collapsed-pill--today">{todayCount}</span>}
-            {urgentCount > 0 && <span className="usb__collapsed-pill usb__collapsed-pill--urgent">{urgentCount}</span>}
-          </div>
-        </div>
+    <>
+      {isMobile && (
+        <div
+          className={`usb-overlay${isDrawerOpen ? ' usb-overlay--visible' : ''}`}
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
-      <div className="usb__content">
-        <div className="usb__header">
-          <span className="usb__header-label">Próximos eventos</span>
-        </div>
+      {isMobile && (
+        <button
+          className="usb-mobile-trigger"
+          onClick={() => setMobileOpen(true)}
+          aria-label="Ver próximos eventos"
+          title="Ver próximos eventos"
+        >
+          <Calendar size={20} color="currentColor" />
+          {(todayCount > 0 || urgentCount > 0) && (
+            <span className="usb-mobile-trigger__badge">
+              {todayCount + urgentCount}
+            </span>
+          )}
+        </button>
+      )}
 
-        <div className="usb__stats">
-          <div className={`usb__stat${todayCount > 0 ? ' usb__stat--today' : ''}`}>
-            <span className="usb__stat-val">{todayCount}</span>
-            <span className="usb__stat-lbl">hoy</span>
-          </div>
-          <div className={`usb__stat${urgentCount > 0 ? ' usb__stat--urgent' : ''}`}>
-            <span className="usb__stat-val">{urgentCount}</span>
-            <span className="usb__stat-lbl">esta semana</span>
-          </div>
-          <div className="usb__stat">
-            <span className="usb__stat-val">{items.filter(i => i.daysLeft > 30).length}</span>
-            <span className="usb__stat-lbl">+ de 30d</span>
-          </div>
-        </div>
+      <aside
+        ref={sidebarRef}
+        className={[
+          'usb',
+          isCollapsed ? 'usb--collapsed' : '',
+          isMobile && isDrawerOpen ? 'usb--mobile-open' : '',
+        ].filter(Boolean).join(' ')}
+      >
+        <button
+          className="usb__toggle"
+          onClick={() => isMobile ? setMobileOpen(false) : setCollapsed(c => !c)}
+          title={isMobile ? 'Cerrar panel' : collapsed ? 'Expandir panel' : 'Colapsar panel'}
+          aria-label={isMobile ? 'Cerrar panel' : collapsed ? 'Expandir panel' : 'Colapsar panel'}
+        >
+          <span className="usb__toggle-icon">
+            {isMobile
+              ? <X size={14} color="currentColor" style={{position:"relative", top:"-4"}} />
+              : collapsed
+                ? <ArrowRight2 size={14} color="currentColor" />
+                : <ArrowLeft2 size={14} color="currentColor" />
+            }
+          </span>
+          {isCollapsed && urgentCount > 0 && (
+            <span className="usb__toggle-badge">{urgentCount}</span>
+          )}
+        </button>
 
-        {nextItem && (
-          <div
-            className="usb__next"
-            style={{ '--nb': nextItem.color ?? '#6366f1' } as React.CSSProperties}
-            onContextMenu={e => handleContextMenu(e, nextItem)}
-          >
-            <div className="usb__next-band" />
-            <div className="usb__next-body">
-              <span className="usb__next-eyebrow">
-                {nextItem.daysLeft === 0 ? 'Hoy' : nextItem.daysLeft === 1 ? 'Mañana' : 'Próximo'}
-              </span>
-              <span className="usb__next-title">{nextItem.title}</span>
-              {nextItem.subtitle && <span className="usb__next-sub">{nextItem.subtitle}</span>}
-              <span className="usb__next-date">{formatDateShort(nextItem.date)}</span>
-            </div>
-            <div className="usb__next-days" style={{ color: nextItem.color ?? '#6366f1' }}>
-              {nextItem.daysLeft === 0 ? 'HOY' : nextItem.daysLeft === 1 ? '+1d' : `+${nextItem.daysLeft}d`}
+        {isCollapsed && (
+          <div className="usb__collapsed-strip">
+            <span className="usb__collapsed-label">Próximos</span>
+            {nextItem && (
+              <div
+                className="usb__collapsed-next"
+                style={{ '--nb': nextItem.color ?? '#6366f1' } as React.CSSProperties}
+              >
+                <div className="usb__collapsed-dot" style={{ background: nextItem.color ?? '#6366f1' }} />
+                <span className="usb__collapsed-days">
+                  {nextItem.daysLeft === 0 ? 'HOY' : `+${nextItem.daysLeft}d`}
+                </span>
+              </div>
+            )}
+            <div className="usb__collapsed-counts">
+              {todayCount > 0 && <span className="usb__collapsed-pill usb__collapsed-pill--today">{todayCount}</span>}
+              {urgentCount > 0 && <span className="usb__collapsed-pill usb__collapsed-pill--urgent">{urgentCount}</span>}
             </div>
           </div>
         )}
 
-        {upcoming.length === 0 ? (
-          <div className="usb__empty">
-            <span className="usb__empty-icon"><Calendar size={25} color='currentColor' /></span>
-            <span>Sin próximos eventos</span>
+        <div className="usb__content">
+          <div className="usb__header">
+            <span className="usb__header-label">Próximos eventos</span>
+
           </div>
-        ) : (
-          <div className="usb__timeline">
-            {upcoming.map((item, idx) => {
-              const rel = formatRelative(item.daysLeft)
-              const showDateSep = idx === 0 || upcoming[idx - 1].date !== item.date
-              return (
-                <div key={item.id} onContextMenu={e => handleContextMenu(e, item)}>
-                  {showDateSep && (
-                    <div className="usb__date-sep">
-                      <span>{item.daysLeft === 0 ? 'Hoy' : item.daysLeft === 1 ? 'Mañana' : formatDateShort(item.date)}</span>
+
+          <div className="usb__stats">
+            <div className={`usb__stat${todayCount > 0 ? ' usb__stat--today' : ''}`}>
+              <span className="usb__stat-val">{todayCount}</span>
+              <span className="usb__stat-lbl">hoy</span>
+            </div>
+            <div className={`usb__stat${urgentCount > 0 ? ' usb__stat--urgent' : ''}`}>
+              <span className="usb__stat-val">{urgentCount}</span>
+              <span className="usb__stat-lbl">esta semana</span>
+            </div>
+            <div className="usb__stat">
+              <span className="usb__stat-val">{items.filter(i => i.daysLeft > 30).length}</span>
+              <span className="usb__stat-lbl">+ de 30d</span>
+            </div>
+          </div>
+
+          {nextItem && (
+            <div
+              className="usb__next"
+              style={{ '--nb': nextItem.color ?? '#6366f1' } as React.CSSProperties}
+              onContextMenu={e => handleContextMenu(e, nextItem)}
+            >
+              <div className="usb__next-band" />
+              <div className="usb__next-body">
+                <span className="usb__next-eyebrow">
+                  {nextItem.daysLeft === 0 ? 'Hoy' : nextItem.daysLeft === 1 ? 'Mañana' : 'Próximo'}
+                </span>
+                <span className="usb__next-title">{nextItem.title}</span>
+                {nextItem.subtitle && <span className="usb__next-sub">{nextItem.subtitle}</span>}
+                <span className="usb__next-date">{formatDateShort(nextItem.date)}</span>
+              </div>
+              <div className="usb__next-days" style={{ color: nextItem.color ?? '#6366f1' }}>
+                {nextItem.daysLeft === 0 ? 'HOY' : nextItem.daysLeft === 1 ? '+1d' : `+${nextItem.daysLeft}d`}
+              </div>
+            </div>
+          )}
+
+          {upcoming.length === 0 ? (
+            <div className="usb__empty">
+              <span className="usb__empty-icon"><Calendar size={25} color='currentColor' /></span>
+              <span>Sin próximos eventos</span>
+            </div>
+          ) : (
+            <div className="usb__timeline">
+              {upcoming.map((item, idx) => {
+                const rel = formatRelative(item.daysLeft)
+                const showDateSep = idx === 0 || upcoming[idx - 1].date !== item.date
+                return (
+                  <div key={item.id} onContextMenu={e => handleContextMenu(e, item)}>
+                    {showDateSep && (
+                      <div className="usb__date-sep">
+                        <span>{item.daysLeft === 0 ? 'Hoy' : item.daysLeft === 1 ? 'Mañana' : formatDateShort(item.date)}</span>
+                      </div>
+                    )}
+                    <div className={`usb__item usb__item--${rel.urgency}`}>
+                      <div className="usb__item-dot" style={{ background: item.color ?? '#6366f1' }} />
+                      <div className="usb__item-body">
+                        <span className="usb__item-title">{item.title}</span>
+                        {item.subtitle && <span className="usb__item-sub">{item.subtitle}</span>}
+                        {item.importance && item.importance !== 'baja' && (
+                          <span className="usb__item-importance" style={{ color: IMPORTANCE_COLOR[item.importance] }}>
+                            {item.importance === 'critica' ? '🔴' : item.importance === 'alta' ? '🟠' : '🟡'}
+                            {' '}{item.importance}
+                          </span>
+                        )}
+                      </div>
+                      <span className={`usb__item-badge usb__item-badge--${rel.urgency}`}>{rel.text}</span>
                     </div>
-                  )}
-                  <div className={`usb__item usb__item--${rel.urgency}`}>
-                    <div className="usb__item-dot" style={{ background: item.color ?? '#6366f1' }} />
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {past.length > 0 && (
+            <details className="usb__past">
+              <summary className="usb__past-summary">Recientes ({past.length})</summary>
+              <div className="usb__timeline usb__timeline--past">
+                {past.map(item => (
+                  <div key={item.id} className="usb__item usb__item--past" onContextMenu={e => handleContextMenu(e, item)}>
+                    <div className="usb__item-dot" style={{ background: item.color ?? '#6366f1', opacity: 0.35 }} />
                     <div className="usb__item-body">
                       <span className="usb__item-title">{item.title}</span>
                       {item.subtitle && <span className="usb__item-sub">{item.subtitle}</span>}
-                      {item.importance && item.importance !== 'baja' && (
-                        <span className="usb__item-importance" style={{ color: IMPORTANCE_COLOR[item.importance] }}>
-                          {item.importance === 'critica' ? '' : item.importance === 'alta' ? '' : ''}
-                          {' '}{item.importance}
-                        </span>
-                      )}
                     </div>
-                    <span className={`usb__item-badge usb__item-badge--${rel.urgency}`}>{rel.text}</span>
+                    <span className="usb__item-badge usb__item-badge--past">{formatRelative(item.daysLeft).text}</span>
                   </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-
-        {past.length > 0 && (
-          <details className="usb__past">
-            <summary className="usb__past-summary">Recientes ({past.length})</summary>
-            <div className="usb__timeline usb__timeline--past">
-              {past.map(item => (
-                <div key={item.id} className="usb__item usb__item--past" onContextMenu={e => handleContextMenu(e, item)}>
-                  <div className="usb__item-dot" style={{ background: item.color ?? '#6366f1', opacity: 0.35 }} />
-                  <div className="usb__item-body">
-                    <span className="usb__item-title">{item.title}</span>
-                    {item.subtitle && <span className="usb__item-sub">{item.subtitle}</span>}
-                  </div>
-                  <span className="usb__item-badge usb__item-badge--past">{formatRelative(item.daysLeft).text}</span>
-                </div>
-              ))}
-            </div>
-          </details>
-        )}
-      </div>
-
-      {ctxMenu && (
-        <div
-          className="usb__ctx-menu"
-          style={{ top: ctxMenu.y, left: ctxMenu.x }}
-          onMouseDown={e => e.stopPropagation()}
-        >
-          <div className="usb__ctx-header">
-            <span className="usb__ctx-title">{ctxMenu.item.title}</span>
-            <span className="usb__ctx-date">{formatDateShort(ctxMenu.item.date)}</span>
-          </div>
-          {ctxActions.map((a, i) => (
-            <button
-              key={i}
-              className={`usb__ctx-btn${(a as any).danger ? ' usb__ctx-btn--danger' : ''}`}
-              onClick={a.onClick}
-            >
-              {a.label}
-            </button>
-          ))}
+                ))}
+              </div>
+            </details>
+          )}
         </div>
-      )}
 
-      {editingEvent && typeof editingEvent === 'object' && (
-        <EventModal
-          event={editingEvent}
-          onSave={(updated) => {
-            onUpdateEvent(editingEvent, updated)
-            setEditingEvent(null)
-          }}
-          onDelete={(ev) => {
-            onRemoveEvent(ev.date, ev.title)
-            setEditingEvent(null)
-          }}
-          onClose={() => setEditingEvent(null)}
-        />
-      )}
-    </aside>
+        {ctxMenu && (
+          <div
+            className="usb__ctx-menu"
+            style={{ top: ctxMenu.y, left: ctxMenu.x }}
+            onMouseDown={e => e.stopPropagation()}
+          >
+            <div className="usb__ctx-header">
+              <span className="usb__ctx-title">{ctxMenu.item.title}</span>
+              <span className="usb__ctx-date">{formatDateShort(ctxMenu.item.date)}</span>
+            </div>
+            {ctxActions.map((a, i) => (
+              <button
+                key={i}
+                className={`usb__ctx-btn${(a as any).danger ? ' usb__ctx-btn--danger' : ''}`}
+                onClick={a.onClick}
+              >
+                {a.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Edit modal */}
+        {editingEvent && typeof editingEvent === 'object' && (
+          <EventModal
+            event={editingEvent}
+            onSave={(updated) => {
+              onUpdateEvent(editingEvent, updated)
+              setEditingEvent(null)
+            }}
+            onDelete={(ev) => {
+              onRemoveEvent(ev.date, ev.title)
+              setEditingEvent(null)
+            }}
+            onClose={() => setEditingEvent(null)}
+          />
+        )}
+      </aside>
+    </>
   )
 }

@@ -11,7 +11,7 @@ const GROUPS: ShortcutGroup[] = [
     {
         title: 'Navegación',
         items: [
-            { keys: ['Ctrl', 'f'], description: 'Buscar materia aprobadas' },
+            { keys: ['Ctrl', 'f'], description: 'Buscar materias' },
             { keys: ['Ctrl', 'y'], description: 'Abrir / cerrar calendario' },
             { keys: ['Ctrl', 'i'], description: 'Mostrar / ocultar promedio (GPA)' },
             { keys: ['Ctrl', 'b'], description: 'Alternar vista compacta' },

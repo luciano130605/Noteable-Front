@@ -14,7 +14,7 @@ import type { Career, CareerConfig } from '../hooks/Usecareers'
 import type { UserPreferences } from '../../supabase/Supabase'
 import { DEFAULT_PREFERENCES } from '../../supabase/Supabase'
 import './Appheader.css'
-import { Eye, Bell, BellOff, EyeOff, TrashIcon, Loader, X, CheckCircle } from 'lucide-react'
+import { Eye, Bell, BellOff, EyeOff, TrashIcon, Loader, X, CheckCircle, SunMoon, Headset, CircleQuestionMark } from 'lucide-react'
 import CharAverage from '../Icon/CharAverage'
 import CloudDown from '../Icon/CloudDown'
 import Cloud from '../Icon/Cloud'
@@ -24,6 +24,9 @@ import Archive from '../Icon/Archive'
 import CalendarUp from '../Icon/CalendarUp'
 import Ranking from '../Icon/Ranking'
 import NotionWidgetTutorial from './Notionwidgettutorial'
+import { useTheme, ThemeCycleButton, type ThemeOption } from './Themetoggle'
+import ContactModal from './Contactmodal'
+import AdminMessagesPanel from './Adminmessagespanel'
 
 export interface HeaderEvent { date: string; title: string }
 
@@ -38,6 +41,7 @@ interface Props {
     onUpdatePreferences: (prefs: UserPreferences) => Promise<string | null>
     search: string
     onSearch: (v: string) => void
+    onOpenOnboarding: () => void
     careers: Career[]
     activeCareer: Career | null
     onOpenScheduleExport: () => void
@@ -62,9 +66,15 @@ interface Props {
     onOpenShortcuts: () => void
 }
 
+const ADMIN_HASH = 'a4d8f49dcf69f4ef82e8701d5977c9c3e3ef47e93d05801beeaa80a7add2d02e'
+
+
+async function hashUid(uid: string): Promise<string> {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(uid))
+    return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('')
+}
 
 interface UniversityResult { display_name: string; place_id: number; lat: string; lon: string }
-
 
 
 async function searchUniversities(query: string): Promise<UniversityResult[]> {
@@ -175,7 +185,7 @@ function UniversityPicker({ value, onChange }: { value: string; onChange: (name:
             </div>
 
             {showDropdown && createPortal(
-                <div className="evm-loc-dropdown" style={dropdownStyle}>
+                <div className="evm-loc-dropdown" style={dropdownStyle} data-menu-portal="true">
                     {loading && <div className="evm-loc-loading">Buscando...</div>}
                     {!loading && results.length === 0 && input.length >= 3 && (
                         <div className="evm-loc-empty">Sin resultados. Podés escribirla manualmente.</div>
@@ -187,9 +197,9 @@ function UniversityPicker({ value, onChange }: { value: string; onChange: (name:
                         </button>
                     ))}
                     {!loading && input.length >= 3 && (
-                        <button type="button" className="evm-loc-item" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
+                        <button type="button" className="evm-loc-item" style={{ borderTop: '1px solid var(--border-faint)' }}
                             onClick={() => { setSelected(true); onChange(input); setOpen(false) }}>
-                            <span className="evm-loc-item-name" style={{ color: '#6366f1' }}>Usar "{input}"</span>
+                            <span className="evm-loc-item-name" style={{ color: 'var(--accent)' }}>Usar "{input}"</span>
                             <span className="evm-loc-item-full">Sin ubicación exacta en el mapa</span>
                         </button>
                     )}
@@ -219,6 +229,7 @@ function NotionIcon({ size = 13 }: { size?: number }) {
     )
 }
 
+// ProgConfigPanel ya NO maneja el tema — es responsabilidad del AppHeader
 function ProgConfigPanel({ career, onSave, onClose }: { career: Career; onSave: (id: string, config: CareerConfig) => Promise<string | null>; onClose: () => void }) {
     const cfg = career.config
     const [subjects, setSubjects] = useState(String(cfg.totalSubjects || ''))
@@ -317,8 +328,12 @@ function EditProfilePanel({ profile, onUpdateProfile, onUpdatePassword, onDelete
         if (!deleteConfirm) { setDeleteConfirm(true); return }
         setDeletingAccount(true); setDeleteMsg(null)
         const err = await onDeleteAccount()
-        if (err) { setDeletingAccount(false); setDeleteMsg(err) }
-        else { onSignOut(); onClose() }
+        if (err) {
+            setDeletingAccount(false)
+            setDeleteMsg(err)
+        } else {
+            onSignOut()
+        }
     }
 
     const handleUniversityChange = useCallback((name: string) => {
@@ -373,19 +388,33 @@ function EditProfilePanel({ profile, onUpdateProfile, onUpdatePassword, onDelete
                 </button>
             </div>
 
-            <div className="hdr-menu__divider" />
-            {deleteMsg && <div className="hdr-cfg__error">{deleteMsg}</div>}
-            {deleteConfirm && <p className="hdr-cfg__delete-warning">Esto eliminará permanentemente tu cuenta, materias y datos. No tiene vuelta atrás.</p>}
-            <button className={`btn btn--danger${deleteConfirm ? ' hdr-cfg__btn--danger-confirm' : ''}`} onClick={handleDeleteAccount} disabled={deletingAccount}>
-                <Trash size={12} color='currentColor' />
-                {deletingAccount ? 'Eliminando...' : deleteConfirm ? 'Sí, eliminar mi cuenta' : 'Eliminar cuenta'}
-            </button>
-            {deleteConfirm && <button className="btn" style={{ marginTop: '6px' }} onClick={() => { setDeleteConfirm(false); setDeleteMsg(null) }}>Cancelar</button>}
+            <div className="hdr-menu__divider hdr-desktop-only" />
+            <div className="hdr-desktop-only">
+                {deleteMsg && <div className="hdr-cfg__error">{deleteMsg}</div>}
+                {deleteConfirm && <p className="hdr-cfg__delete-warning">Esto eliminará permanentemente tu cuenta, materias y datos. No tiene vuelta atrás.</p>}
+                <button className={`btn btn--danger${deleteConfirm ? ' hdr-cfg__btn--danger-confirm' : ''}`} onClick={handleDeleteAccount} disabled={deletingAccount}>
+                    <Trash size={12} color='currentColor' />
+                    {deletingAccount ? 'Eliminando...' : deleteConfirm ? 'Sí, eliminar mi cuenta' : 'Eliminar cuenta'}
+                </button>
+                {deleteConfirm && <button className="btn" style={{ marginTop: '6px' }} onClick={() => { setDeleteConfirm(false); setDeleteMsg(null) }}>Cancelar</button>}
+            </div>
         </div>
     )
 }
 
-function PreferencesPanel({ preferences, onSave, userEmail }: { preferences: UserPreferences; onSave: (prefs: UserPreferences) => Promise<string | null>; userEmail?: string; notionToken?: string | null; notionWorkspaceName?: string | null }) {
+function PreferencesPanel({
+    preferences,
+    onSave,
+    userEmail,
+    theme,
+}: {
+    preferences: UserPreferences
+    onSave: (prefs: UserPreferences) => Promise<string | null>
+    userEmail?: string
+    notionToken?: string | null
+    notionWorkspaceName?: string | null
+    theme: 'dark' | 'light'
+}) {
     const [prefs, setPrefs] = useState<UserPreferences>(() => ({ ...DEFAULT_PREFERENCES, ...preferences, notifications: { ...DEFAULT_PREFERENCES.notifications, ...preferences?.notifications }, promotionThreshold: preferences?.promotionThreshold ?? DEFAULT_PREFERENCES.promotionThreshold, regularThreshold: preferences?.regularThreshold ?? DEFAULT_PREFERENCES.regularThreshold }))
     const [saving, setSaving] = useState(false)
     const [msg, setMsg] = useState<{ type: 'ok' | 'err'; text: string } | null>(null)
@@ -424,7 +453,7 @@ function PreferencesPanel({ preferences, onSave, userEmail }: { preferences: Use
             <div className="hdr-pref__section-label"><Bell size={11} color="currentColor" /> Notificaciones push</div>
             <div className="hdr-pref__group">
                 <div className="hdr-pref__group-header">
-                    <span className="hdr-pref__group-icon">{notif.enabled ? <Bell size={13} color="#818cf8" /> : <BellOff size={13} color="#454560" />}</span>
+                    <span className="hdr-pref__group-icon">{notif.enabled ? <Bell size={13} color="var(--accent2)" /> : <BellOff size={13} color="var(--muted)" />}</span>
                     <span className="hdr-pref__group-label">Notificaciones del navegador</span>
                     <Toggle checked={notif.enabled} onChange={toggleEnabled} />
                 </div>
@@ -455,17 +484,31 @@ function PreferencesPanel({ preferences, onSave, userEmail }: { preferences: Use
                 <div className="hdr-cfg__field">
                     <label>Avisar con anticipación</label>
                     <div className="hdr-pref__chips">{DAYS_OPTIONS.map(day => <button key={day} type="button" className={`hdr-pref__chip${notif.daysBefore.includes(day) ? ' active' : ''}`} onClick={() => toggleDay(day)}>{day === 1 ? '1 día' : `${day} días`}</button>)}</div>
-                    {notif.daysBefore.length === 0 && <span className="hdr-cfg__hint" style={{ color: '#f87171' }}>Seleccioná al menos un día</span>}
+                    {notif.daysBefore.length === 0 && <span className="hdr-cfg__hint" style={{ color: 'var(--danger)' }}>Seleccioná al menos un día</span>}
                 </div>
                 {notif.types.length > 0 && notif.daysBefore.length > 0 && (
                     <div className="hdr-pref__summary">Vas a recibir una notificación{' '}{notif.daysBefore.map((d, i) => <span key={d}>{i > 0 && i === notif.daysBefore.length - 1 ? ' y ' : i > 0 ? ', ' : ''}<strong>{d === 1 ? '1 día' : `${d} días`}</strong></span>)}{' '}antes de cada{' '}{notif.types.includes('final') && notif.types.includes('parcial') ? 'final y parcial' : notif.types.includes('final') ? 'final' : 'parcial'}.</div>
                 )}
             </>)}
             <div className="hdr-menu__divider" />
+
+            <div className="hdr-pref__section-label">
+                <SunMoon size={13} color='currentColor' />
+                Apariencia
+            </div>
+            <div className="hdr-pref__group">
+                <div className="hdr-pref__group-header">
+                    <span className="hdr-pref__group-label">
+                        {theme === 'dark' ? 'Modo oscuro' : 'Modo claro'}
+                    </span>
+                </div>
+            </div>
+
+            <div className="hdr-menu__divider" />
             <div className="hdr-pref__section-label"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></svg>Vista</div>
             <div className="hdr-cfg__field">
                 <div className="hdr-pref__group-header">
-                    <span className="hdr-pref__group-icon">{prefs.showLocked ? <Eye size={13} color="#454560" /> : <EyeOff size={13} color="#454560" />}</span>
+                    <span className="hdr-pref__group-icon">{prefs.showLocked ? <Eye size={13} color="var(--muted)" /> : <EyeOff size={13} color="var(--muted)" />}</span>
                     <span className="hdr-pref__group-label">Mostrar materias bloqueadas</span>
                     <Toggle checked={prefs.showLocked} onChange={v => setPrefs(p => ({ ...p, showLocked: v }))} />
                 </div>
@@ -481,26 +524,56 @@ function PreferencesPanel({ preferences, onSave, userEmail }: { preferences: Use
     )
 }
 
-export default function AppHeader({ user, profile, onOpenShortcuts, onCloseSemester, onOpenScheduleExport, onOpenAuth, onSignOut, onUpdateProfile, onUpdatePassword, onDeleteAccount, onUpdatePreferences, search, onSearch, careers, activeCareer, kanbanView, onToggleCompact, onToggleKanban, onSelectCareer, onAddCareer, onDeleteCareer, onSaveCareerConfig, onAddSubject, onOpenCalendar, onImportSiu, onExportXls, compactView, onToggleGpa, showGpa, onCopyWidget, onOpenAnalytics, upcomingExam }: Props) {
+export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboarding, onCloseSemester, onOpenScheduleExport, onOpenAuth, onSignOut, onUpdateProfile, onUpdatePassword, onDeleteAccount, onUpdatePreferences, search, onSearch, careers, activeCareer, kanbanView, onToggleCompact, onToggleKanban, onSelectCareer, onAddCareer, onDeleteCareer, onSaveCareerConfig, onAddSubject, onOpenCalendar, onImportSiu, onExportXls, compactView, onToggleGpa, showGpa, onCopyWidget, onOpenAnalytics, upcomingExam }: Props) {
     const [menuOpen, setMenuOpen] = useState(false)
-    const [menuSection, setMenuSection] = useState<'main' | 'account' | 'career' | 'config' | 'edit-profile' | 'preferences' | 'widget' | 'datos' | 'ver' | 'stats'>('main')
+    const [menuSection, setMenuSection] = useState<'main' | 'account' | 'career' | 'config' | 'edit-profile' | 'preferences' | 'widget' | 'datos' | 'ver' | 'stats' | 'support'>('main')
     const [newCareerName, setNewCareerName] = useState('')
     const [addingCareer, setAddingCareer] = useState(false)
     const [careerError, setCareerError] = useState<string | null>(null)
     const [deletingId, setDeletingId] = useState<string | null>(null)
-    const menuRef = useRef<HTMLDivElement>(null)
     const [showWidgetTutorial, setShowWidgetTutorial] = useState(false)
     const [copied, setCopied] = useState(false)
     const [holdProgress, setHoldProgress] = useState<Record<string, number>>({})
     const holdTimers = useRef<Record<string, ReturnType<typeof setInterval>>>({})
     const holdTimeouts = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+    const [showContact, setShowContact] = useState(false)
+    const [showAdmin, setShowAdmin] = useState(false)
+    const [isAdmin, setIsAdmin] = useState(false)
+
+    // ── Tema global — vive acá arriba, una sola instancia ──────────
+    const [theme, themeOption, setThemeOption] = useTheme()
+    const cycleTheme = () => {
+        const cycle: ThemeOption[] = ['dark', 'light', 'system']
+        const idx = cycle.indexOf(themeOption)
+        setThemeOption(cycle[(idx + 1) % cycle.length])
+    }
+    const menuRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        if (!user?.id) { setIsAdmin(false); return }
+        hashUid(user.id).then(h => setIsAdmin(h === ADMIN_HASH))
+    }, [user?.id])
 
     useEffect(() => {
         if (!menuOpen) return
-        const handleClick = (e: MouseEvent) => { if (menuRef.current && !menuRef.current.contains(e.target as Node)) { setMenuOpen(false); setMenuSection('main') } }
-        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') { setMenuOpen(false); setMenuSection('main') } }
-        document.addEventListener('mousedown', handleClick); document.addEventListener('keydown', handleKey)
-        return () => { document.removeEventListener('mousedown', handleClick); document.removeEventListener('keydown', handleKey) }
+        const handlePointerDown = (e: PointerEvent) => {
+            const target = e.target as HTMLElement
+
+            if (target.closest('[data-menu-portal]')) return
+
+            if (menuRef.current && menuRef.current.contains(target)) return
+            setMenuOpen(false)
+            setMenuSection('main')
+        }
+        const handleKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') { setMenuOpen(false); setMenuSection('main') }
+        }
+        document.addEventListener('pointerdown', handlePointerDown)
+        document.addEventListener('keydown', handleKey)
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown)
+            document.removeEventListener('keydown', handleKey)
+        }
     }, [menuOpen])
 
     const closeMenu = () => { setMenuOpen(false); setMenuSection('main') }
@@ -528,62 +601,193 @@ export default function AppHeader({ user, profile, onOpenShortcuts, onCloseSemes
 
     return (
         <header className="header">
-            <div className="header__search-wrap">
-                <span className="header__search-icon"><SearchNormal size={16} color="var(--muted)" /></span>
-                <input className="header__search" value={search} onChange={e => onSearch(e.target.value)} placeholder="buscar materia..." />
-            </div>
-            <button type="button" className="btn btn--primary" onClick={onAddSubject}><Add size={16} color="currentColor" /></button>
+            <span className="header__brand">
+                Note<span className="accent">a</span>ble
+            </span>
 
-            <div className="hdr-menu-wrap" ref={menuRef}>
-                <button className={`btn btn--icon hdr-hamburger${menuOpen ? ' active' : ''}`} onClick={() => { setMenuOpen(v => !v); setMenuSection('main') }} title="Menú">
-                    <HambergerMenu size={16} color="currentColor" />
+            {isAdmin && (
+                <button
+                    type="button"
+                    className="btn btn--icon"
+                    onClick={() => setShowAdmin(true)}
+                    title="Mensajes de usuarios"
+                    style={{ position: 'relative' }}
+                >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                        <polyline points="22,6 12,13 2,6" />
+                    </svg>
                 </button>
+            )}
 
-                {menuOpen && (
-                    <div className="hdr-menu">
-                        {menuSection === 'main' && (<>
-                            <button className="hdr-menu__item hdr-menu__item--account" onClick={() => setMenuSection('account')}>
-                                <span className="hdr-menu__avatar">{initials}</span>
-                                <div className="hdr-menu__account-info"><span className="hdr-menu__account-name">{displayName}</span><span className="hdr-menu__account-sub">{user ? user.email : 'No iniciaste sesión'}</span></div>
-                                <span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span>
-                            </button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => setMenuSection('career')}><span className="hdr-menu__item-icon"><Teacher size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Carrera</span><span className="hdr-menu__item-value">{activeCareer?.name ?? '—'}</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => setMenuSection('datos')}><span className="hdr-menu__item-icon"><Cloud size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Importar / Exportar</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => { onCloseSemester(); closeMenu() }}><span className="hdr-menu__item-icon"><Archive size={16} stroke="currentColor" /></span><span className="hdr-menu__item-label">Cerrar cuatrimestre</span></button>
-                            <div className="hdr-menu__divider" />
-                            {user && <button className="hdr-menu__item" onClick={() => setMenuSection('widget')}><span className="hdr-menu__item-icon"><NotionIcon size={14} /></span><span className="hdr-menu__item-label">Widget Notion</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>}
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => setMenuSection('ver')}><span className="hdr-menu__item-icon"><ViewAgendal size={14} /></span><span className="hdr-menu__item-label">Calendario y vista</span><div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>{upcomingExam && <span className="hdr-menu__badge">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>}</div><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => setMenuSection('stats')}><span className="hdr-menu__item-icon"><Diagram size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Estadísticas</span>{showGpa && <span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>GPA visible</span>}<span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => setMenuSection('preferences')}><span className="hdr-menu__item-icon"><Setting4 size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Preferencias</span><div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>{notifsEnabled && <span className="hdr-menu__badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', borderColor: 'rgba(16,185,129,0.25)' }}><Bell size={9} color="currentColor" style={{ display: 'inline', marginRight: 3, position: "relative", top: "1" }} />activo</span>}</div><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
-                            <div className="hdr-menu__divider" />
-                            <button className="hdr-menu__item" onClick={() => { onOpenShortcuts(); closeMenu() }}><span className="hdr-menu__item-icon"><Keyboard size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Atajos de teclado</span><span className="hdr-menu__item-value" style={{ display: 'flex', gap: '3px', alignItems: 'center' }}><kbd className="header__search-kbd">Shift</kbd><kbd className="header__search-kbd">A</kbd></span></button>
-                        </>)}
+            <div className="header__actions">
+                <button
+                    type="button"
+                    className="btn btn--primary"
+                    onClick={() => {
+                        if (!user) {
+                            onOpenAuth()
+                            return
+                        }
+                        onAddSubject()
+                    }}
+                >
+                    <Add size={16} color="currentColor" />
+                </button>
+                <ThemeCycleButton themeOption={themeOption} onCycle={cycleTheme} />
 
-                        {menuSection === 'stats' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Estadísticas</div><button className={`hdr-menu__item${showGpa ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleGpa(); closeMenu() }}><span className="hdr-menu__item-icon"><CharAverage size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Promedio</span>{showGpa && <span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>visible</span>}</button><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => { onOpenAnalytics(); closeMenu() }}><span className="hdr-menu__item-icon"><Chart size={14} color='currentColor' /></span><span className="hdr-menu__item-label">Analítica</span></button></>)}
+                <div className="hdr-menu-wrap" ref={menuRef}>
+                    <button
+                        className={`btn btn--icon hdr-hamburger${menuOpen ? ' active' : ''}`}
+                        onClick={e => {
+                            e.stopPropagation()
+                            setMenuOpen(v => !v)
+                            setMenuSection('main')
+                        }}
+                        title="Menú"
+                    >
+                        <HambergerMenu size={16} color="currentColor" />
+                    </button>
 
-                        {menuSection === 'widget' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Widget Notion</div><p style={{ fontSize: '0.75rem', color: '#475569', padding: '0 4px 8px', lineHeight: 1.5 }}>Agrega tu progreso en cualquier página de Notion usando tu URL personal.</p><button className="hdr-menu__item" onClick={() => { onCopyWidget(); setCopied(true); setTimeout(() => setCopied(false), 2000) }}><span className="hdr-menu__item-icon">{copied ? <CopySuccess size={14} color='currentColor' /> : <Copy size={14} color='currentColor' />}</span><span className="hdr-menu__item-label">{copied ? '¡Copiado!' : 'Copiar URL del widget'}</span></button><button className="hdr-menu__item" onClick={() => setShowWidgetTutorial(true)}><span className="hdr-menu__item-icon"><MessageQuestion size={14} color="currentColor" /></span><span className="hdr-menu__item-label">¿Cómo funciona?</span></button>{showWidgetTutorial && <NotionWidgetTutorial userId={user?.id ?? ''} onClose={() => setShowWidgetTutorial(false)} />}</>)}
+                    {showAdmin && (
+                        <AdminMessagesPanel onClose={() => setShowAdmin(false)} />
+                    )}
 
-                        {menuSection === 'account' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Cuenta</div>{user ? (<><div className="hdr-menu__profile-card"><div className="hdr-menu__avatar hdr-menu__avatar--lg">{initials}</div><div>{profile?.full_name && <div className="hdr-menu__profile-name">{profile.full_name}</div>}<div className="hdr-menu__profile-email">{user.email}</div>{profile?.university && <div className="hdr-menu__profile-uni">{profile.university}</div>}</div></div><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => setMenuSection('edit-profile')}><span className="hdr-menu__item-icon"><Edit2 size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Editar perfil</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button><div className="hdr-menu__divider" /><button className="hdr-menu__item hdr-menu__item--danger" onClick={() => { onSignOut(); closeMenu() }}><span className="hdr-menu__item-icon"><Logout size={16} color="#f87171" /></span><span className="hdr-menu__item-label">Cerrar sesión</span></button></>) : (<><p className="hdr-menu__login-hint">Iniciá sesión para guardar tu progreso en la nube.</p><button className="hdr-menu__login-btn" onClick={() => { onOpenAuth(); closeMenu() }}>Iniciar sesión / Registrarse</button></>)}</>)}
+                    {menuOpen && (
+                        <div className="hdr-menu" onClick={e => e.stopPropagation()}>
+                            {menuSection === 'main' && (<>
+                                <button className="hdr-menu__item hdr-menu__item--account" onClick={() => setMenuSection('account')}>
+                                    <span className="hdr-menu__avatar">{initials}</span>
+                                    <div className="hdr-menu__account-info"><span className="hdr-menu__account-name">{displayName}</span><span className="hdr-menu__account-sub">{user ? user.email : 'No iniciaste sesión'}</span></div>
+                                    <span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span>
+                                </button>
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('career')}><span className="hdr-menu__item-icon"><Teacher size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Carrera</span><span className="hdr-menu__item-value">{activeCareer?.name ?? '—'}</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('datos')}><span className="hdr-menu__item-icon"><Cloud size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Importar / Exportar</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => { onCloseSemester(); closeMenu() }}><span className="hdr-menu__item-icon"><Archive size={16} stroke="currentColor" /></span><span className="hdr-menu__item-label">Cerrar cuatrimestre</span></button>
+                                <div className="hdr-menu__divider" />
+                                {user && <button className="hdr-menu__item" onClick={() => setMenuSection('widget')}><span className="hdr-menu__item-icon"><NotionIcon size={14} /></span><span className="hdr-menu__item-label">Widget Notion</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>}
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('ver')}><span className="hdr-menu__item-icon"><ViewAgendal size={14} /></span><span className="hdr-menu__item-label">Calendario y vista</span><div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>{upcomingExam && <span className="hdr-menu__badge">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>}</div><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('stats')}><span className="hdr-menu__item-icon"><Diagram size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Estadísticas</span>{showGpa && <span className="hdr-menu__badge">GPA visible</span>}<span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('preferences')}><span className="hdr-menu__item-icon"><Setting4 size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Preferencias</span><div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>{notifsEnabled && <span className="hdr-menu__badge" style={{ background: 'rgba(16,185,129,0.15)', color: '#34d399', borderColor: 'rgba(16,185,129,0.25)' }}><Bell size={9} color="currentColor" style={{ display: 'inline', marginRight: 3, position: "relative", top: "1" }} />activo</span>}</div><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
 
-                        {menuSection === 'datos' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Importar / Exportar</div><button className="hdr-menu__item" onClick={() => { onImportSiu(); closeMenu() }}><span className="hdr-menu__item-icon"><CloudDown size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Importar materias</span><span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>.xls</span></button><button className="hdr-menu__item" onClick={() => { onExportXls(); closeMenu() }}><span className="hdr-menu__item-icon"><CloudExport size={14} stroke="currentColor" style={{ transform: 'rotate(180deg)' }} /></span><span className="hdr-menu__item-label">Exportar materias</span><span className="hdr-menu__badge" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399', borderColor: 'rgba(16,185,129,0.25)' }}>.xls</span></button><button className="hdr-menu__item" onClick={() => { onOpenScheduleExport(); closeMenu() }}><span className="hdr-menu__item-icon"><CalendarUp size={14} /></span><span className="hdr-menu__item-label">Exportar horario</span><span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>.png</span></button><div className="hdr-menu__divider" /></>)}
+                                <div className="hdr-menu__divider" />
+                                <button className="hdr-menu__item" onClick={() => setMenuSection('support')}>
+                                    <span className="hdr-menu__item-icon">
+                                        <Headset size={14} color='currentColor' />
+                                    </span>
+                                    <span className="hdr-menu__item-label">Soporte</span>
+                                    <span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span>
+                                </button>
 
-                        {menuSection === 'ver' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Calendario y vista</div><button className="hdr-menu__item" onClick={() => { onOpenCalendar(); closeMenu() }}><span className="hdr-menu__item-icon"><CalIcon size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Calendario</span>{upcomingExam && <span className="hdr-menu__badge">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>}</button><button className={`hdr-menu__item${compactView ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleCompact(); closeMenu() }}><span className="hdr-menu__item-icon">{compactView ? <MaximizeCircle size={14} color="currentColor" /> : <MinusSquare size={14} color="currentColor" />}</span><span className="hdr-menu__item-label">{compactView ? 'Vista normal' : 'Vista compacta'}</span>{compactView && <span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>activa</span>}</button><button className={`hdr-menu__item${kanbanView ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleKanban(); closeMenu() }}><span className="hdr-menu__item-icon"><svg width="14" height="14" viewBox="0 0 13 13" fill="none"><rect x="0.5" y="0.5" width="3.5" height="12" rx="1.5" fill="currentColor" opacity="0.9" /><rect x="4.75" y="0.5" width="3.5" height="8" rx="1.5" fill="currentColor" opacity="0.9" /><rect x="9" y="0.5" width="3.5" height="10" rx="1.5" fill="currentColor" opacity="0.9" /></svg></span><span className="hdr-menu__item-label">Vista Kanban</span>{kanbanView && <span className="hdr-menu__badge" style={{ background: 'rgba(99,102,241,0.12)', color: '#818cf8', borderColor: 'rgba(99,102,241,0.25)' }}>activa</span>}</button>{upcomingExam && (<><div className="hdr-menu__divider" /><div className="hdr-menu__upcoming"><NotificationBing size={12} color="#818cf8" /><div><div className="hdr-menu__upcoming-title">{upcomingExam.title}</div><div className="hdr-menu__upcoming-date">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</div></div></div></>)}</>)}
 
-                        {menuSection === 'edit-profile' && user && (<><button className="hdr-menu__back" onClick={() => setMenuSection('account')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><EditProfilePanel profile={profile} onUpdateProfile={onUpdateProfile} onUpdatePassword={onUpdatePassword} onDeleteAccount={onDeleteAccount} onClose={closeMenu} onSignOut={onSignOut} /></>)}
+                            </>)}
 
-                        {menuSection === 'preferences' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button>{user ? <PreferencesPanel preferences={currentPrefs} onSave={onUpdatePreferences} userEmail={user.email} notionToken={profile?.notion_token} notionWorkspaceName={profile?.notion_workspace_name} /> : <div className="hdr-menu__section"><p className="hdr-menu__login-hint">Iniciá sesión para guardar tus preferencias.</p></div>}</>)}
+                            {menuSection === 'stats' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Estadísticas</div><button className={`hdr-menu__item${showGpa ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleGpa(); closeMenu() }}><span className="hdr-menu__item-icon"><CharAverage size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Promedio</span>{showGpa && <span className="hdr-menu__badge">visible</span>}</button><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => { onOpenAnalytics(); closeMenu() }}><span className="hdr-menu__item-icon"><Chart size={14} color='currentColor' /></span><span className="hdr-menu__item-label">Analítica</span></button></>)}
 
-                        {menuSection === 'career' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Mis carreras</div>{careers.length === 0 && <p className="hdr-menu__login-hint">No tenés carreras todavía.</p>}{careers.map(c => (<div key={c.id} className={`hdr-menu__item hdr-menu__item--career${c.id === activeCareer?.id ? ' hdr-menu__item--active' : ''}`} onClick={() => { onSelectCareer(c.id); setMenuSection('main') }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onSelectCareer(c.id)}><span className="hdr-menu__item-label">{c.name}</span>{c.id === activeCareer?.id && <span className="hdr-menu__check"><TickSquare size={13} color="#10b981" style={{ position: "relative", top: "2" }} /></span>}<button className="hdr-menu__item-delete" onMouseDown={e => startHold(c.id, e)} onMouseUp={() => cancelHold(c.id)} onMouseLeave={() => cancelHold(c.id)} onTouchStart={e => startHold(c.id, e)} onTouchEnd={() => cancelHold(c.id)} disabled={deletingId === c.id} title="Mantené apretado para eliminar" style={{ position: 'relative', overflow: 'hidden' }}>{(holdProgress[c.id] ?? 0) > 0 && <span style={{ position: 'absolute', inset: 0, background: 'rgba(248,113,113,0.2)', width: `${holdProgress[c.id]}%`, transition: 'none', borderRadius: 'inherit' }} />}{deletingId === c.id ? <Loader size={13} color='currentColor' className='spin' /> : <TrashIcon size={13} color={holdProgress[c.id] > 0 ? '#fca5a5' : '#f87171'} />}</button></div>))}{activeCareer && (<><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => setMenuSection('config')}><span className="hdr-menu__item-icon"><Setting2 size={14} color='currentColor' /></span><span className="hdr-menu__item-label">Configurar {activeCareer.name}</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button></>)}<div className="hdr-menu__divider" /><div className="hdr-cfg__field"><label>Nueva carrera</label><div className="hdr-career__add-row"><input className="hdr-cfg__input" value={newCareerName} onChange={e => { setNewCareerName(e.target.value); setCareerError(null) }} placeholder="ej. Ingeniería en Sistemas" onKeyDown={e => e.key === 'Enter' && handleAddCareer()} maxLength={60} /><button className="btn btn--primary" onClick={handleAddCareer} disabled={addingCareer || !newCareerName.trim()}>{addingCareer ? <Loader size={14} color='currentColor' className='spin' /> : <Add size={14} color="currentColor" />}</button></div>{careerError && <div className="hdr-cfg__error">{careerError}</div>}</div></>)}
+                            {menuSection === 'widget' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Widget Notion</div><p style={{ fontSize: '0.75rem', color: 'var(--muted)', padding: '0 4px 8px', lineHeight: 1.5 }}>Agrega tu progreso en cualquier página de Notion usando tu URL personal.</p><button className="hdr-menu__item" onClick={() => { onCopyWidget(); setCopied(true); setTimeout(() => setCopied(false), 2000) }}><span className="hdr-menu__item-icon">{copied ? <CopySuccess size={14} color='currentColor' /> : <Copy size={14} color='currentColor' />}</span><span className="hdr-menu__item-label">{copied ? '¡Copiado!' : 'Copiar URL del widget'}</span></button><button className="hdr-menu__item" onClick={() => setShowWidgetTutorial(true)}><span className="hdr-menu__item-icon"><MessageQuestion size={14} color="currentColor" /></span><span className="hdr-menu__item-label">¿Cómo funciona?</span></button>{showWidgetTutorial && <NotionWidgetTutorial userId={user?.id ?? ''} onClose={() => setShowWidgetTutorial(false)} />}</>)}
 
-                        {menuSection === 'config' && activeCareer && (<><button className="hdr-menu__back" onClick={() => setMenuSection('career')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><ProgConfigPanel career={activeCareer} onSave={onSaveCareerConfig} onClose={() => setMenuSection('career')} /></>)}
-                    </div>
-                )}
+                            {menuSection === 'account' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Cuenta</div>{user ? (<><div className="hdr-menu__profile-card"><div className="hdr-menu__avatar hdr-menu__avatar--lg">{initials}</div><div>{profile?.full_name && <div className="hdr-menu__profile-name">{profile.full_name}</div>}<div className="hdr-menu__profile-email">{user.email}</div>{profile?.university && <div className="hdr-menu__profile-uni">{profile.university}</div>}</div></div><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => setMenuSection('edit-profile')}><span className="hdr-menu__item-icon"><Edit2 size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Editar perfil</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button><div className="hdr-menu__divider" /><button className="hdr-menu__item hdr-menu__item--danger" onClick={() => { onSignOut(); closeMenu() }}><span className="hdr-menu__item-icon"><Logout size={16} color="var(--danger)" /></span><span className="hdr-menu__item-label">Cerrar sesión</span></button></>) : (<><p className="hdr-menu__login-hint">Iniciá sesión para guardar tu progreso en la nube.</p><button className="hdr-menu__login-btn" onClick={() => { onOpenAuth(); closeMenu() }}>Iniciar sesión / Registrarse</button></>)}</>)}
+
+                            {menuSection === 'datos' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Importar / Exportar</div><button className="hdr-menu__item" onClick={() => { onImportSiu(); closeMenu() }}><span className="hdr-menu__item-icon"><CloudDown size={14} stroke="currentColor" /></span><span className="hdr-menu__item-label">Importar materias</span><span className="hdr-menu__badge">.xls</span></button><button className="hdr-menu__item" onClick={() => { onExportXls(); closeMenu() }}><span className="hdr-menu__item-icon"><CloudExport size={14} stroke="currentColor" style={{ transform: 'rotate(180deg)' }} /></span><span className="hdr-menu__item-label">Exportar materias</span><span className="hdr-menu__badge2">.xls</span></button><button className="hdr-menu__item" onClick={() => { onOpenScheduleExport(); closeMenu() }}><span className="hdr-menu__item-icon"><CalendarUp size={14} /></span><span className="hdr-menu__item-label">Exportar horario</span><span className="hdr-menu__badge">.png</span></button><div className="hdr-menu__divider" /></>)}
+
+                            {menuSection === 'ver' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Calendario y vista</div><button className="hdr-menu__item" onClick={() => { onOpenCalendar(); closeMenu() }}><span className="hdr-menu__item-icon"><CalIcon size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Calendario</span>{upcomingExam && <span className="hdr-menu__badge">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>}</button><button className={`hdr-menu__item${compactView ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleCompact(); closeMenu() }}><span className="hdr-menu__item-icon">{compactView ? <MaximizeCircle size={14} color="currentColor" /> : <MinusSquare size={14} color="currentColor" />}</span><span className="hdr-menu__item-label">{compactView ? 'Vista normal' : 'Vista compacta'}</span>{compactView && <span className="hdr-menu__badge">activa</span>}</button><button className={`hdr-menu__item${kanbanView ? ' hdr-menu__item--active' : ''}`} onClick={() => { onToggleKanban(); closeMenu() }}><span className="hdr-menu__item-icon"><svg width="14" height="14" viewBox="0 0 13 13" fill="none"><rect x="0.5" y="0.5" width="3.5" height="12" rx="1.5" fill="currentColor" opacity="0.9" /><rect x="4.75" y="0.5" width="3.5" height="8" rx="1.5" fill="currentColor" opacity="0.9" /><rect x="9" y="0.5" width="3.5" height="10" rx="1.5" fill="currentColor" opacity="0.9" /></svg></span><span className="hdr-menu__item-label">Vista Kanban</span>{kanbanView && <span className="hdr-menu__badge">activa</span>}</button>{upcomingExam && (<><div className="hdr-menu__divider" /><div className="hdr-menu__upcoming"><NotificationBing size={12} color="var(--accent2)" /><div><div className="hdr-menu__upcoming-title">{upcomingExam.title}</div><div className="hdr-menu__upcoming-date">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })}</div></div></div></>)}</>)}
+
+                            {menuSection === 'edit-profile' && user && (<><button className="hdr-menu__back"
+                                onClick={() => setMenuSection('account')}>
+                                <ArrowLeft2 size={16} color='currentColor' />
+                                Volver</button>
+                                <EditProfilePanel profile={profile} onUpdateProfile={onUpdateProfile} onUpdatePassword={onUpdatePassword} onDeleteAccount={onDeleteAccount} onClose={closeMenu} onSignOut={() => { onSignOut(); closeMenu() }} /></>)}
+
+                            {menuSection === 'preferences' && (
+                                <>
+                                    <button className="hdr-menu__back" onClick={() => setMenuSection('main')}>
+                                        <ArrowLeft2 size={16} color='currentColor' /> Volver
+                                    </button>
+                                    {user
+                                        ? <PreferencesPanel
+                                            preferences={currentPrefs}
+                                            onSave={onUpdatePreferences}
+                                            userEmail={user.email}
+                                            notionToken={profile?.notion_token}
+                                            notionWorkspaceName={profile?.notion_workspace_name}
+                                            theme={theme}
+                                        />
+                                        : <div className="hdr-menu__section"><p className="hdr-menu__login-hint">Iniciá sesión para guardar tus preferencias.</p></div>
+                                    }
+                                </>
+                            )}
+
+                            {menuSection === 'support' && (
+                                <>
+                                    <button className="hdr-menu__back" onClick={() => setMenuSection('main')}>
+                                        <ArrowLeft2 size={16} color='currentColor' /> Volver
+                                    </button>
+                                    <div className="hdr-menu__section-title">Soporte</div>
+
+                                    <button className="hdr-menu__item" onClick={() => { onOpenOnboarding(); closeMenu() }}>
+                                        <span className="hdr-menu__item-icon">
+                                            <CircleQuestionMark size={14} color='currentColor' />
+                                        </span>
+                                        <span className="hdr-menu__item-label">Ver tutorial</span>
+                                    </button>
+
+                                    <div className="hdr-desktop-only">
+                                        <div className="hdr-menu__divider hdr-desktop-only" />
+                                        <button className="hdr-menu__item hdr-desktop-only" onClick={() => { onOpenShortcuts(); closeMenu() }}>
+                                            <span className="hdr-menu__item-icon hdr-desktop-only"><Keyboard size={14} color="currentColor" className='hdr-desktop-only' /></span>
+                                            <span className="hdr-menu__item-label hdr-desktop-only">Atajos de teclado</span>
+                                            <span className="hdr-menu__item-value hdr-desktop-only" style={{ display: 'flex', gap: '3px', alignItems: 'center' }}>
+                                                <kbd className="header__search-kbd hdr-desktop-only">Shift</kbd>
+                                                <kbd className="header__search-kbd hdr-desktop-only">A</kbd>
+                                            </span>
+                                        </button>
+                                    </div>
+                                    <div className="hdr-menu__divider" />
+                                    <button className="hdr-menu__item" onClick={() => setShowContact(true)}>
+                                        <span className="hdr-menu__item-icon">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                                <polyline points="22,6 12,13 2,6" />
+                                            </svg>
+                                        </span>
+                                        <span className="hdr-menu__item-label">Contacto / Feedback</span>
+                                    </button>
+
+                                    <div className="hdr-menu__divider" />
+                                    <div className="hdr-menu__section-label" style={{
+                                        fontSize: '0.6rem', fontWeight: 700, textTransform: 'uppercase',
+                                        letterSpacing: '0.08em', color: 'var(--muted)', padding: '6px 14px 2px',
+                                    }}>
+                                        App
+                                    </div>
+                                    <div className="hdr-menu__item" style={{ cursor: 'default', pointerEvents: 'none', opacity: 0.5 }}>
+                                        <span className="hdr-menu__item-label" style={{ fontSize: '0.7rem' }}>Noteable · v1.0.0</span>
+                                    </div>
+                                </>
+                            )}
+
+                            {showContact && (
+                                <ContactModal
+                                    userEmail={user?.email}
+                                    onClose={() => setShowContact(false)}
+                                />
+                            )}
+
+
+                            {menuSection === 'career' && (<><button className="hdr-menu__back" onClick={() => setMenuSection('main')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><div className="hdr-menu__section-title">Mis carreras</div>{careers.length === 0 && <p className="hdr-menu__login-hint">No tenés carreras todavía.</p>}{careers.map(c => (<div key={c.id} className={`hdr-menu__item hdr-menu__item--career${c.id === activeCareer?.id ? ' hdr-menu__item--active' : ''}`} onClick={() => { onSelectCareer(c.id); setMenuSection('main') }} role="button" tabIndex={0} onKeyDown={e => e.key === 'Enter' && onSelectCareer(c.id)}><span className="hdr-menu__item-label">{c.name}</span>{c.id === activeCareer?.id && <span className="hdr-menu__check"><TickSquare size={13} color={`var(--approved)`} style={{ position: "relative", top: "2" }} /></span>}<button className="hdr-menu__item-delete" onMouseDown={e => startHold(c.id, e)} onMouseUp={() => cancelHold(c.id)} onMouseLeave={() => cancelHold(c.id)} onTouchStart={e => startHold(c.id, e)} onTouchEnd={() => cancelHold(c.id)} disabled={deletingId === c.id} title="Mantené apretado para eliminar" style={{ position: 'relative', overflow: 'hidden' }}>{(holdProgress[c.id] ?? 0) > 0 && <span style={{ position: 'absolute', inset: 0, background: 'var(--danger-bg-hover)', width: `${holdProgress[c.id]}%`, transition: 'none', borderRadius: 'inherit' }} />}{deletingId === c.id ? <Loader size={13} color='currentColor' className='spin' /> : <TrashIcon size={13} color={holdProgress[c.id] > 0 ? 'var(--danger)' : 'var(--danger)'} />}</button></div>))}{activeCareer && (<><div className="hdr-menu__divider" /><button className="hdr-menu__item" onClick={() => setMenuSection('config')}><span className="hdr-menu__item-icon"><Setting2 size={14} color='currentColor' /></span><span className="hdr-menu__item-label">Configurar {activeCareer.name}</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button></>)}<div className="hdr-menu__divider" /><div className="hdr-cfg__field"><label>Nueva carrera</label><div className="hdr-career__add-row"><input className="hdr-cfg__input" value={newCareerName} onChange={e => { setNewCareerName(e.target.value); setCareerError(null) }} placeholder="ej. Ingeniería en Sistemas" onKeyDown={e => e.key === 'Enter' && handleAddCareer()} maxLength={60} /><button className="btn btn--primary" onClick={handleAddCareer} disabled={addingCareer || !newCareerName.trim()}>{addingCareer ? <Loader size={14} color='currentColor' className='spin' /> : <Add size={14} color="currentColor" />}</button></div>{careerError && <div className="hdr-cfg__error">{careerError}</div>}</div></>)}
+
+                            {menuSection === 'config' && activeCareer && (<><button className="hdr-menu__back" onClick={() => setMenuSection('career')}><ArrowLeft2 size={16} color='currentColor' /> Volver</button><ProgConfigPanel career={activeCareer} onSave={onSaveCareerConfig} onClose={() => setMenuSection('career')} /></>)}
+                        </div>
+                    )}
+                </div>
             </div>
         </header>
     )

@@ -53,7 +53,7 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
                     <input
                         ref={inputRef}
                         className="spotlight__input"
-                        placeholder="Buscar materia aprobadas..."
+                        placeholder="Buscar materia..."
                         value={query}
                         onChange={e => setQuery(e.target.value)}
                         onKeyDown={handleKey}

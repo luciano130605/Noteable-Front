@@ -3,6 +3,7 @@ import EventModal, { type CalendarEvent } from './Eventmodal'
 import MapModal from './Mapmodal'
 import './Calendar.css'
 import { AddCircle, ArrowCircleLeft, ArrowCircleRight, CalendarCircle, CloseCircle, Edit, Location } from 'iconsax-react'
+import { useLongPress } from '../hooks/UseLongPress'
 
 interface CalendarProps {
   events?: CalendarEvent[]
@@ -37,6 +38,61 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   critica: '#ec4899',
 }
 
+function EventPill({
+  ev,
+  isPast,
+  gradeColor,
+  onDetail,
+  onContext,
+  onContextHandled,
+}: {
+  ev: CalendarEvent
+  isPast: boolean
+  gradeColor: string | null
+  onDetail: () => void
+  onEdit: () => void
+  onContext: (e: React.MouseEvent) => void
+  onContextHandled: () => void
+}) {
+  const lp = useLongPress(
+    () => onContext({ clientX: window.innerWidth / 2, clientY: window.innerHeight * 0.65 } as React.MouseEvent),
+    () => onDetail(),
+    400
+  )
+
+  return (
+    <div
+      className={`cal-event-pill${ev.graded ? ' cal-event-pill--graded' : ''}`}
+      style={{
+        opacity: isPast ? 0.6 : 1,
+        borderLeft: `3px solid ${ev.importance ? IMPORTANCE_COLORS[ev.importance] : '#6b7280'}`,
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+      }}
+      title={ev.title + (ev.startTime ? ` · ${ev.startTime}` : '') + (ev.grade != null ? ` · Nota: ${ev.grade}` : '')}
+      {...lp}
+      onTouchStart={(e) => {
+        e.stopPropagation()
+        lp.onTouchStart?.(e)
+      }}
+      onContextMenu={e => {
+        e.preventDefault();  onContextHandled(); onContext(e);
+      }}
+
+    >
+      {!ev.allDay && ev.startTime && <span className="cal-event-time">{ev.startTime}</span>}
+      <span style={{ textDecoration: (ev.graded || isPast) ? 'line-through' : 'none' }}>{ev.title}</span>
+      {
+        ev.graded && ev.grade != null && (
+          <span className="cal-event-grade" style={{ color: gradeColor ?? '#888', background: (gradeColor ?? '#888') + '22' }}>
+            {ev.grade}
+          </span>
+        )
+      }
+    </div >
+  )
+}
+
 const Calendar = forwardRef<CalendarHandle, CalendarProps>(
   ({ events = [], onAddEvent, onRemoveEvent, onUpdateEvent, onEditSubject, universityLocation }, ref) => {
     const today = new Date()
@@ -44,13 +100,13 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
     const [viewMonth, setViewMonth] = useState(today.getMonth())
     const [hoveredDay, setHoveredDay] = useState<string | null>(null)
     const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
-    const clickTimeout = useRef<number | null>(null)
     const [modalOpen, setModalOpen] = useState(false)
     const [modalDate, setModalDate] = useState('')
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null)
     const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
-
+    const contextHandledByPill = useRef(false)
     const [mapOpen, setMapOpen] = useState(false)
+    const isMobile = window.matchMedia('(pointer: coarse)').matches
     const [mapDestination, setMapDestination] = useState<string | undefined>(undefined)
 
     const wrapperRef = useRef<HTMLDivElement>(null)
@@ -103,14 +159,27 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
       return eventDateTime.getTime() < Date.now()
     }
 
-    const openContextMenu = useCallback((e: React.MouseEvent, date: string, event?: CalendarEvent) => {
-      e.preventDefault()
-      e.stopPropagation()
-      const menuW = 200, menuH = event ? 200 : 120
-      const x = Math.min(e.clientX, window.innerWidth - menuW - 8)
-      const y = Math.min(e.clientY, window.innerHeight - menuH - 8)
-      setContextMenu({ x, y, date, event })
-    }, [])
+    const openContextMenu = useCallback(
+      (
+        e: React.MouseEvent | { clientX: number; clientY: number; preventDefault?: () => void; stopPropagation?: () => void },
+        date: string,
+        event?: CalendarEvent
+      ) => {
+        e.preventDefault?.()
+        e.stopPropagation?.()
+
+        contextHandledByPill.current = false
+
+        const menuW = 200
+        const menuH = event ? 200 : 120
+
+        const x = Math.min(e.clientX, window.innerWidth - menuW - 8)
+        const y = Math.min(e.clientY, window.innerHeight - menuH - 8)
+
+        setContextMenu({ x, y, date, event })
+      },
+      []
+    )
 
     const prevMonth = () => {
       if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
@@ -169,6 +238,8 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
         weekday: 'short', day: 'numeric', month: 'short'
       })
 
+
+
     const cells = []
     for (let i = 0; i < firstDay; i++) {
       cells.push(<div key={`empty-${i}`} className="cal-cell cal-cell--empty" />)
@@ -179,12 +250,36 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
       const todayCell = isToday(dateStr)
       const hovered = hoveredDay === dateStr
 
+      const lpCell = useLongPress(
+        () =>
+          openContextMenu(
+            { clientX: window.innerWidth / 2, clientY: window.innerHeight * 0.65 },
+            dateStr
+          ),
+        () => { },
+        450
+      )
       cells.push(
         <div
           key={dateStr}
           className={['cal-cell', todayCell ? 'cal-cell--today' : '', hovered ? 'cal-cell--hovered' : ''].filter(Boolean).join(' ')}
-          onClick={() => openNewEvent(dateStr)}
-          onContextMenu={e => openContextMenu(e, dateStr)}
+          {...lpCell}
+          onClick={(e) => {
+            const target = e.target as HTMLElement
+            if (!target.closest('.cal-event-pill') && !target.closest('.cal-event-more')) {
+              openNewEvent(dateStr)
+            }
+          }}
+          onContextMenu={e => {
+            e.preventDefault()
+
+            if (contextHandledByPill.current) {
+              contextHandledByPill.current = false
+              return
+            }
+
+            openContextMenu(e, dateStr)
+          }}
           onMouseEnter={() => setHoveredDay(dateStr)}
           onMouseLeave={() => setHoveredDay(null)}
         >
@@ -196,46 +291,16 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
                 : null
 
               return (
-                <div
+                <EventPill
                   key={ev.date + ev.title + (ev.startTime ?? '')}
-                  className={`cal-event-pill${ev.graded ? ' cal-event-pill--graded' : ''}`}
-                  style={{
-                    opacity: isPastEvent(ev) ? 0.6 : 1,
-                    borderLeft: `3px solid ${ev.importance ? IMPORTANCE_COLORS[ev.importance] : '#6b7280'
-                      }`
-                  }}
-                  title={ev.title + (ev.startTime ? ` · ${ev.startTime}` : '') + (ev.grade != null ? ` · Nota: ${ev.grade}` : '')}
-                  onClick={e => {
-                    e.stopPropagation()
-
-                    if (clickTimeout.current) return
-
-                    clickTimeout.current = setTimeout(() => {
-                      openEventDetail(ev)
-                      clickTimeout.current = null
-                    }, 200)
-                  }}
-
-                  onDoubleClick={e => {
-                    e.stopPropagation()
-
-                    if (clickTimeout.current) {
-                      clearTimeout(clickTimeout.current)
-                      clickTimeout.current = null
-                    }
-
-                    openEditEvent(ev)
-                  }}
-                  onContextMenu={e => openContextMenu(e, dateStr, ev)}
-                >
-                  {!ev.allDay && ev.startTime && <span className="cal-event-time">{ev.startTime}</span>}
-                  <span style={{ textDecoration: (ev.graded || isPastEvent(ev)) ? 'line-through' : 'none' }}>{ev.title}</span>
-                  {ev.graded && ev.grade != null && (
-                    <span className="cal-event-grade" style={{ color: gradeColor ?? '#888', background: (gradeColor ?? '#888') + '22' }}>
-                      {ev.grade}
-                    </span>
-                  )}
-                </div>
+                  ev={ev}
+                  isPast={isPastEvent(ev)}
+                  gradeColor={gradeColor}
+                  onDetail={() => openEventDetail(ev)}
+                  onEdit={() => openEditEvent(ev)}
+                  onContext={e => openContextMenu(e, dateStr, ev)}
+                  onContextHandled={() => { contextHandledByPill.current = true }}
+                />
               )
             })}
             {dayEvents.length > 2 && <div className="cal-event-more">+{dayEvents.length - 2}</div>}
@@ -267,7 +332,12 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
             <div className="cal-grid">{cells}</div>
           </div>
 
-          <p className="cal-tip">Clic para agregar · Clic en evento para editar · Clic derecho para opciones</p>
+          <p className="cal-tip">
+            {isMobile
+              ? 'Toque para agregar · Toque para ver · Mantené para opciones'
+              : 'Clic para agregar · Clic en evento para ver · clic derecho para opciones'
+            }
+          </p>
 
           <div className="cal-stats">
             <span className="cal-stat"><strong>{events.length}</strong> eventos</span>

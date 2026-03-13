@@ -1,0 +1,164 @@
+/* ═══════════════════════════════════════════════════
+   THEME TOGGLE (tt-*)
+═══════════════════════════════════════════════════ */
+
+.tt-btn {
+    all: unset;
+    cursor: pointer;
+    width: 52px;
+    height: 28px;
+    border-radius: 99px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.35s cubic-bezier(.4, 0, .2, 1), border-color 0.35s ease;
+    border: 1.5px solid transparent;
+}
+
+.tt-btn--dark {
+    background: #1e1b4b;
+    border-color: #4338ca;
+}
+
+.tt-btn--light {
+    background: #fef3c7;
+    border-color: #f59e0b;
+}
+
+/* Estrellas */
+.tt-stars {
+    position: absolute;
+    inset: 0;
+    border-radius: 99px;
+    overflow: hidden;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+.tt-star {
+    position: absolute;
+    border-radius: 50%;
+    background: #c7d2fe;
+}
+
+/* Thumb */
+.tt-thumb {
+    position: absolute;
+    top: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        transform 0.38s cubic-bezier(.34, 1.56, .64, 1),
+        background 0.35s ease,
+        box-shadow 0.35s ease;
+}
+
+.tt-thumb--dark {
+    transform: translateX(3px);
+    background: #818cf8;
+    box-shadow: 0 0 8px rgba(99, 102, 241, 0.5);
+}
+
+.tt-thumb--light {
+    transform: translateX(27px);
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+}
+
+/* Íconos dentro del thumb */
+.tt-icon {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.34, 1.56, .64, 1);
+}
+
+/* Luna */
+.tt-moon {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+.tt-moon--hidden {
+    opacity: 0;
+    transform: scale(0.4) rotate(-90deg);
+}
+
+/* Sol */
+.tt-sun {
+    opacity: 0;
+    transform: scale(0.4) rotate(90deg);
+}
+
+.tt-sun--visible {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+}
+
+/* Rayos del sol */
+.tt-rays {
+    transform-origin: 50% 50%;
+    transition: transform 0.5s cubic-bezier(.34, 1.56, .64, 1), opacity 0.3s ease;
+}
+
+.tt-rays--hidden {
+    transform: scale(0.4) rotate(180deg);
+    opacity: 0;
+}
+
+.tt-rays--visible {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 56px;
+    height: 28px;
+}
+
+.switch-label {
+    position: absolute;
+    width: 100%;
+    height: 28px;
+    background-color: #13131a;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 2px solid #13131a;
+}
+
+.slider {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 14px;
+    transition: 0.3s;
+}
+
+.slider--checked {
+    background-color: #f8f8fc;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: inset 6px -2px 0px 0px #f8f8fc;
+    background-color: #16161f;
+    transition: 0.3s;
+}
+
+.slider--checked::before {
+    transform: translateX(28px);
+    background-color: #13131a;
+    box-shadow: none;
+}   

@@ -1,5 +1,278 @@
-/* Overlay */
-.sched-overlay {
+:root,
+[data-theme="dark"] {
+    /* Base */
+    --bg: #0a0a0f;
+    --card: #13131a;
+    --surface: #16161f;
+    --border: rgba(255, 255, 255, 0.07);
+
+    /* Texto */
+    --text: #e8e8f4;
+    --text-secondary: #c8c8e0;
+    --text-tertiary: #888899;
+    --muted: #454560;
+    --muted-deep: #2a2a42;
+
+    /* Acento */
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --accent-bg: rgba(99, 102, 241, 0.12);
+    --accent-bg-hover: rgba(99, 102, 241, 0.18);
+    --accent-bg-strong: rgba(99, 102, 241, 0.22);
+    --accent-border: rgba(99, 102, 241, 0.35);
+    --accent-border-strong: rgba(99, 102, 241, 0.5);
+
+    /* Estados */
+    --approved: #4ade80;
+    --pending-final: #fbbf24;
+    --in-progress: #a78bfa;
+    --retaking: #a78bfa;
+    --available: #38bdf8;
+    --failed-final: #fb923c;
+    --free: #475569;
+    --locked: #f43f5e;
+
+    /* Danger */
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.08);
+    --danger-border: rgba(248, 113, 113, 0.2);
+    --danger-bg-hover: rgba(248, 113, 113, 0.1);
+
+    /* Success */
+    --success: #34d399;
+    --success-bg: rgba(52, 211, 153, 0.08);
+    --success-border: rgba(52, 211, 153, 0.2);
+
+    /* Sombras */
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+    --shadow-menu: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04);
+
+    /* Superficies interactivas */
+    --item-hover: rgba(255, 255, 255, 0.05);
+    --item-hover-strong: rgba(255, 255, 255, 0.09);
+    --surface-faint: rgba(255, 255, 255, 0.03);
+    --surface-subtle: rgba(255, 255, 255, 0.05);
+    --border-faint: rgba(255, 255, 255, 0.05);
+    --border-subtle: rgba(255, 255, 255, 0.09);
+
+    /* Toggle */
+    --toggle-track: rgba(255, 255, 255, 0.08);
+    --toggle-thumb: rgba(255, 255, 255, 0.4);
+    --toggle-thumb-on: #fff;
+
+    /* Menu */
+    --menu-bg: #13131c;
+    --menu-border: rgba(255, 255, 255, 0.09);
+
+    /* Input */
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(255, 255, 255, 0.09);
+    --input-bg-focus: rgba(99, 102, 241, 0.08);
+    --input-text: #c8c8e0;
+    --input-text-focus: #e4e4f4;
+
+    /* Avatar */
+    --avatar-gradient: linear-gradient(135deg, #6366f1, #a78bfa);
+
+    /* Chips */
+    --chip-bg: rgba(255, 255, 255, 0.03);
+    --chip-border: rgba(255, 255, 255, 0.08);
+    --chip-color: #555570;
+    --chip-hover-border: rgba(99, 102, 241, 0.4);
+    --chip-hover-color: #a5b4fc;
+
+    /* Back button */
+    --back-color: #454560;
+    --back-hover-bg: rgba(255, 255, 255, 0.05);
+    --back-hover-color: #888899;
+
+    /* Upcoming exam */
+    --upcoming-bg: rgba(99, 102, 241, 0.07);
+    --upcoming-border: rgba(99, 102, 241, 0.14);
+    --upcoming-title: #a5b4fc;
+    --upcoming-date: #454560;
+
+    /* Section title */
+    --section-title-color: #2a2a42;
+
+    /* Promo/regular thresholds */
+    --promo-color: #4ade80;
+    --promo-bg: rgba(74, 222, 128, 0.15);
+    --promo-border: rgba(74, 222, 128, 0.45);
+    --promo-badge-bg: rgba(74, 222, 128, 0.12);
+    --promo-badge-border: rgba(74, 222, 128, 0.3);
+    --regular-color: #fbbf24;
+    --regular-bg: rgba(251, 191, 36, 0.15);
+    --regular-border: rgba(251, 191, 36, 0.45);
+    --regular-badge-bg: rgba(251, 191, 36, 0.12);
+    --regular-badge-border: rgba(251, 191, 36, 0.3);
+
+    /* Scrollbar */
+    --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
+
+    /* Grade preview */
+    --grade-preview-bg: rgba(255, 255, 255, 0.02);
+    --grade-preview-border: rgba(255, 255, 255, 0.06);
+    --grade-row-color: #555570;
+
+    /* Pref group */
+    --pref-group-bg: rgba(255, 255, 255, 0.03);
+    --pref-group-border: rgba(255, 255, 255, 0.06);
+    --pref-group-label: #c8c8e0;
+
+    /* Radius */
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* Theme toggle specific */
+    --theme-toggle-bg: rgba(255, 255, 255, 0.05);
+    --theme-toggle-border: rgba(255, 255, 255, 0.09);
+    --theme-toggle-icon: #454560;
+    --theme-toggle-hover-bg: rgba(255, 255, 255, 0.09);
+    --theme-toggle-hover-icon: #c8c8e0;
+
+    --placeholder: #252538;
+    --overlay-bg: rgba(4, 4, 8, 0.85);
+}
+
+
+[data-theme="light"] {
+    /* Base */
+    --bg: #f4f4f8;
+    --card: #ffffff;
+    --surface: #f8f8fc;
+    --border: rgba(0, 0, 0, 0.07);
+
+    /* Texto */
+    --text: #1a1a2e;
+    --text-secondary: #2a2a42;
+    --text-tertiary: #555575;
+    --muted: #8888aa;
+    --muted-deep: #aaaacc;
+
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --accent-bg: rgba(99, 102, 241, 0.12);
+    --accent-bg-hover: rgba(99, 102, 241, 0.18);
+    --accent-bg-strong: rgba(99, 102, 241, 0.22);
+    --accent-border: rgba(99, 102, 241, 0.35);
+    --accent-border-strong: rgba(99, 102, 241, 0.5);
+
+    /* Estados */
+    --approved: #4ade80;
+    --pending-final: #fbbf24;
+    --in-progress: #a78bfa;
+    --retaking: #a78bfa;
+    --available: #38bdf8;
+    --failed-final: #fb923c;
+    --free: #475569;
+    --locked: #f43f5e;
+    /* Danger */
+    --danger: #dc2626;
+    --danger-bg: rgba(220, 38, 38, 0.06);
+    --danger-border: rgba(220, 38, 38, 0.18);
+    --danger-bg-hover: rgba(220, 38, 38, 0.1);
+
+    /* Success */
+    --success: #059669;
+    --success-bg: rgba(5, 150, 105, 0.07);
+    --success-border: rgba(5, 150, 105, 0.2);
+
+    /* Sombras */
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-menu: 0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+    /* Superficies interactivas */
+    --item-hover: rgba(0, 0, 0, 0.04);
+    --item-hover-strong: rgba(0, 0, 0, 0.07);
+    --surface-faint: rgba(0, 0, 0, 0.02);
+    --surface-subtle: rgba(0, 0, 0, 0.04);
+    --border-faint: rgba(0, 0, 0, 0.05);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+
+    /* Toggle */
+    --toggle-track: rgba(0, 0, 0, 0.1);
+    --toggle-thumb: rgba(255, 255, 255, 0.9);
+    --toggle-thumb-on: #fff;
+
+    /* Menu */
+    --menu-bg: #ffffff;
+    --menu-border: rgba(0, 0, 0, 0.08);
+
+    /* Input */
+    --input-bg: rgba(0, 0, 0, 0.04);
+    --input-border: rgba(0, 0, 0, 0.1);
+    --input-bg-focus: rgba(83, 84, 212, 0.06);
+    --input-text: #2a2a42;
+    --input-text-focus: #1a1a2e;
+
+    /* Avatar */
+    --avatar-gradient: linear-gradient(135deg, #5254d4, #818cf8);
+
+    /* Chips */
+    --chip-bg: rgba(0, 0, 0, 0.03);
+    --chip-border: rgba(0, 0, 0, 0.08);
+    --chip-color: #666688;
+    --chip-hover-border: rgba(83, 84, 212, 0.4);
+    --chip-hover-color: #5254d4;
+
+    /* Back button */
+    --back-color: #8888aa;
+    --back-hover-bg: rgba(0, 0, 0, 0.05);
+    --back-hover-color: #555575;
+
+    /* Upcoming exam */
+    --upcoming-bg: rgba(83, 84, 212, 0.06);
+    --upcoming-border: rgba(83, 84, 212, 0.15);
+    --upcoming-title: #5254d4;
+    --upcoming-date: #8888aa;
+
+    /* Section title */
+    --section-title-color: #aaaacc;
+
+    /* Promo/regular thresholds */
+    --promo-color: #16a34a;
+    --promo-bg: rgba(22, 163, 74, 0.1);
+    --promo-border: rgba(22, 163, 74, 0.35);
+    --promo-badge-bg: rgba(22, 163, 74, 0.08);
+    --promo-badge-border: rgba(22, 163, 74, 0.25);
+    --regular-color: #d97706;
+    --regular-bg: rgba(217, 119, 6, 0.1);
+    --regular-border: rgba(217, 119, 6, 0.35);
+    --regular-badge-bg: rgba(217, 119, 6, 0.08);
+    --regular-badge-border: rgba(217, 119, 6, 0.25);
+
+    --scrollbar-thumb: rgba(0, 0, 0, 0.1);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.2);
+
+    --grade-preview-bg: rgba(0, 0, 0, 0.02);
+    --grade-preview-border: rgba(0, 0, 0, 0.06);
+    --grade-row-color: #666688;
+
+    --pref-group-bg: rgba(0, 0, 0, 0.025);
+    --pref-group-border: rgba(0, 0, 0, 0.07);
+    --pref-group-label: #2a2a42;
+
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    --theme-toggle-bg: rgba(0, 0, 0, 0.04);
+    --theme-toggle-border: rgba(0, 0, 0, 0.09);
+    --theme-toggle-icon: #8888aa;
+    --theme-toggle-hover-bg: rgba(0, 0, 0, 0.08);
+    --theme-toggle-hover-icon: #2a2a42;
+
+    --placeholder: #8888aa;
+    --overlay-bg: rgba(0, 0, 0, 0.35);
+
+}
+
+.schedule-overlay {
     position: fixed;
     inset: 0;
     z-index: 1000;
@@ -11,116 +284,162 @@
     padding: 20px;
 }
 
-/* Drawer */
-.sched-drawer {
-    background: #13131f;
-    border: 1px solid rgba(255, 255, 255, 0.07);
+.schedule-drawer {
+    background: var(--bg);
+    border: 1px solid var(--border);
     border-radius: 18px;
     display: flex;
     flex-direction: column;
     max-width: 95vw;
     max-height: 92vh;
     overflow: hidden;
-    animation: schedSlideUp 0.22s ease;
+    animation: schedSlideUp .22s ease;
 }
 
-/* Toolbar */
-.sched-toolbar {
+.schedule-toolbar {
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
     padding: 16px 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: 1px solid var(--border);
 }
 
-.sched-toolbar-title {
+.schedule-title {
     font-weight: 700;
-    font-size: 0.95rem;
-    color: #e2e8f0;
+    font-size: .95rem;
+    color: var(--text);
 }
 
-.sched-toolbar-sub {
-    font-size: 0.75rem;
-    color: #64748b;
+.schedule-subtitle {
+    font-size: .75rem;
+    color: var(--muted);
     margin-top: 2px;
 }
 
-.sched-toolbar-actions {
+.schedule-actions {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
-/* Botones */
-.sched-theme-btn {
-    border: none;
-    cursor: pointer;
-    border-radius: 8px;
-    padding: 6px 10px;
-}
-
-.sched-theme-btn.dark {
-    background: #1e1e30;
-    color: #f8fafc;
-}
-
-.sched-theme-btn.light {
-    background: #f1f5f9;
-    color: #1e293b;
-}
-
-.sched-download-btn {
-    background: #6366f1;
-    color: white;
+.schedule-download {
+    background: var(--accent);
+    color: #fff;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
     padding: 8px 16px;
-    font-size: 0.82rem;
+    font-size: .82rem;
     font-weight: 600;
-    transition: opacity 0.15s;
+    cursor: pointer;
 }
 
-.sched-download-btn:hover {
-    opacity: 0.9;
-}
-
-/* Preview */
-.sched-preview-wrap {
-    overflow-y: auto;
-    overflow-x: auto;
+.schedule-previewWrap {
+    overflow: auto;
     padding: 24px;
     flex: 1;
 }
 
-/* Grid base */
-.sched-grid {
+.schedule-preview {
+    background: var(--card);
     border-radius: 16px;
     padding: 24px 20px 20px;
     min-width: 560px;
     font-family: "DM Sans", system-ui, sans-serif;
 }
 
-/* Themes */
-.sched-grid.dark {
-    background: #0d0d1a;
-    color: #e2e8f0;
+.schedule-header {
+    margin-bottom: 20px;
 }
 
-.sched-grid.light {
-    background: #f8fafc;
-    color: #1e293b;
+.schedule-career {
+    font-size: .65rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
 }
 
-/* Animaciones */
+.schedule-mainTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.schedule-grid {
+    display: flex;
+}
+
+.schedule-hours {
+    width: 44px;
+    position: relative;
+    padding-top: 32px;
+}
+
+.schedule-hour {
+    position: absolute;
+    font-size: .6rem;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.schedule-days {
+    display: flex;
+    flex: 1;
+    gap: 6px;
+}
+
+.schedule-day {
+    flex: 1;
+    min-width: 0;
+}
+
+.schedule-dayLabel {
+    text-align: center;
+    font-size: .68rem;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.schedule-dayGrid {
+    position: relative;
+}
+
+.schedule-block {
+    position: absolute;
+    left: 2px;
+    right: 2px;
+    border-radius: 6px;
+    padding: 4px 6px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+}
+
+.schedule-blockTitle {
+    font-size: .62rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-blockTime {
+    font-size: .55rem;
+    margin-top: 2px;
+}
+
 @keyframes schedSlideUp {
     from {
         opacity: 0;
-        transform: translateY(24px);
+        transform: translateY(24px)
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0)
     }
 }

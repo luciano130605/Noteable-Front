@@ -15,6 +15,7 @@ interface UniversityResult {
 
 interface Props {
     onClose: () => void
+    onResetPassword: (email: string) => Promise<string | null>
     initialMode?: 'login' | 'register'
     onSignIn: (email: string, password: string) => Promise<string | null>
     onSignUp: (
@@ -51,7 +52,7 @@ function cleanUniversityName(displayName: string): string {
     return displayName.split(',')[0].trim()
 }
 
-export default function AuthModal({ onClose, initialMode = 'login', onSignIn, onSignUp, onSignInWithMagicLink, onSignInWithOAuth }: Props) {
+export default function AuthModal({ onClose, onResetPassword, initialMode = 'login', onSignIn, onSignUp, onSignInWithMagicLink, onSignInWithOAuth }: Props) {
     const [mode, setMode] = useState<'login' | 'register'>(initialMode)
     const [registerStep, setRegisterStep] = useState<1 | 2>(1)
 
@@ -77,7 +78,8 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
     const [totalSubjects, setTotalSubjects] = useState<string>('')
     const [currentYear, setCurrentYear] = useState<number>(1)
     const [currentSemester, setCurrentSemester] = useState<1 | 2>(1)
-
+    const [resetLoading, setResetLoading] = useState(false)
+    const [resetSent, setResetSent] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [success, setSuccess] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
@@ -139,6 +141,23 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
         if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
         if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
         setRegisterStep(2)
+    }
+
+    const handleResetPassword = async () => {
+        setError(null)
+        if (!email.trim()) { setError('Ingresá tu email primero.'); return }
+        setResetLoading(true)
+        const err = await onResetPassword(email.trim())
+        setResetLoading(false)
+        if (err) {
+            const t: Record<string, string> = {
+                'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos.',
+                'User not found': 'No existe una cuenta con ese email.',
+            }
+            setError(t[err] ?? err)
+        } else {
+            setResetSent(true)
+        }
     }
 
     const handleSubmit = async () => {
@@ -250,7 +269,6 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
 
                     {success ? (
                         <div className="auth-modal__success-full">
-                            <div className="auth-modal__success-icon">🎉</div>
                             <div className="auth-modal__success-title">¡Cuenta creada!</div>
                             <p className="auth-modal__success-text">Te enviamos un email de confirmación. Revisá tu bandeja de entrada (y spam).</p>
                         </div>
@@ -282,6 +300,7 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
                                         {showPassword ? <EyeSlash size={14} color='currentColor' /> : <Eye size={14} color='currentColor' />}
                                     </button>
                                 </div>
+
                             </div>
 
                             <div className="auth-modal__field">
@@ -462,6 +481,24 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
                                         {showPassword ? <EyeSlash size={14} color='currentColor' /> : <Eye size={14} color='currentColor' />}
                                     </button>
                                 </div>
+                                <button
+                                    type="button"
+                                    className={`auth-modal__forgot-btn${resetSent ? ' sent' : ''}`}
+                                    onClick={handleResetPassword}
+                                    disabled={resetLoading}
+                                >
+                                    {resetLoading ? 'Enviando...' : resetSent ? 'Link enviado' : '¿Olvidaste tu contraseña?'}
+                                </button>
+
+                                {resetSent && (
+                                    <div className="auth-modal__reset-sent">
+                                        <Mail size={15} color="#6366f1" style={{ flexShrink: 0, marginTop: 1 }} />
+                                        <div>
+                                            <strong>Link enviado</strong>
+                                            <p>Revisá tu bandeja de entrada para restablecer tu contraseña.</p>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {error && <div className="auth-modal__error"><Danger size={12} color='currentColor' /> {error}</div>}
@@ -486,7 +523,6 @@ export default function AuthModal({ onClose, initialMode = 'login', onSignIn, on
                                 <div className="auth-modal__magic-sent">
                                     <Mail size={18} color="#6366f1" style={{ flexShrink: 0 }} />
                                     <div>
-                                        <strong>¡Link enviado!</strong>
                                         <p>Revisá el email <strong>{email}</strong> y hacé clic en el link para entrar.</p>
                                     </div>
                                 </div>

@@ -531,8 +531,8 @@ export default function EventModal({ initialDate, event, onSave, onDelete, onClo
                                     className="evm-btn evm-btn--danger"
                                     onClick={() => onDelete(form)}
                                 >
-                                    <Trash size={16} color="#ef4444" />
-                                    <span className="evm-btn-label">Eliminar</span>
+                                    <Trash size={16} color="#ef4444" style={{ position: "relative", top: "2" }} />
+                                    <span className="evm-btn-label" >Eliminar</span>
                                 </button>
                             )}
 

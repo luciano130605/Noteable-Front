@@ -354,3 +354,31 @@
     opacity: 0.5;
     cursor: not-allowed;
 }
+
+@media (max-width: 600px) {
+    .notion-picker__overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .notion-picker {
+        width: 100%;
+        max-height: 92dvh;
+        border-radius: 20px 20px 0 0;
+        border-bottom: none;
+    }
+
+    .notion-picker__header {
+        border-radius: 20px 20px 0 0;
+    }
+
+    .notion-picker__search {
+        font-size: 1rem;
+        /* evita zoom en iOS */
+    }
+
+    .notion-picker__item {
+        padding: 12px 16px;
+        /* táctil más fácil */
+    }
+}

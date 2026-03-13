@@ -1,9 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:wght@600&display=swap');
 
-/* ═══════════════════════════════════════════════════════
-   ROOT — dark theme unificado con Calendar
-═══════════════════════════════════════════════════════ */
-:root {
+
+═:root,
+[data-theme="dark"] {
     /* Base */
     --bg: #0a0a0f;
     --card: #13131a;
@@ -12,13 +11,22 @@
 
     /* Texto */
     --text: #e8e8f4;
+    --text-secondary: #c8c8e0;
+    --text-tertiary: #888899;
     --muted: #454560;
+    --muted-deep: #2a2a42;
 
-    /* Acento principal — indigo coherente con Calendar */
+    /* Acento */
     --accent: #6366f1;
     --accent2: #818cf8;
     --accent3: #f472b6;
+    --accent-bg: rgba(99, 102, 241, 0.12);
+    --accent-bg-hover: rgba(99, 102, 241, 0.18);
+    --accent-bg-strong: rgba(99, 102, 241, 0.22);
+    --accent-border: rgba(99, 102, 241, 0.35);
+    --accent-border-strong: rgba(99, 102, 241, 0.5);
 
+    /* Estados */
     --approved: #4ade80;
     --pending-final: #fbbf24;
     --in-progress: #a78bfa;
@@ -27,46 +35,245 @@
     --failed-final: #fb923c;
     --free: #475569;
     --locked: #f43f5e;
+
+    /* Danger */
+    --danger: #f87171;
+    --danger-bg: rgba(248, 113, 113, 0.08);
+    --danger-border: rgba(248, 113, 113, 0.2);
+    --danger-bg-hover: rgba(248, 113, 113, 0.1);
+
+    /* Success */
+    --success: #34d399;
+    --success-bg: rgba(52, 211, 153, 0.08);
+    --success-border: rgba(52, 211, 153, 0.2);
+
     /* Sombras */
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
+    --shadow-menu: 0 24px 60px rgba(0, 0, 0, 0.65),
+        0 0 0 1px rgba(255, 255, 255, 0.04);
 
-    /* Radio */
+    /* Superficies interactivas */
+    --item-hover: rgba(255, 255, 255, 0.05);
+    --item-hover-strong: rgba(255, 255, 255, 0.09);
+    --surface-faint: rgba(255, 255, 255, 0.03);
+    --surface-subtle: rgba(255, 255, 255, 0.05);
+    --border-faint: rgba(255, 255, 255, 0.05);
+    --border-subtle: rgba(255, 255, 255, 0.09);
+
+    /* Toggle */
+    --toggle-track: rgba(255, 255, 255, 0.08);
+    --toggle-thumb: rgba(255, 255, 255, 0.4);
+    --toggle-thumb-on: #fff;
+
+    /* Menu */
+    --menu-bg: #13131c;
+    --menu-border: rgba(255, 255, 255, 0.09);
+
+    /* Input */
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(255, 255, 255, 0.09);
+    --input-bg-focus: rgba(99, 102, 241, 0.08);
+    --input-text: #c8c8e0;
+    --input-text-focus: #e4e4f4;
+
+    /* Avatar */
+    --avatar-gradient: linear-gradient(135deg, #6366f1, #a78bfa);
+
+    /* Chips */
+    --chip-bg: rgba(255, 255, 255, 0.03);
+    --chip-border: rgba(255, 255, 255, 0.08);
+    --chip-color: #555570;
+    --chip-hover-border: rgba(99, 102, 241, 0.4);
+    --chip-hover-color: #a5b4fc;
+
+    /* Back button */
+    --back-color: #454560;
+    --back-hover-bg: rgba(255, 255, 255, 0.05);
+    --back-hover-color: #888899;
+
+    /* Upcoming exam */
+    --upcoming-bg: rgba(99, 102, 241, 0.07);
+    --upcoming-border: rgba(99, 102, 241, 0.14);
+    --upcoming-title: #a5b4fc;
+    --upcoming-date: #454560;
+
+    /* Section title */
+    --section-title-color: #2a2a42;
+
+    /* Promo/regular thresholds */
+    --promo-color: #4ade80;
+    --promo-bg: rgba(74, 222, 128, 0.15);
+    --promo-border: rgba(74, 222, 128, 0.45);
+    --promo-badge-bg: rgba(74, 222, 128, 0.12);
+    --promo-badge-border: rgba(74, 222, 128, 0.3);
+    --regular-color: #fbbf24;
+    --regular-bg: rgba(251, 191, 36, 0.15);
+    --regular-border: rgba(251, 191, 36, 0.45);
+    --regular-badge-bg: rgba(251, 191, 36, 0.12);
+    --regular-badge-border: rgba(251, 191, 36, 0.3);
+
+    /* Scrollbar */
+    --scrollbar-thumb: rgba(255, 255, 255, 0.08);
+    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
+
+    /* Grade preview */
+    --grade-preview-bg: rgba(255, 255, 255, 0.02);
+    --grade-preview-border: rgba(255, 255, 255, 0.06);
+    --grade-row-color: #555570;
+
+    /* Pref group */
+    --pref-group-bg: rgba(255, 255, 255, 0.03);
+    --pref-group-border: rgba(255, 255, 255, 0.06);
+    --pref-group-label: #c8c8e0;
+
+    /* Radius */
     --radius-md: 10px;
     --radius-lg: 16px;
 
-
+    /* Theme toggle specific */
+    --theme-toggle-bg: rgba(255, 255, 255, 0.05);
+    --theme-toggle-border: rgba(255, 255, 255, 0.09);
+    --theme-toggle-icon: #454560;
+    --theme-toggle-hover-bg: rgba(255, 255, 255, 0.09);
+    --theme-toggle-hover-icon: #c8c8e0;
 }
 
+/* ═══════════════════════════════════════════════════
+   THEME VARIABLES — LIGHT
+═══════════════════════════════════════════════════ */
 [data-theme="light"] {
     /* Base */
-    --bg: #f6f7fb;
+    --bg: #f4f4f8;
     --card: #ffffff;
-    --surface: #f1f3f9;
-    --border: rgba(0, 0, 0, 0.08);
+    --surface: #f8f8fc;
+    --border: rgba(0, 0, 0, 0.07);
 
     /* Texto */
-    --text: #141420;
-    --muted: #6b6b85;
+    --text: #1a1a2e;
+    --text-secondary: #2a2a42;
+    --text-tertiary: #555575;
+    --muted: #8888aa;
+    --muted-deep: #aaaacc;
 
-    /* Acentos (mismos tonos, adaptados) */
-    --accent: #4f46e5;
-    --accent2: #6366f1;
-    --accent3: #db2777;
+    --accent: #6366f1;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --accent-bg: rgba(99, 102, 241, 0.12);
+    --accent-bg-hover: rgba(99, 102, 241, 0.18);
+    --accent-bg-strong: rgba(99, 102, 241, 0.22);
+    --accent-border: rgba(99, 102, 241, 0.35);
+    --accent-border-strong: rgba(99, 102, 241, 0.5);
 
     /* Estados */
-    --approved: #16a34a;
-    --pending-final: #ca8a04;
-    --in-progress: #2563eb;
-    --retaking: #7c3aed;
-    --available: #0284c7;
-    --failed-final: #ea580c;
-    --free: #64748b;
-    --locked: #dc2626;
+    --approved: #4ade80;
+    --pending-final: #fbbf24;
+    --in-progress: #a78bfa;
+    --retaking: #a78bfa;
+    --available: #38bdf8;
+    --failed-final: #fb923c;
+    --free: #475569;
+    --locked: #f43f5e;
+    /* Danger */
+    --danger: #dc2626;
+    --danger-bg: rgba(220, 38, 38, 0.06);
+    --danger-border: rgba(220, 38, 38, 0.18);
+    --danger-bg-hover: rgba(220, 38, 38, 0.1);
+
+    /* Success */
+    --success: #059669;
+    --success-bg: rgba(5, 150, 105, 0.07);
+    --success-border: rgba(5, 150, 105, 0.2);
 
     /* Sombras */
     --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    --shadow-menu: 0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+
+    /* Superficies interactivas */
+    --item-hover: rgba(0, 0, 0, 0.04);
+    --item-hover-strong: rgba(0, 0, 0, 0.07);
+    --surface-faint: rgba(0, 0, 0, 0.02);
+    --surface-subtle: rgba(0, 0, 0, 0.04);
+    --border-faint: rgba(0, 0, 0, 0.05);
+    --border-subtle: rgba(0, 0, 0, 0.08);
+
+    /* Toggle */
+    --toggle-track: rgba(0, 0, 0, 0.1);
+    --toggle-thumb: rgba(255, 255, 255, 0.9);
+    --toggle-thumb-on: #fff;
+
+    /* Menu */
+    --menu-bg: #ffffff;
+    --menu-border: rgba(0, 0, 0, 0.08);
+
+    /* Input */
+    --input-bg: rgba(0, 0, 0, 0.04);
+    --input-border: rgba(0, 0, 0, 0.1);
+    --input-bg-focus: rgba(83, 84, 212, 0.06);
+    --input-text: #2a2a42;
+    --input-text-focus: #1a1a2e;
+
+    /* Avatar */
+    --avatar-gradient: linear-gradient(135deg, #5254d4, #818cf8);
+
+    /* Chips */
+    --chip-bg: rgba(0, 0, 0, 0.03);
+    --chip-border: rgba(0, 0, 0, 0.08);
+    --chip-color: #6666888;
+    --chip-hover-border: rgba(83, 84, 212, 0.4);
+    --chip-hover-color: #5254d4;
+
+    /* Back button */
+    --back-color: #8888aa;
+    --back-hover-bg: rgba(0, 0, 0, 0.05);
+    --back-hover-color: #555575;
+
+    /* Upcoming exam */
+    --upcoming-bg: rgba(83, 84, 212, 0.06);
+    --upcoming-border: rgba(83, 84, 212, 0.15);
+    --upcoming-title: #5254d4;
+    --upcoming-date: #8888aa;
+
+    /* Section title */
+    --section-title-color: #aaaacc;
+
+    /* Promo/regular thresholds */
+    --promo-color: #16a34a;
+    --promo-bg: rgba(22, 163, 74, 0.1);
+    --promo-border: rgba(22, 163, 74, 0.35);
+    --promo-badge-bg: rgba(22, 163, 74, 0.08);
+    --promo-badge-border: rgba(22, 163, 74, 0.25);
+    --regular-color: #d97706;
+    --regular-bg: rgba(217, 119, 6, 0.1);
+    --regular-border: rgba(217, 119, 6, 0.35);
+    --regular-badge-bg: rgba(217, 119, 6, 0.08);
+    --regular-badge-border: rgba(217, 119, 6, 0.25);
+
+    /* Scrollbar */
+    --scrollbar-thumb: rgba(0, 0, 0, 0.1);
+    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.2);
+
+    /* Grade preview */
+    --grade-preview-bg: rgba(0, 0, 0, 0.02);
+    --grade-preview-border: rgba(0, 0, 0, 0.06);
+    --grade-row-color: #666688;
+
+    /* Pref group */
+    --pref-group-bg: rgba(0, 0, 0, 0.025);
+    --pref-group-border: rgba(0, 0, 0, 0.07);
+    --pref-group-label: #2a2a42;
+
+    /* Radius */
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    /* Theme toggle specific */
+    --theme-toggle-bg: rgba(0, 0, 0, 0.04);
+    --theme-toggle-border: rgba(0, 0, 0, 0.09);
+    --theme-toggle-icon: #8888aa;
+    --theme-toggle-hover-bg: rgba(0, 0, 0, 0.08);
+    --theme-toggle-hover-icon: #2a2a42;
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -114,7 +321,6 @@ body {
 ═══════════════════════════════════════════════════════ */
 .header {
     padding: 14px 28px;
-    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -122,10 +328,6 @@ body {
     top: 0;
     z-index: 100;
     gap: 1rem;
-    background: rgb(22, 22, 31, 0.30);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: 0 1px 0 var(--border), var(--shadow);
 }
 
 .header__logo {
@@ -133,7 +335,6 @@ body {
     font-size: 1.35rem;
     letter-spacing: -0.02em;
     flex-shrink: 0;
-    color: var(--text);
 }
 
 .header__logo span {
@@ -209,8 +410,8 @@ body {
 
 .header__search {
     width: 100%;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border);
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
     color: var(--text);
     padding: 7px 12px 7px 32px;
     border-radius: var(--radius-md);
@@ -225,6 +426,7 @@ body {
 }
 
 .header__search:focus {
+    outline: none;
     border-color: var(--accent);
     background: rgba(99, 102, 241, 0.07);
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
@@ -236,9 +438,9 @@ body {
 .btn {
     padding: 7px 16px;
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--muted);
+    background: var(--surface-subtle);
+    color: var(--text-tertiary);
+    border: 1px solid var(--border-subtle);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.82rem;
     font-weight: 500;
@@ -255,7 +457,7 @@ body {
 .btn--primary {
     background: var(--accent);
     border: none;
-    color: var(--text);
+    color: #fff;
     font-weight: bold;
 }
 
@@ -307,7 +509,7 @@ body {
 }
 
 .stats-bar__item:hover {
-    background: #17171f;
+    background: var(--surface);
     border-color: rgba(255, 255, 255, 0.1);
 }
 
@@ -376,6 +578,34 @@ body {
    FILTERS
 ═══════════════════════════════════════════════════════ */
 
+.filters-row {
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+    position: relative;
+}
+
+.filters {
+    flex: 1;
+    overflow-x: auto;
+    border-bottom: none;
+}
+
+.filters-settings-wrap {
+    flex-shrink: 0;
+    position: relative;
+    padding: 8px 12px 8px 6px;
+    background: var(--bg) !important;
+}
+
+.filters-panel {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    z-index: 200;
+}
+
 .filters {
     padding: 10px 24px;
     display: flex;
@@ -383,7 +613,7 @@ body {
     flex-wrap: wrap;
     align-items: center;
     border-bottom: 1px solid var(--border);
-    background: #0f0f13;
+    background: var(--bg);
 }
 
 .filters__label {
@@ -395,11 +625,56 @@ body {
     margin-right: 4px;
 }
 
+
+.app-loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    width: 100vh;
+}
+
+
+.app-loading__spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-top-color: #6366f1;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+
+.app-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 12px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    background: var(--bg) !important;
+}
+
 .filter-btn {
     padding: 5px 12px;
     border-radius: 20px;
     border: 1px solid transparent;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--surface-faint);
     color: var(--muted);
     font-family: 'DM Sans', sans-serif;
     font-size: 0.72rem;
@@ -413,7 +688,7 @@ body {
 
 .filter-btn[data-status="all"]:hover,
 .filter-btn[data-status="all"].filter-btn--active {
-    background: rgba(99, 102, 241, 0.15);
+    background: var(--border-faint);
     border-color: rgba(99, 102, 241, 0.45);
     color: var(--accent2);
 }
@@ -1466,7 +1741,7 @@ body {
     position: relative;
     width: min(720px, 95vw);
     height: 100vh;
-    background: #0f0f13;
+    background: var(--bg);
     border-left: 1px solid rgba(255, 255, 255, 0.07);
     overflow-y: auto;
     animation: cal-drawer-in 0.25s cubic-bezier(0.2, 0, 0, 1);
@@ -1628,4 +1903,302 @@ body {
 .teclas {
     position: relative;
     right: 90px;
+}
+
+.progress-strip {
+    display: none;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — agregar al final de App.css
+   Cubre: Stats bar · Progress section · Filters · Year grid
+══════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────
+   TABLET (≤ 1024px)
+──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+    .progress-bar__left {
+        min-width: 120px;
+    }
+
+    .year-semesters {
+        gap: 20px;
+    }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    }
+}
+
+/* ────────────────────────────────────────────
+   MOBILE (≤ 768px)
+──────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* ── Header ── */
+    .header {
+        padding: 10px 14px;
+        gap: 8px;
+    }
+
+    /* ── Status chips — más pequeños en mobile ── */
+    .subject-card__status,
+    .status-badge,
+    [class*="status-chip"],
+    [class*="status-badge"] {
+        font-size: 0.58rem !important;
+        padding: 1px 6px !important;
+        border-radius: 4px !important;
+        gap: 3px !important;
+    }
+
+    .subject-card__status-dot,
+    [class*="status-dot"] {
+        width: 5px !important;
+        height: 5px !important;
+    }
+
+    .progress-strip {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        padding: 0 14px 0 0;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+        height: 22px;
+    }
+
+    .progress-strip__track {
+        flex: 1;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .progress-strip__fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 0 6px rgba(99, 102, 241, 0.5);
+    }
+
+    .progress-strip__pct {
+        font-size: 0.68rem;
+        font-weight: 700;
+        color: var(--accent2);
+        white-space: nowrap;
+        flex-shrink: 0;
+        opacity: 0.8;
+    }
+
+    .progress-section {
+        padding: 0;
+    }
+
+    .progress-section .progress-bar,
+    .progress-years {
+        display: none !important;
+    }
+
+    .progress-strip {
+        display: none;
+    }
+
+    .header__search-wrap {
+        max-width: none;
+    }
+
+    /* ══ STATS BAR: grid 2×2 ══════════════════ */
+    .stats-bar {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+        padding: 10px 12px;
+        overflow: visible;
+    }
+
+    .stats-bar__item {
+        flex: none !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 14px 12px;
+        border-radius: 12px;
+        text-align: center;
+    }
+
+    .stats-bar__value {
+        font-size: 1.75rem;
+        line-height: 1;
+    }
+
+    .stats-bar__label {
+        font-size: 0.6rem;
+        margin-top: 4px;
+    }
+
+    /* ══ PROGRESS ═════════════════════════════ */
+    .progress-section {
+        padding: 10px 14px 4px;
+    }
+
+    .progress-bar {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 10px 0 6px;
+    }
+
+    /* Fila superior: label truncado + subtítulo */
+    .progress-bar__left {
+        width: 100%;
+        min-width: 0;
+        flex-direction: row;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 6px;
+        overflow: hidden;
+    }
+
+    .progress-bar__label {
+        font-size: 0.65rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .progress-bar__sub {
+        font-size: 0.62rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* Fila inferior: barra + porcentaje */
+    .progress-bar__track-wrap {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .progress-bar__track {
+        height: 5px;
+    }
+
+    .progress-bar__pct {
+        font-size: 0.78rem;
+        min-width: 34px;
+        flex-shrink: 0;
+    }
+
+    .progress-years {
+        display: none;
+    }
+
+    /* ══ FILTERS ══════════════════════════════ */
+    .filters {
+        padding: 8px 12px;
+        gap: 5px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .filters::-webkit-scrollbar {
+        display: none;
+    }
+
+    .filters__label {
+        display: none;
+    }
+
+    .filter-btn {
+        flex-shrink: 0;
+        font-size: 0.7rem;
+        padding: 5px 12px;
+        white-space: nowrap;
+        height: 30px;
+    }
+
+    /* Botón settings pegado a la derecha, siempre visible */
+    .filters>div:last-child {
+        flex-shrink: 0;
+        margin-left: 4px;
+        position: static;
+        background: transparent;
+        padding-left: 0;
+        z-index: 1;
+    }
+
+    /* ══ LAYOUT ════════════════════════════════ */
+    .year-semesters {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .main__content {
+        padding: 16px 14px 100px;
+    }
+
+    .subjects-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 8px;
+    }
+}
+
+/* ────────────────────────────────────────────
+   MOBILE PORTRAIT (≤ 480px)
+──────────────────────────────────────────── */
+@media (max-width: 480px) {
+
+    .header {
+        padding: 8px 12px;
+    }
+
+    .stats-bar {
+        padding: 8px 10px !important;
+        gap: 6px !important;
+    }
+
+    .stats-bar__item {
+        padding: 12px 8px !important;
+    }
+
+    .stats-bar__value {
+        font-size: 1.5rem !important;
+    }
+
+    .stats-bar__label {
+        font-size: 0.56rem !important;
+    }
+
+    .progress-bar__sub {
+        display: none;
+    }
+
+    .subjects-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .year-section__title {
+        font-size: 0.6rem;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .main__content {
+        padding: 12px 10px 100px;
+    }
+}
+
+/* ────────────────────────────────────────────
+   REDUCED MOTION
+──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+
+    .progress-bar__fill,
+    .stats-bar__item,
+    .filter-btn {
+        transition: none !important;
+    }
 }

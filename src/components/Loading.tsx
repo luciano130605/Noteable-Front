@@ -1,68 +1,86 @@
-import styled from 'styled-components';
+import './Loading.css';
 
-const Loader = () => {
-    return (
-        <StyledWrapper>
-            <span className="loader" />
-        </StyledWrapper>
-    );
-}
+const Loading = () => {
+  return (
+    <div className="sk-app">
+      <div className="sk-header">
+        <div className="sk-header__left">
+          <div className="sk sk-logo" />
 
-const StyledWrapper = styled.div`
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  .loader {
-    width: 48px;
-    height: 48px;
-    display: block;
-    margin: 15px auto;
-    position: relative;
-    color: #e8e8f4;
-    box-sizing: border-box;
-    animation: rotation_19 1s linear infinite;
-  }
+        </div>
+        <div className="sk-header__right">
+          <div className="sk sk-btn-sq" />
+          <div className="sk sk-btn-sq" />
+          <div className="sk sk-avatar" />
+        </div>
+      </div>
 
-  .loader::after,
-  .loader::before {
-    content: '';
-    box-sizing: border-box;
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    top: 0;
-    background-color: #e8e8f4;
-    border-radius: 50%;
-    animation: scale50 1s infinite ease-in-out;
-  }
+      <div className="sk-stats">
+        {[0, 1, 2, 3].map(i => (
+          <div className="sk-stat-item" key={i}>
+            <div className="sk sk-stat-num" style={{ animationDelay: `${i * 0.07}s` }} />
+            <div className="sk sk-stat-lbl" style={{ animationDelay: `${i * 0.07 + 0.05}s` }} />
+          </div>
+        ))}
+      </div>
 
-  .loader::before {
-    top: auto;
-    bottom: 0;
-    background-color: #6366f1;
-    animation-delay: 0.5s;
-  }
+      <div className="sk-progress">
+        <div className="sk sk-prog-label" />
+        <div className="sk sk-prog-track" />
+        <div className="sk sk-prog-pct" />
+      </div>
 
-  @keyframes rotation_19 {
-    0% {
-      transform: rotate(0deg);
-    }
+      <div className="sk-filters">
+        {[80, 100, 90, 110, 95, 85].map((w, i) => (
+          <div className="sk sk-filter-pill" key={i} style={{ width: w, animationDelay: `${i * 0.04}s` }} />
+        ))}
+        <div className="sk sk-filters__label" />
 
-    100% {
-      transform: rotate(360deg);
-    }
-  }
+      </div>
 
-  @keyframes scale50 {
-    0%, 100% {
-      transform: scale(0);
-    }
+      <div className="sk-main">
+        <div className="sk-sidebar">
+          <div className="sk sk-sidebar__title" />
+          <div className="sk-sidebar__stats">
+            {[0, 1, 2].map(i => (
+              <div className="sk sk-sidebar__stat" key={i} style={{ animationDelay: `${i * 0.07}s` }} />
+            ))}
+          </div>
+          <div className="sk sk-sidebar__card" />
+          <div className="sk-sidebar__list">
+            {[0, 1, 2, 3].map(i => (
+              <div className="sk sk-sidebar__row" key={i} style={{ animationDelay: `${i * 0.06}s` }} />
+            ))}
+          </div>
+        </div>
 
-    50% {
-      transform: scale(1);
-    }
-  }`;
+        <div className="sk-content">
+          {[0, 1].map(year => (
+            <div className="sk-year-block" key={year}>
+              <div className="sk-year-block__header">
+                <div className="sk sk-year-label" style={{ animationDelay: `${year * 0.1}s` }} />
+                <div className="sk sk-year-badge" style={{ animationDelay: `${year * 0.1 + 0.05}s` }} />
+              </div>
+              <div className="sk-year-cols">
+                {[0, 1].map(col => (
+                  <div className="sk-col" key={col}>
+                    <div className="sk sk-col-title" style={{ animationDelay: `${(year * 2 + col) * 0.05}s` }} />
+                    {Array.from({ length: col === 0 ? 3 : 2 }).map((_, c) => (
+                      <div className="sk-subject-card" key={c} style={{ animationDelay: `${(year * 2 + col) * 0.06 + c * 0.04}s` }}>
+                        <div className="sk sk-subject-card__name" />
+                        <div className="sk sk-subject-card__code" />
+                        <div className="sk sk-subject-card__badge" />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
 
-export default Loader;
+export default Loading;

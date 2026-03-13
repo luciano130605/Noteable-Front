@@ -5,6 +5,7 @@ import { useCalendarEvents } from './hooks/Usecalendarevents'
 import { useAuth } from './hooks/Useauth'
 import { SubjectCard } from './components/SubjectCard'
 import SubjectModal from './components/SubjectModal'
+import { supabase } from '../supabase/Supabase'
 import Calendar from './components/Calendar'
 import UpcomingSidebar from './components/Upcomingsidebar'
 import type { CalendarHandle } from './components/Calendar'
@@ -35,7 +36,8 @@ import KanbanView from './components/Kanbanview'
 import type { CalendarEvent } from './components/Eventmodal'
 import AnalyticsModal from './components/Analyticsmodal'
 import PinLocation from './Icon/PinLocation'
-
+import MobileFAB from './components/Mobilefab'
+import Onboarding from './components/Onboarding'
 
 export function getEffectiveStatus(
   subject: Subject,
@@ -92,6 +94,7 @@ export default function App() {
   const [filter, setFilter] = useState<FilterKey>('all')
   const [search, setSearch] = useState('')
   const [modal, setModal] = useState<Subject | null | 'new'>(null)
+  const [mobileUpcomingOpen, setMobileUpcomingOpen] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
   const [showCloseSemester, setShowCloseSemester] = useState(false)
   const [showShortcuts, setShowShortcuts] = useState(false)
@@ -103,7 +106,7 @@ export default function App() {
   const [kanbanView, setKanbanView] = useState(() => localStorage.getItem('kanbanView') === 'true')
   const toggleCompact = () => setCompactView(v => { const next = !v; localStorage.setItem('compactView', String(next)); return next })
   const toggleKanban = () => setKanbanView(v => { const next = !v; localStorage.setItem('kanbanView', String(next)); return next })
-
+  const [showOnboarding, setShowOnboarding] = useState(false)
 
   useKeyboardShortcuts([
     { key: 'f', ctrl: true, description: 'Buscar materia (Spotlight)', action: () => setSpotlightOpen(v => !v) },
@@ -111,7 +114,6 @@ export default function App() {
     { key: 'y', ctrl: true, description: 'Abrir / cerrar calendario', action: () => setCalOpen(v => !v) },
     { key: 'i', ctrl: true, description: 'Mostrar / ocultar GPA', action: () => setShowGpa(v => !v) },
     { key: 'b', ctrl: true, description: 'Alternar vista compacta', action: () => toggleCompact() },
-
     { key: 'k', ctrl: true, description: 'Alternar vista Kanban', action: () => toggleKanban() },
     { key: 'a', shift: true, description: 'Ver atajos de teclado', action: () => setShowShortcuts(v => !v) },
     { key: 'n', ctrl: true, description: 'Abrir analítica', action: () => setShowAnalytics(v => !v) },
@@ -199,7 +201,6 @@ export default function App() {
     return err
   }
 
-
   const subjectFinals = subjects
     .filter(s => s.finalDate)
     .map(s => ({ date: s.finalDate, title: `Final de ${s.name}`, subjectId: s.id, color: '#ef4444' }))
@@ -223,22 +224,12 @@ export default function App() {
     ? Math.min(100, Math.round((stats.approved / totalSubjects) * 100))
     : stats.progress
 
-
-
   const currentPrefs = profile?.preferences ?? DEFAULT_PREFERENCES
   const showLocked = currentPrefs.showLocked ?? true
-
   const promotionThreshold = currentPrefs.promotionThreshold ?? 7
   const regularThreshold = currentPrefs.regularThreshold ?? 4
 
 
-
-  useEffect(() => {
-    document.documentElement.setAttribute(
-      'data-theme',
-      currentPrefs.theme === 'light' ? 'light' : 'dark'
-    )
-  }, [currentPrefs.theme])
 
   const filteredSubjects = subjects.filter(s => {
     const effectiveStatus = getEffectiveStatus(s, currentYear, subjects)
@@ -317,10 +308,6 @@ export default function App() {
     })
   }
 
-
-
-
-
   const STAT_ITEMS = [
     { label: 'Aprobadas', value: stats.approved, color: 'var(--approved)' },
     { label: 'Final pendiente', value: stats.pending, color: 'var(--pending-final)' },
@@ -352,37 +339,26 @@ export default function App() {
 
   const syncEventToSubject = async (event: CalendarEvent) => {
     if (!event.graded || event.grade == null) return
-
     const title = event.title.toLowerCase()
-
     const isFinal = title.includes('final')
     const isParcial = title.includes('parcial')
     const isRecup = title.includes('recuperatorio') || title.includes('recup')
-
-    let matchingSubject = event.subjectId
-      ? subjects.find(s => s.id === event.subjectId)
-      : null
-
+    let matchingSubject = event.subjectId ? subjects.find(s => s.id === event.subjectId) : null
     if (!matchingSubject) {
       matchingSubject = subjects.find(s =>
         (s.examDates ?? []).some((ex: any) => ex.date === event.date)
       ) ?? null
     }
-
     if (!matchingSubject) {
       matchingSubject = subjects.find(s => {
         const name = s.name.toLowerCase()
         return title.includes(name) || name.split(' ').filter(w => w.length > 3).every(w => title.includes(w))
       }) ?? null
     }
-
     if (!matchingSubject) return
-
     const updates: Partial<typeof matchingSubject> = {}
-
     const examEntry = (matchingSubject.examDates ?? []).find((ex: any) => ex.date === event.date) as any
     const examType = examEntry?.type ?? (isFinal || isRecup ? 'final' : isParcial ? 'parcial' : 'final')
-
     if (examType === 'final' || examType === 'recuperatorio' || isFinal || isRecup) {
       updates.gradeFinalExam = event.grade
       if (event.grade >= 4) {
@@ -405,7 +381,6 @@ export default function App() {
         updates.gradeP1 = event.grade
       }
     }
-
     if (Object.keys(updates).length > 0) {
       await updateSubject(matchingSubject.id, updates)
     }
@@ -428,14 +403,30 @@ export default function App() {
     toast('Evento eliminado', 'warning')
   }
 
+
+  useEffect(() => {
+    if (user && profile && !profile.onboarding_done) {
+      setShowOnboarding(true)
+    }
+  }, [user, profile])
+
+
   if (authLoading) {
     return (
-      <div className="app-loading">
-        <div className="app-loading__spinner" />
+      <div  >
         <Loading />
       </div>
     )
   }
+
+  const urgentCount =
+    mergedEvents.filter(e => {
+      const d = Math.round(
+        (new Date(e.date).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0)) / 86400000
+      )
+      return d >= 0 && d <= 7
+    }).length
+
   return (
     <div className="app">
 
@@ -447,6 +438,7 @@ export default function App() {
         onToggleCompact={toggleCompact}
         onExportXls={handleExport}
         onOpenScheduleExport={() => setShowScheduleExport(true)}
+        onOpenOnboarding={() => setShowOnboarding(true)}  
         onCloseSemester={() => setShowCloseSemester(true)}
         onUpdateProfile={updateProfile}
         onUpdatePassword={updatePassword}
@@ -502,50 +494,62 @@ export default function App() {
               {activeCareer ? `Progreso · ${activeCareer.name}` : 'Progreso de la carrera'}
             </span>
             {totalSubjects && (
-              <span className="progress-bar__sub">{stats.approved} / {totalSubjects} materias aprobadas</span>
+              <span className="progress-bar__sub">
+                {stats.approved} / {totalSubjects} materias aprobadas
+              </span>
             )}
           </div>
           <div className="progress-bar__track-wrap">
             <div className="progress-bar__track">
               <div className="progress-bar__fill" style={{ width: `${progressPct}%` }} />
-              {totalSemesters && totalSemesters > 1 && Array.from({ length: totalSemesters - 1 }, (_, i) => {
-                const isYearBoundary = (i + 1) % 2 === 0
-                return (
-                  <div
-                    key={i}
-                    className={`progress-bar__marker${isYearBoundary ? ' progress-bar__marker--year' : ''}`}
-                    style={{ left: `${((i + 1) / totalSemesters) * 100}%` }}
-                  />
-                )
-              })}
+              {totalSemesters && totalSemesters > 1 &&
+                Array.from({ length: totalSemesters - 1 }, (_, i) => {
+                  const isYearBoundary = (i + 1) % 2 === 0
+                  return (
+                    <div
+                      key={i}
+                      className={`progress-bar__marker${isYearBoundary ? ' progress-bar__marker--year' : ''}`}
+                      style={{ left: `${((i + 1) / totalSemesters) * 100}%` }}
+                    />
+                  )
+                })}
             </div>
           </div>
           <span className="progress-bar__pct">{progressPct}%</span>
         </div>
+
+        <div className="progress-strip">
+          <div className="progress-strip__track">
+            <div className="progress-strip__fill" style={{ width: `${progressPct}%` }} />
+          </div>
+          <span className="progress-strip__pct">{progressPct}%</span>
+        </div>
       </div>
 
-      <div className="filters" style={{ position: 'relative' }}>
-        <span className="filters__label">Filtrar:</span>
+      {/* ── Filters row ── */}
+      <div className="filters-row">
+        <div className="filters">
+          <span className="filters__label">Filtrar:</span>
+          {FILTERS.filter(f => visibleFilterKeys.includes(f.key)).map(f => {
+            const config = f.key !== 'all' ? STATUS_CONFIG[f.key] : null
+            const Icon = config?.icon
+            const isActive = filter === f.key
+            return (
+              <button
+                key={f.key}
+                type="button"
+                data-status={f.key}
+                className={`filter-btn${isActive ? ' filter-btn--active' : ''}`}
+                onClick={() => setFilter(f.key)}
+              >
+                {Icon && <Icon size="14" color={isActive ? 'currentColor' : config?.color} />}
+                {f.label}
+              </button>
+            )
+          })}
+        </div>
 
-        {FILTERS.filter(f => visibleFilterKeys.includes(f.key)).map(f => {
-          const config = f.key !== 'all' ? STATUS_CONFIG[f.key] : null
-          const Icon = config?.icon
-          const isActive = filter === f.key
-          return (
-            <button
-              key={f.key}
-              type="button"
-              data-status={f.key}
-              className={`filter-btn${isActive ? ' filter-btn--active' : ''}`}
-              onClick={() => setFilter(f.key)}
-            >
-              {Icon && <Icon size="14" color={isActive ? 'currentColor' : config?.color} />}
-              {f.label}
-            </button>
-          )
-        })}
-
-        <div ref={filterPanelRef} style={{ marginLeft: 'auto', position: 'relative' }}>
+        <div ref={filterPanelRef} className="filters-settings">
           <button
             className={`filter-btn${filterPanelOpen ? ' filter-btn--active' : ''}`}
             style={{ padding: '4px 10px', fontSize: '1rem', letterSpacing: 1 }}
@@ -556,18 +560,20 @@ export default function App() {
           </button>
 
           {filterPanelOpen && (
-            <div style={{
-              position: 'absolute', right: 0, top: 'calc(100% + 6px)', zIndex: 200,
-              background: '#13131f', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 12, padding: '8px 0', minWidth: 210,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-              animation: 'ctxFadeIn 0.1s ease',
-            }}>
+            <div
+              onMouseDown={e => e.stopPropagation()}
+              style={{
+                position: 'absolute', right: 0, top: 'calc(100% + 6px)', zIndex: 200,
+                background: 'var(--card)', border: '1px solid var(--border)',
+                borderRadius: 12, padding: '8px 0', minWidth: 210,
+                animation: 'ctxFadeIn 0.1s ease',
+              }}
+            >
               <div style={{
                 padding: '4px 14px 8px',
-                fontSize: '0.7rem', color: '#475569', fontWeight: 600,
+                fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 600,
                 textTransform: 'uppercase', letterSpacing: '0.05em',
-                borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 4,
+                borderBottom: '1px solid var(--border)', marginBottom: 4,
               }}>
                 Mostrar filtros
               </div>
@@ -587,7 +593,7 @@ export default function App() {
                       display: 'flex', alignItems: 'center', gap: 10,
                       width: '100%', padding: '7px 14px',
                       fontSize: '0.82rem', cursor: isAll ? 'default' : 'pointer',
-                      color: isVisible ? '#e2e8f0' : '#475569',
+                      color: isVisible ? 'var(--text)' : 'var(--muted)',
                       boxSizing: 'border-box',
                       transition: 'background 0.1s',
                     }}
@@ -651,6 +657,8 @@ export default function App() {
         <UpcomingSidebar
           subjects={subjects}
           calendarEvents={mergedEvents}
+          mobileOpen={mobileUpcomingOpen}
+          onMobileClose={() => setMobileUpcomingOpen(false)}
           onOpenCalendar={(date) => {
             setCalOpen(true)
             if (date) setTimeout(() => calRef.current?.navigateTo(date), 50)
@@ -658,6 +666,14 @@ export default function App() {
           onEditSubject={(id) => { const s = subjects.find(x => x.id === id); if (s) setModal(s) }}
           onRemoveEvent={removeEvent}
           onUpdateEvent={updateEvent}
+        />
+
+        <MobileFAB
+          onOpenCalendar={console.log}
+          onAddSubject={() => setModal('new')}
+          onOpenSpotlight={() => setSpotlightOpen(true)}
+          onOpenUpcoming={() => setMobileUpcomingOpen(true)}
+          urgentCount={urgentCount}
         />
 
         <main className="main__content">
@@ -720,13 +736,8 @@ export default function App() {
                   return order[a.term] - order[b.term]
                 })
                 if (group.length === 0) return null
-                const firstSemester = group.filter(
-                  s => s.term === 'Q1' || s.term === 'ANNUAL'
-                )
-
-                const secondSemester = group.filter(
-                  s => s.term === 'Q2' || s.term === 'ANNUAL'
-                )
+                const firstSemester = group.filter(s => s.term === 'Q1' || s.term === 'ANNUAL')
+                const secondSemester = group.filter(s => s.term === 'Q2' || s.term === 'ANNUAL')
                 return (
                   <section key={year} className="year-section">
                     <div className="year-section__title">
@@ -745,13 +756,11 @@ export default function App() {
                               onCycle={cycleStatus} onDelete={handleDeleteInline}
                               onCopy={() => toast('Copiado', 'success')}
                             />
-
                           ))}
                         </div>
                       </div>
                       <div className="semester-column">
                         <div className="year-section__title">2° Cuatrimestre</div>
-
                         <div className="subjects-grid">
                           {secondSemester.map(s => (
                             <SubjectCard key={s.id} subject={s} compact={compactView} allSubjects={subjects}
@@ -759,7 +768,6 @@ export default function App() {
                               onEdit={id => setModal(subjects.find(x => x.id === id) ?? null)}
                               onCycle={cycleStatus} onDelete={handleDeleteInline}
                               onCopy={() => toast('Copiado', 'success')}
-
                             />
                           ))}
                         </div>
@@ -835,6 +843,12 @@ export default function App() {
 
       {showAuth && (
         <AuthModal
+          onResetPassword={async (email) => {
+            const { error } = await supabase.auth.resetPasswordForEmail(email, {
+              redirectTo: `${window.location.origin}/reset-password`,
+            })
+            return error ? error.message : null
+          }}
           onClose={() => setShowAuth(false)}
           onSignInWithOAuth={signInWithOAuth}
           onSignIn={signIn}
@@ -860,12 +874,23 @@ export default function App() {
       <ToastContainer toasts={toasts} onRemove={removeToast} />
       <ConfirmDialog dialog={confirmDialog} onClose={() => setConfirmDialog(null)} />
 
+      {showOnboarding && (
+        <div className="onboarding-overlay">
+          <Onboarding
+            onFinish={async () => {
+              setShowOnboarding(false)
+
+              if (user) {
+                await updateProfile({
+                  onboarding_done: true
+                })
+              }
+            }}
+          />
+        </div>
+      )}
+
       <style>{`
-        .app-loading {
-          display: flex; flex-direction: column; align-items: center;
-          justify-content: center; height: 100vh; gap: 12px;
-          color: var(--muted); font-size: 0.85rem;
-        }
         .app-loading__spinner {
           width: 28px; height: 28px;
           border: 2px solid rgba(255,255,255,0.06);
@@ -893,10 +918,20 @@ export default function App() {
           border-radius: 8px; padding: 1px 6px;
         }
         .progress-bar__track-wrap { flex: 1; }
+        .filters-row {
+          display: flex;
+          align-items: center;
+          border-bottom: 1px solid var(--border);
+        }
+        .filters-row .filters {
+          flex: 1;
+          border-bottom: none;
+          min-width: 0;
+        }
+
       `}</style>
     </div>
   )
 }
-
 
 export { }
