@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import NotionCallback from './components/Notioncallback.tsx'
 import WidgetView from './components/Widgetview.tsx'
+import NotFound from './components/NotFound.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Route path="/" element={<App />} />
         <Route path="/notion/callback" element={<NotionCallback />} />
         <Route path="/widget/:userId" element={<WidgetView />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

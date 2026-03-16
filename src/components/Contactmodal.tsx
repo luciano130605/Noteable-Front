@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Send, CheckCircle, Loader, Bug, CircleQuestionMark, Mail, MessageCircle } from 'lucide-react'
-import './ContactModal.css'
+import './Contactmodal.css'
 import { Instagram, LampOn } from 'iconsax-react'
 import { supabase } from '../../supabase/Supabase'
 

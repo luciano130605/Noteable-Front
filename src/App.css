@@ -1362,6 +1362,7 @@ body {
     background: #818cf8;
     box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
+
 .progress-bar__marker {
     position: absolute;
     top: -2px;
@@ -2101,6 +2102,10 @@ body {
     .main__content {
         padding: 12px 10px 100px;
     }
+}
+
+@view-transition {
+    navigation: auto;
 }
 
 @media (prefers-reduced-motion: reduce) {
