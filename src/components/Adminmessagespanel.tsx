@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { X, Mail, MessageCircle, RefreshCw, Bug, Lightbulb, HelpCircle, MoreHorizontal, Instagram, Trash } from 'lucide-react'
 import { supabase } from '../../supabase/Supabase'
-import './AdminMessagesPanel.css'
+import './Adminmessagespanel.css'
 import { Copy, CopySuccess } from 'iconsax-react'
 
 
