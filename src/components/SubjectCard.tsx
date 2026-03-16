@@ -293,7 +293,6 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
                       className="dm__notion-link" onClick={e => e.stopPropagation()}>
                         <Video size={12} color='currentColor' />
                       <span className="dm__notion-title">Clase virtual (Zoom/Meet)</span>
-                      <span className="dm__notion-arrow">↗</span>
                     </a>
                   )}
                   {(subject as any).aulaVirtualLink && (
