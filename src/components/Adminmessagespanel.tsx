@@ -52,7 +52,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
     const [error, setError] = useState<string | null>(null)
     const [filter, setFilter] = useState<'all' | 'bug' | 'suggestion' | 'question' | 'other'>('all')
     const [expanded, setExpanded] = useState<string | null>(null)
-    const [search] = useState('')
+    const [search] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [deleteTimer, setDeleteTimer] = useState<number | null>(null)
     const [holdingDelete, setHoldingDelete] = useState<string | null>(null)
@@ -208,7 +208,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                         </div>
                     </div>
                     <div className="adm-header__actions">
-                       
+
                         <button className="adm-icon-btn" onClick={fetchMessages} title="Recargar">
                             <RefreshCw size={13} className={loading ? 'adm-spin' : ''} />
                         </button>
