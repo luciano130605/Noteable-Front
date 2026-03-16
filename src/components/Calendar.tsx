@@ -76,20 +76,103 @@ function EventPill({
         lp.onTouchStart?.(e)
       }}
       onContextMenu={e => {
-        e.preventDefault();  onContextHandled(); onContext(e);
+        e.preventDefault(); onContextHandled(); onContext(e);
       }}
-
     >
       {!ev.allDay && ev.startTime && <span className="cal-event-time">{ev.startTime}</span>}
       <span style={{ textDecoration: (ev.graded || isPast) ? 'line-through' : 'none' }}>{ev.title}</span>
-      {
-        ev.graded && ev.grade != null && (
-          <span className="cal-event-grade" style={{ color: gradeColor ?? '#888', background: (gradeColor ?? '#888') + '22' }}>
-            {ev.grade}
-          </span>
-        )
-      }
-    </div >
+      {ev.graded && ev.grade != null && (
+        <span className="cal-event-grade" style={{ color: gradeColor ?? '#888', background: (gradeColor ?? '#888') + '22' }}>
+          {ev.grade}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// ── DayCell extraído como componente propio para no violar la regla de hooks ──
+function DayCell({
+  dateStr,
+  d,
+  dayEvents,
+  todayCell,
+  openContextMenu,
+  openNewEvent,
+  openEventDetail,
+  openEditEvent,
+  isPastEvent,
+  contextHandledByPill,
+}: {
+  dateStr: string
+  d: number
+  dayEvents: CalendarEvent[]
+  todayCell: boolean
+  openContextMenu: (
+    e: React.MouseEvent | { clientX: number; clientY: number; preventDefault?: () => void; stopPropagation?: () => void },
+    date: string,
+    event?: CalendarEvent
+  ) => void
+  openNewEvent: (date: string) => void
+  openEventDetail: (ev: CalendarEvent) => void
+  openEditEvent: (ev: CalendarEvent) => void
+  isPastEvent: (ev: CalendarEvent) => boolean
+  contextHandledByPill: React.MutableRefObject<boolean>
+}) {
+  const [hovered, setHovered] = useState(false)
+
+  const lpCell = useLongPress(
+    () =>
+      openContextMenu(
+        { clientX: window.innerWidth / 2, clientY: window.innerHeight * 0.65 },
+        dateStr
+      ),
+    () => { },
+    450
+  )
+
+  return (
+    <div
+      className={['cal-cell', todayCell ? 'cal-cell--today' : '', hovered ? 'cal-cell--hovered' : ''].filter(Boolean).join(' ')}
+      {...lpCell}
+      onClick={(e) => {
+        const target = e.target as HTMLElement
+        if (!target.closest('.cal-event-pill') && !target.closest('.cal-event-more')) {
+          openNewEvent(dateStr)
+        }
+      }}
+      onContextMenu={e => {
+        e.preventDefault()
+        if (contextHandledByPill.current) {
+          contextHandledByPill.current = false
+          return
+        }
+        openContextMenu(e, dateStr)
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <span className="cal-cell__num">{d}</span>
+      <div className="cal-cell__events">
+        {dayEvents.slice(0, 2).map((ev) => {
+          const gradeColor = ev.grade != null
+            ? ev.grade >= 6 ? '#4ade80' : ev.grade >= 4 ? '#fbbf24' : '#f87171'
+            : null
+          return (
+            <EventPill
+              key={ev.date + ev.title + (ev.startTime ?? '')}
+              ev={ev}
+              isPast={isPastEvent(ev)}
+              gradeColor={gradeColor}
+              onDetail={() => openEventDetail(ev)}
+              onEdit={() => openEditEvent(ev)}
+              onContext={e => openContextMenu(e, dateStr, ev)}
+              onContextHandled={() => { contextHandledByPill.current = true }}
+            />
+          )
+        })}
+        {dayEvents.length > 2 && <div className="cal-event-more">+{dayEvents.length - 2}</div>}
+      </div>
+    </div>
   )
 }
 
@@ -98,7 +181,6 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
     const today = new Date()
     const [viewYear, setViewYear] = useState(today.getFullYear())
     const [viewMonth, setViewMonth] = useState(today.getMonth())
-    const [hoveredDay, setHoveredDay] = useState<string | null>(null)
     const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null)
     const [modalOpen, setModalOpen] = useState(false)
     const [modalDate, setModalDate] = useState('')
@@ -131,16 +213,13 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
 
       const handleClickOutside = (e: MouseEvent) => {
         if (!wrapperRef.current) return
-
         if (!wrapperRef.current.contains(e.target as Node)) {
           setContextMenu(null)
         }
       }
 
       const handleEsc = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          setContextMenu(null)
-        }
+        if (e.key === 'Escape') setContextMenu(null)
       }
 
       window.addEventListener('mousedown', handleClickOutside)
@@ -153,9 +232,7 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
     }, [contextMenu])
 
     const isPastEvent = (ev: CalendarEvent) => {
-      const eventDateTime = new Date(
-        ev.date + 'T' + (ev.startTime ?? '23:59')
-      )
+      const eventDateTime = new Date(ev.date + 'T' + (ev.startTime ?? '23:59'))
       return eventDateTime.getTime() < Date.now()
     }
 
@@ -238,74 +315,27 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
         weekday: 'short', day: 'numeric', month: 'short'
       })
 
-
-
+    // ── Construcción de celdas — sin hooks dentro del loop ──
     const cells = []
     for (let i = 0; i < firstDay; i++) {
       cells.push(<div key={`empty-${i}`} className="cal-cell cal-cell--empty" />)
     }
     for (let d = 1; d <= daysInMonth; d++) {
       const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-      const dayEvents = getEventsForDate(dateStr)
-      const todayCell = isToday(dateStr)
-      const hovered = hoveredDay === dateStr
-
-      const lpCell = useLongPress(
-        () =>
-          openContextMenu(
-            { clientX: window.innerWidth / 2, clientY: window.innerHeight * 0.65 },
-            dateStr
-          ),
-        () => { },
-        450
-      )
       cells.push(
-        <div
+        <DayCell
           key={dateStr}
-          className={['cal-cell', todayCell ? 'cal-cell--today' : '', hovered ? 'cal-cell--hovered' : ''].filter(Boolean).join(' ')}
-          {...lpCell}
-          onClick={(e) => {
-            const target = e.target as HTMLElement
-            if (!target.closest('.cal-event-pill') && !target.closest('.cal-event-more')) {
-              openNewEvent(dateStr)
-            }
-          }}
-          onContextMenu={e => {
-            e.preventDefault()
-
-            if (contextHandledByPill.current) {
-              contextHandledByPill.current = false
-              return
-            }
-
-            openContextMenu(e, dateStr)
-          }}
-          onMouseEnter={() => setHoveredDay(dateStr)}
-          onMouseLeave={() => setHoveredDay(null)}
-        >
-          <span className="cal-cell__num">{d}</span>
-          <div className="cal-cell__events">
-            {dayEvents.slice(0, 2).map((ev) => {
-              const gradeColor = ev.grade != null
-                ? ev.grade >= 6 ? '#4ade80' : ev.grade >= 4 ? '#fbbf24' : '#f87171'
-                : null
-
-              return (
-                <EventPill
-                  key={ev.date + ev.title + (ev.startTime ?? '')}
-                  ev={ev}
-                  isPast={isPastEvent(ev)}
-                  gradeColor={gradeColor}
-                  onDetail={() => openEventDetail(ev)}
-                  onEdit={() => openEditEvent(ev)}
-                  onContext={e => openContextMenu(e, dateStr, ev)}
-                  onContextHandled={() => { contextHandledByPill.current = true }}
-                />
-              )
-            })}
-            {dayEvents.length > 2 && <div className="cal-event-more">+{dayEvents.length - 2}</div>}
-          </div>
-        </div >
+          dateStr={dateStr}
+          d={d}
+          dayEvents={getEventsForDate(dateStr)}
+          todayCell={isToday(dateStr)}
+          openContextMenu={openContextMenu}
+          openNewEvent={openNewEvent}
+          openEventDetail={openEventDetail}
+          openEditEvent={openEditEvent}
+          isPastEvent={isPastEvent}
+          contextHandledByPill={contextHandledByPill}
+        />
       )
     }
 
