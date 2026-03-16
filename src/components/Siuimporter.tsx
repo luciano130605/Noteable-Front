@@ -2,7 +2,7 @@ import { X } from 'lucide-react'
 import { useRef, useState, useEffect } from 'react'
 import * as XLSX from 'xlsx'
 import Xls from '../Icon/Xls'
-import './SiuImporter.css'
+import './Siuimporter.css'
 import { Trash, Copy, Status } from 'iconsax-react'
 
 export interface SiuSubject {
