@@ -52,7 +52,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
     const [error, setError] = useState<string | null>(null)
     const [filter, setFilter] = useState<'all' | 'bug' | 'suggestion' | 'question' | 'other'>('all')
     const [expanded, setExpanded] = useState<string | null>(null)
-    const [search, setSearch] = useState('')
+    const [search] = useState('')
     const [copiedId, setCopiedId] = useState<string | null>(null)
     const [deleteTimer, setDeleteTimer] = useState<number | null>(null)
     const [holdingDelete, setHoldingDelete] = useState<string | null>(null)
