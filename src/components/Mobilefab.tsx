@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Add, CalendarAdd, SearchNormal } from 'iconsax-react'
-import './MobileFAB.css'
+import './Mobilefab.css'
 
 interface Props {
     onAddSubject: () => void
