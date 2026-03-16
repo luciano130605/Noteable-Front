@@ -1,278 +1,3 @@
-:root,
-[data-theme="dark"] {
-  /* Base */
-  --bg: #0a0a0f;
-  --card: #13131a;
-  --surface: #16161f;
-  --border: rgba(255, 255, 255, 0.07);
-
-  /* Texto */
-  --text: #e8e8f4;
-  --text-secondary: #c8c8e0;
-  --text-tertiary: #888899;
-  --muted: #454560;
-  --muted-deep: #2a2a42;
-
-  /* Acento */
-  --accent: #6366f1;
-  --accent2: #818cf8;
-  --accent3: #f472b6;
-  --accent-bg: rgba(99, 102, 241, 0.12);
-  --accent-bg-hover: rgba(99, 102, 241, 0.18);
-  --accent-bg-strong: rgba(99, 102, 241, 0.22);
-  --accent-border: rgba(99, 102, 241, 0.35);
-  --accent-border-strong: rgba(99, 102, 241, 0.5);
-
-  /* Estados */
-  --approved: #4ade80;
-  --pending-final: #fbbf24;
-  --in-progress: #a78bfa;
-  --retaking: #a78bfa;
-  --available: #38bdf8;
-  --failed-final: #fb923c;
-  --free: #475569;
-  --locked: #f43f5e;
-
-  /* Danger */
-  --danger: #f87171;
-  --danger-bg: rgba(248, 113, 113, 0.08);
-  --danger-border: rgba(248, 113, 113, 0.2);
-  --danger-bg-hover: rgba(248, 113, 113, 0.1);
-
-  /* Success */
-  --success: #34d399;
-  --success-bg: rgba(52, 211, 153, 0.08);
-  --success-border: rgba(52, 211, 153, 0.2);
-
-  /* Sombras */
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
-  --shadow-menu: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04);
-
-  /* Superficies interactivas */
-  --item-hover: rgba(255, 255, 255, 0.05);
-  --item-hover-strong: rgba(255, 255, 255, 0.09);
-  --surface-faint: rgba(255, 255, 255, 0.03);
-  --surface-subtle: rgba(255, 255, 255, 0.05);
-  --border-faint: rgba(255, 255, 255, 0.05);
-  --border-subtle: rgba(255, 255, 255, 0.09);
-
-  /* Toggle */
-  --toggle-track: rgba(255, 255, 255, 0.08);
-  --toggle-thumb: rgba(255, 255, 255, 0.4);
-  --toggle-thumb-on: #fff;
-
-  /* Menu */
-  --menu-bg: #13131c;
-  --menu-border: rgba(255, 255, 255, 0.09);
-
-  /* Input */
-  --input-bg: rgba(255, 255, 255, 0.05);
-  --input-border: rgba(255, 255, 255, 0.09);
-  --input-bg-focus: rgba(99, 102, 241, 0.08);
-  --input-text: #c8c8e0;
-  --input-text-focus: #e4e4f4;
-
-  /* Avatar */
-  --avatar-gradient: linear-gradient(135deg, #6366f1, #a78bfa);
-
-  /* Chips */
-  --chip-bg: rgba(255, 255, 255, 0.03);
-  --chip-border: rgba(255, 255, 255, 0.08);
-  --chip-color: #555570;
-  --chip-hover-border: rgba(99, 102, 241, 0.4);
-  --chip-hover-color: #a5b4fc;
-
-  /* Back button */
-  --back-color: #454560;
-  --back-hover-bg: rgba(255, 255, 255, 0.05);
-  --back-hover-color: #888899;
-
-  /* Upcoming exam */
-  --upcoming-bg: rgba(99, 102, 241, 0.07);
-  --upcoming-border: rgba(99, 102, 241, 0.14);
-  --upcoming-title: #a5b4fc;
-  --upcoming-date: #454560;
-
-  /* Section title */
-  --section-title-color: #2a2a42;
-
-  /* Promo/regular thresholds */
-  --promo-color: #4ade80;
-  --promo-bg: rgba(74, 222, 128, 0.15);
-  --promo-border: rgba(74, 222, 128, 0.45);
-  --promo-badge-bg: rgba(74, 222, 128, 0.12);
-  --promo-badge-border: rgba(74, 222, 128, 0.3);
-  --regular-color: #fbbf24;
-  --regular-bg: rgba(251, 191, 36, 0.15);
-  --regular-border: rgba(251, 191, 36, 0.45);
-  --regular-badge-bg: rgba(251, 191, 36, 0.12);
-  --regular-badge-border: rgba(251, 191, 36, 0.3);
-
-  /* Scrollbar */
-  --scrollbar-thumb: rgba(255, 255, 255, 0.08);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
-
-  /* Grade preview */
-  --grade-preview-bg: rgba(255, 255, 255, 0.02);
-  --grade-preview-border: rgba(255, 255, 255, 0.06);
-  --grade-row-color: #555570;
-
-  /* Pref group */
-  --pref-group-bg: rgba(255, 255, 255, 0.03);
-  --pref-group-border: rgba(255, 255, 255, 0.06);
-  --pref-group-label: #c8c8e0;
-
-  /* Radius */
-  --radius-md: 10px;
-  --radius-lg: 16px;
-
-  /* Theme toggle specific */
-  --theme-toggle-bg: rgba(255, 255, 255, 0.05);
-  --theme-toggle-border: rgba(255, 255, 255, 0.09);
-  --theme-toggle-icon: #454560;
-  --theme-toggle-hover-bg: rgba(255, 255, 255, 0.09);
-  --theme-toggle-hover-icon: #c8c8e0;
-
-  --placeholder: #252538;
-  --overlay-bg: rgba(4, 4, 8, 0.85);
-}
-
-
-[data-theme="light"] {
-  /* Base */
-  --bg: #f4f4f8;
-  --card: #ffffff;
-  --surface: #f8f8fc;
-  --border: rgba(0, 0, 0, 0.07);
-
-  /* Texto */
-  --text: #1a1a2e;
-  --text-secondary: #2a2a42;
-  --text-tertiary: #555575;
-  --muted: #8888aa;
-  --muted-deep: #aaaacc;
-
-  --accent: #6366f1;
-  --accent2: #818cf8;
-  --accent3: #f472b6;
-  --accent-bg: rgba(99, 102, 241, 0.12);
-  --accent-bg-hover: rgba(99, 102, 241, 0.18);
-  --accent-bg-strong: rgba(99, 102, 241, 0.22);
-  --accent-border: rgba(99, 102, 241, 0.35);
-  --accent-border-strong: rgba(99, 102, 241, 0.5);
-
-  /* Estados */
-  --approved: #4ade80;
-  --pending-final: #fbbf24;
-  --in-progress: #a78bfa;
-  --retaking: #a78bfa;
-  --available: #38bdf8;
-  --failed-final: #fb923c;
-  --free: #475569;
-  --locked: #f43f5e;
-  /* Danger */
-  --danger: #dc2626;
-  --danger-bg: rgba(220, 38, 38, 0.06);
-  --danger-border: rgba(220, 38, 38, 0.18);
-  --danger-bg-hover: rgba(220, 38, 38, 0.1);
-
-  /* Success */
-  --success: #059669;
-  --success-bg: rgba(5, 150, 105, 0.07);
-  --success-border: rgba(5, 150, 105, 0.2);
-
-  /* Sombras */
-  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-  --shadow-menu: 0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
-
-  /* Superficies interactivas */
-  --item-hover: rgba(0, 0, 0, 0.04);
-  --item-hover-strong: rgba(0, 0, 0, 0.07);
-  --surface-faint: rgba(0, 0, 0, 0.02);
-  --surface-subtle: rgba(0, 0, 0, 0.04);
-  --border-faint: rgba(0, 0, 0, 0.05);
-  --border-subtle: rgba(0, 0, 0, 0.08);
-
-  /* Toggle */
-  --toggle-track: rgba(0, 0, 0, 0.1);
-  --toggle-thumb: rgba(255, 255, 255, 0.9);
-  --toggle-thumb-on: #fff;
-
-  /* Menu */
-  --menu-bg: #ffffff;
-  --menu-border: rgba(0, 0, 0, 0.08);
-
-  /* Input */
-  --input-bg: rgba(0, 0, 0, 0.04);
-  --input-border: rgba(0, 0, 0, 0.1);
-  --input-bg-focus: rgba(83, 84, 212, 0.06);
-  --input-text: #2a2a42;
-  --input-text-focus: #1a1a2e;
-
-  /* Avatar */
-  --avatar-gradient: linear-gradient(135deg, #5254d4, #818cf8);
-
-  /* Chips */
-  --chip-bg: rgba(0, 0, 0, 0.03);
-  --chip-border: rgba(0, 0, 0, 0.08);
-  --chip-color: #666688;
-  --chip-hover-border: rgba(83, 84, 212, 0.4);
-  --chip-hover-color: #5254d4;
-
-  /* Back button */
-  --back-color: #8888aa;
-  --back-hover-bg: rgba(0, 0, 0, 0.05);
-  --back-hover-color: #555575;
-
-  /* Upcoming exam */
-  --upcoming-bg: rgba(83, 84, 212, 0.06);
-  --upcoming-border: rgba(83, 84, 212, 0.15);
-  --upcoming-title: #5254d4;
-  --upcoming-date: #8888aa;
-
-  /* Section title */
-  --section-title-color: #aaaacc;
-
-  /* Promo/regular thresholds */
-  --promo-color: #16a34a;
-  --promo-bg: rgba(22, 163, 74, 0.1);
-  --promo-border: rgba(22, 163, 74, 0.35);
-  --promo-badge-bg: rgba(22, 163, 74, 0.08);
-  --promo-badge-border: rgba(22, 163, 74, 0.25);
-  --regular-color: #d97706;
-  --regular-bg: rgba(217, 119, 6, 0.1);
-  --regular-border: rgba(217, 119, 6, 0.35);
-  --regular-badge-bg: rgba(217, 119, 6, 0.08);
-  --regular-badge-border: rgba(217, 119, 6, 0.25);
-
-  --scrollbar-thumb: rgba(0, 0, 0, 0.1);
-  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.2);
-
-  --grade-preview-bg: rgba(0, 0, 0, 0.02);
-  --grade-preview-border: rgba(0, 0, 0, 0.06);
-  --grade-row-color: #666688;
-
-  --pref-group-bg: rgba(0, 0, 0, 0.025);
-  --pref-group-border: rgba(0, 0, 0, 0.07);
-  --pref-group-label: #2a2a42;
-
-  --radius-md: 10px;
-  --radius-lg: 16px;
-
-  --theme-toggle-bg: rgba(0, 0, 0, 0.04);
-  --theme-toggle-border: rgba(0, 0, 0, 0.09);
-  --theme-toggle-icon: #8888aa;
-  --theme-toggle-hover-bg: rgba(0, 0, 0, 0.08);
-  --theme-toggle-hover-icon: #2a2a42;
-
-  --placeholder: #8888aa;
-  --overlay-bg: rgba(0, 0, 0, 0.35);
-
-}
-
-
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -455,7 +180,6 @@
   letter-spacing: 0.04em;
 }
 
-/* ── HORARIOS ── */
 .modal__schedule-list {
   display: flex;
   flex-direction: column;
@@ -544,7 +268,6 @@
   color: var(--placeholder);
 }
 
-/* ── UPCOMING ── */
 .modal__upcoming-list {
   display: flex;
   flex-direction: column;
@@ -591,7 +314,6 @@
   background: rgba(251, 191, 36, 0.12);
 }
 
-/* ── GRADES ── */
 .modal__grade-toggle {
   display: flex;
   gap: 2px;
@@ -805,7 +527,6 @@
   font-weight: 400;
 }
 
-/* ── EXAM DATES ── */
 .modal__exam-add {
   all: unset;
   font-family: 'DM Sans', sans-serif;
@@ -927,7 +648,6 @@
   color: #f87171;
 }
 
-/* ── CORRELATIVAS ── */
 .modal__corr-info {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -1012,7 +732,6 @@
   font-family: monospace;
 }
 
-/* ── FIELD ── */
 .field {
   display: flex;
   flex-direction: column;
@@ -1027,7 +746,6 @@
   color: var(--placeholder);
 }
 
-/* ── FORM CONTROLS ── */
 .form-control {
   background: var(--border);
   border: 1px solid var(--border);
@@ -1089,7 +807,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   -webkit-appearance: none;
 }
 
-/* ── ACTIONS ── */
 .modal__actions {
   display: flex;
   align-items: center;
@@ -1164,9 +881,7 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   }
 }
 
-/* ═══════════════════════════════════════════════════════
-   CONTEXT MENU
-═══════════════════════════════════════════════════════ */
+
 .context-menu {
   min-width: 190px;
   background: #1e1e2e;
@@ -1231,9 +946,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   margin: 3px 4px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   DETAIL MODAL
-═══════════════════════════════════════════════════════ */
 .detail-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1396,9 +1108,7 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   margin-top: 2px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   SUBJECT CARD — year-lock + next exam
-═══════════════════════════════════════════════════════ */
+
 .subject-card--year-locked {
   opacity: 0.55;
 }
@@ -1447,12 +1157,7 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   margin-top: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   APP.CSS ADDITIONS
-   → Pegá estas reglas en tu App.css existente
-═══════════════════════════════════════════════════════ */
 
-/* Selector de año en ProgressConfig */
 .prog-popover__year-select {
   display: flex;
   flex-wrap: wrap;
@@ -1490,7 +1195,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   color: #a5b4fc;
 }
 
-/* Indicador "estás aquí" en la barra de progreso */
 .progress-bar__track-wrap {
   position: relative;
   flex: 1;
@@ -1525,7 +1229,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   letter-spacing: 0.04em;
 }
 
-/* Badge "año actual" en el encabezado de sección */
 .year-section__current-badge {
   font-size: 0.65rem;
   font-weight: 600;
@@ -1537,7 +1240,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   letter-spacing: 0.03em;
 }
 
-/* Highlight del año actual en barras por año */
 .progress-years__item--current .progress-years__label {
   color: #a5b4fc;
   font-weight: 800;
@@ -1551,7 +1253,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   background: linear-gradient(90deg, #6366f1, #818cf8);
 }
 
-/* ── Correlativas dropdown ─────────────────────────────────── */
 .corr-dropdown {
   position: absolute;
   top: calc(100% + 4px);
@@ -1614,7 +1315,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   overflow: hidden;
 }
 
-/* botón toggle */
 .sbjset-toggle {
   all: unset;
   font-family: 'DM Sans', sans-serif;
@@ -1652,7 +1352,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   margin-right: 4px;
 }
 
-/* panel expandido */
 .sbjset {
   display: flex;
   flex-direction: column;
@@ -1693,7 +1392,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   color: #2e2e48;
 }
 
-/* chips de opciones */
 .sbjset__chips {
   display: flex;
   gap: 4px;
@@ -1736,10 +1434,51 @@ input[type="number"].form-control::-webkit-outer-spin-button {
   letter-spacing: 0.02em;
 }
 
+.modal__resource-links {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.modal__resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 9px;
+  border: 1px solid;
+  text-decoration: none;
+  transition: filter 0.15s, transform 0.15s;
+  letter-spacing: 0.01em;
+}
+
+.modal__resource-link:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+.modal__resource-link-arrow {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}
+
+.modal__resource-link--zoom {
+  color: #2D8CFF;
+  background: rgba(45, 140, 255, 0.08);
+  border-color: rgba(45, 140, 255, 0.25);
+}
+
+.modal__resource-link--campus {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.08);
+  border-color: rgba(167, 139, 250, 0.25);
+}
+
 
 @media (max-width: 600px) {
 
-  /* ── Modal: bottom sheet ── */
   .modal-overlay {
     padding: 0;
     align-items: flex-end;
@@ -1765,7 +1504,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     padding: 16px 18px 8px;
   }
 
-  /* ── Grids: una columna ── */
   .modal__grid-2 {
     grid-template-columns: 1fr;
   }
@@ -1778,7 +1516,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     grid-column: unset;
   }
 
-  /* ── Actions: columna inversa ── */
   .modal__actions {
     flex-direction: column-reverse;
     padding: 14px 18px 28px;
@@ -1794,7 +1531,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     margin-right: 0;
   }
 
-  /* ── Exam row: stack ── */
   .modal__exam-row {
     grid-template-columns: 1fr 1fr 28px;
     grid-template-rows: auto auto;
@@ -1804,7 +1540,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     grid-column: 1 / 3;
   }
 
-  /* ── Schedule row: wrap natural ── */
   .modal__schedule-row {
     gap: 5px;
   }
@@ -1813,7 +1548,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     width: 66px;
   }
 
-  /* ── Detail modal: bottom sheet ── */
   .detail-modal-overlay {
     align-items: flex-end;
     padding: 0;
@@ -1827,7 +1561,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     overflow-y: auto;
   }
 
-  /* ── Context menu: bottom sheet ── */
   .context-menu {
     position: fixed;
     top: auto;
@@ -1858,7 +1591,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     font-size: 0.88rem;
   }
 
-  /* ── Grade inputs: más compactos ── */
   .modal__grade-inputs {
     gap: 6px;
   }
@@ -1867,7 +1599,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     min-width: 64px;
   }
 
-  /* ── Corr input ── */
   .corr-input {
     padding: 8px;
   }
@@ -1876,7 +1607,6 @@ input[type="number"].form-control::-webkit-outer-spin-button {
     opacity: 0;
   }
 
-  /* ── sbjset chips: wrap ── */
   .sbjset__chips {
     flex-wrap: wrap;
     justify-content: flex-end;

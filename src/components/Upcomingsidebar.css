@@ -1,276 +1,4 @@
-:root,
-[data-theme="dark"] {
-    /* Base */
-    --bg: #0a0a0f;
-    --card: #13131a;
-    --surface: #16161f;
-    --border: rgba(255, 255, 255, 0.07);
 
-    /* Texto */
-    --text: #e8e8f4;
-    --text-secondary: #c8c8e0;
-    --text-tertiary: #888899;
-    --muted: #454560;
-    --muted-deep: #2a2a42;
-
-    /* Acento */
-    --accent: #6366f1;
-    --accent2: #818cf8;
-    --accent3: #f472b6;
-    --accent-bg: rgba(99, 102, 241, 0.12);
-    --accent-bg-hover: rgba(99, 102, 241, 0.18);
-    --accent-bg-strong: rgba(99, 102, 241, 0.22);
-    --accent-border: rgba(99, 102, 241, 0.35);
-    --accent-border-strong: rgba(99, 102, 241, 0.5);
-
-    /* Estados */
-    --approved: #4ade80;
-    --pending-final: #fbbf24;
-    --in-progress: #a78bfa;
-    --retaking: #a78bfa;
-    --available: #38bdf8;
-    --failed-final: #fb923c;
-    --free: #475569;
-    --locked: #f43f5e;
-
-    /* Danger */
-    --danger: #f87171;
-    --danger-bg: rgba(248, 113, 113, 0.08);
-    --danger-border: rgba(248, 113, 113, 0.2);
-    --danger-bg-hover: rgba(248, 113, 113, 0.1);
-
-    /* Success */
-    --success: #34d399;
-    --success-bg: rgba(52, 211, 153, 0.08);
-    --success-border: rgba(52, 211, 153, 0.2);
-
-    /* Sombras */
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.55);
-    --shadow-menu: 0 24px 60px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.04);
-
-    /* Superficies interactivas */
-    --item-hover: rgba(255, 255, 255, 0.05);
-    --item-hover-strong: rgba(255, 255, 255, 0.09);
-    --surface-faint: rgba(255, 255, 255, 0.03);
-    --surface-subtle: rgba(255, 255, 255, 0.05);
-    --border-faint: rgba(255, 255, 255, 0.05);
-    --border-subtle: rgba(255, 255, 255, 0.09);
-
-    /* Toggle */
-    --toggle-track: rgba(255, 255, 255, 0.08);
-    --toggle-thumb: rgba(255, 255, 255, 0.4);
-    --toggle-thumb-on: #fff;
-
-    /* Menu */
-    --menu-bg: #13131c;
-    --menu-border: rgba(255, 255, 255, 0.09);
-
-    /* Input */
-    --input-bg: rgba(255, 255, 255, 0.05);
-    --input-border: rgba(255, 255, 255, 0.09);
-    --input-bg-focus: rgba(99, 102, 241, 0.08);
-    --input-text: #c8c8e0;
-    --input-text-focus: #e4e4f4;
-
-    /* Avatar */
-    --avatar-gradient: linear-gradient(135deg, #6366f1, #a78bfa);
-
-    /* Chips */
-    --chip-bg: rgba(255, 255, 255, 0.03);
-    --chip-border: rgba(255, 255, 255, 0.08);
-    --chip-color: #555570;
-    --chip-hover-border: rgba(99, 102, 241, 0.4);
-    --chip-hover-color: #a5b4fc;
-
-    /* Back button */
-    --back-color: #454560;
-    --back-hover-bg: rgba(255, 255, 255, 0.05);
-    --back-hover-color: #888899;
-
-    /* Upcoming exam */
-    --upcoming-bg: rgba(99, 102, 241, 0.07);
-    --upcoming-border: rgba(99, 102, 241, 0.14);
-    --upcoming-title: #a5b4fc;
-    --upcoming-date: #454560;
-
-    /* Section title */
-    --section-title-color: #2a2a42;
-
-    /* Promo/regular thresholds */
-    --promo-color: #4ade80;
-    --promo-bg: rgba(74, 222, 128, 0.15);
-    --promo-border: rgba(74, 222, 128, 0.45);
-    --promo-badge-bg: rgba(74, 222, 128, 0.12);
-    --promo-badge-border: rgba(74, 222, 128, 0.3);
-    --regular-color: #fbbf24;
-    --regular-bg: rgba(251, 191, 36, 0.15);
-    --regular-border: rgba(251, 191, 36, 0.45);
-    --regular-badge-bg: rgba(251, 191, 36, 0.12);
-    --regular-badge-border: rgba(251, 191, 36, 0.3);
-
-    /* Scrollbar */
-    --scrollbar-thumb: rgba(255, 255, 255, 0.08);
-    --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
-
-    /* Grade preview */
-    --grade-preview-bg: rgba(255, 255, 255, 0.02);
-    --grade-preview-border: rgba(255, 255, 255, 0.06);
-    --grade-row-color: #555570;
-
-    /* Pref group */
-    --pref-group-bg: rgba(255, 255, 255, 0.03);
-    --pref-group-border: rgba(255, 255, 255, 0.06);
-    --pref-group-label: #c8c8e0;
-
-    /* Radius */
-    --radius-md: 10px;
-    --radius-lg: 16px;
-
-    /* Theme toggle specific */
-    --theme-toggle-bg: rgba(255, 255, 255, 0.05);
-    --theme-toggle-border: rgba(255, 255, 255, 0.09);
-    --theme-toggle-icon: #454560;
-    --theme-toggle-hover-bg: rgba(255, 255, 255, 0.09);
-    --theme-toggle-hover-icon: #c8c8e0;
-
-    --placeholder: #252538;
-    --overlay-bg: rgba(4, 4, 8, 0.85);
-}
-
-
-[data-theme="light"] {
-    /* Base */
-    --bg: #f4f4f8;
-    --card: #ffffff;
-    --surface: #f8f8fc;
-    --border: rgba(0, 0, 0, 0.07);
-
-    /* Texto */
-    --text: #1a1a2e;
-    --text-secondary: #2a2a42;
-    --text-tertiary: #555575;
-    --muted: #8888aa;
-    --muted-deep: #aaaacc;
-
-    --accent: #6366f1;
-    --accent2: #818cf8;
-    --accent3: #f472b6;
-    --accent-bg: rgba(99, 102, 241, 0.12);
-    --accent-bg-hover: rgba(99, 102, 241, 0.18);
-    --accent-bg-strong: rgba(99, 102, 241, 0.22);
-    --accent-border: rgba(99, 102, 241, 0.35);
-    --accent-border-strong: rgba(99, 102, 241, 0.5);
-
-    /* Estados */
-    --approved: #4ade80;
-    --pending-final: #fbbf24;
-    --in-progress: #a78bfa;
-    --retaking: #a78bfa;
-    --available: #38bdf8;
-    --failed-final: #fb923c;
-    --free: #475569;
-    --locked: #f43f5e;
-    /* Danger */
-    --danger: #dc2626;
-    --danger-bg: rgba(220, 38, 38, 0.06);
-    --danger-border: rgba(220, 38, 38, 0.18);
-    --danger-bg-hover: rgba(220, 38, 38, 0.1);
-
-    /* Success */
-    --success: #059669;
-    --success-bg: rgba(5, 150, 105, 0.07);
-    --success-border: rgba(5, 150, 105, 0.2);
-
-    /* Sombras */
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
-    --shadow-menu: 0 16px 48px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
-
-    /* Superficies interactivas */
-    --item-hover: rgba(0, 0, 0, 0.04);
-    --item-hover-strong: rgba(0, 0, 0, 0.07);
-    --surface-faint: rgba(0, 0, 0, 0.02);
-    --surface-subtle: rgba(0, 0, 0, 0.04);
-    --border-faint: rgba(0, 0, 0, 0.05);
-    --border-subtle: rgba(0, 0, 0, 0.08);
-
-    /* Toggle */
-    --toggle-track: rgba(0, 0, 0, 0.1);
-    --toggle-thumb: rgba(255, 255, 255, 0.9);
-    --toggle-thumb-on: #fff;
-
-    /* Menu */
-    --menu-bg: #ffffff;
-    --menu-border: rgba(0, 0, 0, 0.08);
-
-    /* Input */
-    --input-bg: rgba(0, 0, 0, 0.04);
-    --input-border: rgba(0, 0, 0, 0.1);
-    --input-bg-focus: rgba(83, 84, 212, 0.06);
-    --input-text: #2a2a42;
-    --input-text-focus: #1a1a2e;
-
-    /* Avatar */
-    --avatar-gradient: linear-gradient(135deg, #5254d4, #818cf8);
-
-    /* Chips */
-    --chip-bg: rgba(0, 0, 0, 0.03);
-    --chip-border: rgba(0, 0, 0, 0.08);
-    --chip-color: #666688;
-    --chip-hover-border: rgba(83, 84, 212, 0.4);
-    --chip-hover-color: #5254d4;
-
-    /* Back button */
-    --back-color: #8888aa;
-    --back-hover-bg: rgba(0, 0, 0, 0.05);
-    --back-hover-color: #555575;
-
-    /* Upcoming exam */
-    --upcoming-bg: rgba(83, 84, 212, 0.06);
-    --upcoming-border: rgba(83, 84, 212, 0.15);
-    --upcoming-title: #5254d4;
-    --upcoming-date: #8888aa;
-
-    /* Section title */
-    --section-title-color: #aaaacc;
-
-    /* Promo/regular thresholds */
-    --promo-color: #16a34a;
-    --promo-bg: rgba(22, 163, 74, 0.1);
-    --promo-border: rgba(22, 163, 74, 0.35);
-    --promo-badge-bg: rgba(22, 163, 74, 0.08);
-    --promo-badge-border: rgba(22, 163, 74, 0.25);
-    --regular-color: #d97706;
-    --regular-bg: rgba(217, 119, 6, 0.1);
-    --regular-border: rgba(217, 119, 6, 0.35);
-    --regular-badge-bg: rgba(217, 119, 6, 0.08);
-    --regular-badge-border: rgba(217, 119, 6, 0.25);
-
-    --scrollbar-thumb: rgba(0, 0, 0, 0.1);
-    --scrollbar-thumb-hover: rgba(0, 0, 0, 0.2);
-
-    --grade-preview-bg: rgba(0, 0, 0, 0.02);
-    --grade-preview-border: rgba(0, 0, 0, 0.06);
-    --grade-row-color: #666688;
-
-    --pref-group-bg: rgba(0, 0, 0, 0.025);
-    --pref-group-border: rgba(0, 0, 0, 0.07);
-    --pref-group-label: #2a2a42;
-
-    --radius-md: 10px;
-    --radius-lg: 16px;
-
-    --theme-toggle-bg: rgba(0, 0, 0, 0.04);
-    --theme-toggle-border: rgba(0, 0, 0, 0.09);
-    --theme-toggle-icon: #8888aa;
-    --theme-toggle-hover-bg: rgba(0, 0, 0, 0.08);
-    --theme-toggle-hover-icon: #2a2a42;
-
-    --placeholder: #8888aa;
-    --overlay-bg: rgba(0, 0, 0, 0.35);
-
-}
 
 .usb {
   position: relative;
@@ -305,7 +33,6 @@
   border-radius: 3px;
 }
 
-/* ── Header ── */
 .usb__header {
   display: flex;
   align-items: center;
@@ -331,7 +58,6 @@
   letter-spacing: 0.04em;
 }
 
-/* ── Mini stats ── */
 .usb__stats {
   display: flex;
   padding-bottom: 15px;
@@ -386,7 +112,6 @@
   white-space: nowrap;
 }
 
-/* ── Next Up card ── */
 .usb__next {
   position: relative;
   background: var(--border-faint);
@@ -460,7 +185,6 @@
   align-self: center;
 }
 
-/* ── Timeline ── */
 .usb__timeline {
   display: flex;
   flex-direction: column;
@@ -472,7 +196,6 @@
   opacity: 0.5;
 }
 
-/* Date separator */
 .usb__date-sep {
   display: flex;
   align-items: center;
@@ -500,7 +223,6 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
-/* Item */
 .usb__item {
   display: flex;
   align-items: flex-start;
@@ -517,7 +239,6 @@
   border-color: rgba(255, 255, 255, 0.07);
 }
 
-/* Urgency variants */
 .usb__item--today {
   background: rgba(239, 68, 68, 0.07);
   border-color: rgba(239, 68, 68, 0.18) !important;
@@ -573,7 +294,6 @@
   margin-top: 1px;
 }
 
-/* Badge */
 .usb__item-badge {
   font-size: 0.6rem;
   font-weight: 700;
@@ -615,7 +335,6 @@
   border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-/* Empty state */
 .usb__empty {
   display: flex;
   flex-direction: column;
@@ -634,7 +353,6 @@
   opacity: 0.5;
 }
 
-/* Past section */
 .usb__past {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   padding-top: 10px;
@@ -672,7 +390,6 @@ details[open] .usb__past-summary::before {
   transform: rotate(90deg);
 }
 
-/* ── Context Menu ── */
 .usb__ctx-menu {
   position: fixed;
   z-index: 9999;
@@ -750,9 +467,6 @@ details[open] .usb__past-summary::before {
   color: #fca5a5;
 }
 
-/* ══════════════════════════════════════════════
-   COLLAPSED STATE
-══════════════════════════════════════════════ */
 
 .usb--collapsed {
   width: 48px;
@@ -760,7 +474,6 @@ details[open] .usb__past-summary::before {
   padding: 0;
 }
 
-/* ── Content: fade out when collapsed ── */
 .usb__content {
   position: relative;
   opacity: 1;
@@ -780,7 +493,6 @@ details[open] .usb__past-summary::before {
   visibility: hidden;
 }
 
-/* ── Toggle Button ── */
 .usb__toggle {
   position: absolute;
   top: 10px !important;
@@ -829,7 +541,6 @@ details[open] .usb__past-summary::before {
   transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Badge de urgentes sobre el toggle cuando colapsado */
 .usb__toggle-badge {
   position: absolute;
   top: -5px;
@@ -860,7 +571,6 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ── Collapsed Strip ── */
 .usb__collapsed-strip {
   display: flex;
   flex-direction: column;
@@ -960,11 +670,7 @@ details[open] .usb__past-summary::before {
   color: #f59e0b;
 }
 
-/* ══════════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-══════════════════════════════════════════════ */
 
-/* ── Tablet (≤ 1024px): sidebar más angosto ── */
 @media (max-width: 1024px) {
   .usb {
     width: 200px;
@@ -977,9 +683,7 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ── Mobile landscape / tablet chico (≤ 768px):
-      el sidebar se convierte en un drawer desde
-      la derecha, oculto por defecto             ── */
+
 @media (max-width: 768px) {
   .usb {
     position: fixed;
@@ -997,12 +701,10 @@ details[open] .usb__past-summary::before {
     z-index: 200;
   }
 
-  /* Cuando está abierto en mobile, se muestra con slide-in */
   .usb--mobile-open {
     transform: translateX(0);
   }
 
-  /* En mobile, el estado colapsado no aplica — usamos open/closed */
   .usb--collapsed {
     width: 280px;
     min-width: 280px;
@@ -1014,7 +716,6 @@ details[open] .usb__past-summary::before {
     transform: translateX(0);
   }
 
-  /* Mostrar contenido completo en mobile (no usar collapsed-strip) */
   .usb--collapsed .usb__content {
     opacity: 1;
     transform: none;
@@ -1027,7 +728,6 @@ details[open] .usb__past-summary::before {
     display: none;
   }
 
-  /* Toggle reposicionado en mobile: actúa como close btn */
   .usb__toggle {
     right: 14px !important;
     left: auto !important;
@@ -1036,7 +736,6 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ── Mobile portrait (≤ 480px): drawer ocupa casi todo el ancho ── */
 @media (max-width: 480px) {
 
   .usb,
@@ -1046,11 +745,7 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ══════════════════════════════════════════════
-   OVERLAY (backdrop para mobile drawer)
-   Agregar al HTML: <div class="usb-overlay"></div>
-   Mostrar/ocultar con JS junto a --mobile-open
-══════════════════════════════════════════════ */
+
 .usb-overlay {
   display: none;
 }
@@ -1075,11 +770,6 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ══════════════════════════════════════════════
-   MOBILE TRIGGER BUTTON
-   Botón flotante para abrir el drawer en mobile.
-   Agregar al HTML fuera del .usb.
-══════════════════════════════════════════════ */
 .usb-mobile-trigger {
   display: none;
 }
@@ -1113,7 +803,6 @@ details[open] .usb__past-summary::before {
     transform: scale(0.93);
   }
 
-  /* Badge urgentes en el trigger */
   .usb-mobile-trigger__badge {
     position: absolute;
     top: -5px;
@@ -1132,10 +821,6 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ══════════════════════════════════════════════
-   BOTTOM SHEET (≤ 480px, alternativa al drawer)
-   Activar añadiendo .usb--bottom-sheet al .usb
-══════════════════════════════════════════════ */
 @media (max-width: 480px) {
   .usb--bottom-sheet {
     top: auto;
@@ -1157,7 +842,6 @@ details[open] .usb__past-summary::before {
     transform: translateY(0);
   }
 
-  /* Drag handle visual */
   .usb--bottom-sheet::before {
     content: '';
     display: block;
@@ -1175,9 +859,7 @@ details[open] .usb__past-summary::before {
   }
 }
 
-/* ══════════════════════════════════════════════
-   REDUCED MOTION
-══════════════════════════════════════════════ */
+
 @media (prefers-reduced-motion: reduce) {
 
   .usb,

@@ -89,7 +89,6 @@ export default function SiuExporter({ subjects, careerName, onClose }: Props) {
                         </div>
                     </div>
 
-                    {/* Resumen */}
                     <div className="siu-instructions">
                         <div className="siu-instructions-title">Resumen</div>
                         <ol className="siu-instructions-list" style={{ listStyle: 'none', padding: 0 }}>

@@ -391,7 +391,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
         <div className="map-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
             <div className="map-modal">
 
-                {/* Header */}
                 <div className="map-header">
                     <MapPin size={16} color="#6366f1" />
                     <span className="map-header__title">
@@ -402,7 +401,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     </button>
                 </div>
 
-                {/* Search */}
                 <div className="map-search" ref={suggestRef}>
                     <div className="map-search__input-wrap">
                         <Navigation size={14} color="var(--muted, #888)" />
@@ -427,7 +425,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     )}
                 </div>
 
-                {/* Mode selector */}
                 <div className="map-modes">
                     {MODES.map(m => {
                         const on = travelMode === m.key
@@ -450,7 +447,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     })}
                 </div>
 
-                {/* Bike type */}
                 {travelMode === 'cycling' && (
                     <div className="map-biketype">
                         {(['propia', 'ecobici'] as const).map(bt => {
@@ -475,7 +471,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     </div>
                 )}
 
-                {/* Route info */}
                 {(route || status !== 'idle' || errorMsg) && (
                     <div className="map-route-info">
                         {status !== 'idle' && (
@@ -503,7 +498,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     </div>
                 )}
 
-                {/* Ecobici panel */}
                 {travelMode === 'cycling' && bikeType === 'ecobici' && (nearestOrigin || nearestDest || loadingEcobici) && (
                     <div className="map-ecobici">
                         {loadingEcobici && (
@@ -541,7 +535,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     </div>
                 )}
 
-                {/* External nav links */}
                 {destCoords && (
                     <div className="map-nav-links">
                         {wazeUrl && (
@@ -557,7 +550,6 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                     </div>
                 )}
 
-                {/* Map */}
                 <div ref={mapRef} className="map-leaflet" />
             </div>
 

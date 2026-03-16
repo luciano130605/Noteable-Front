@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { X, Mail, MessageCircle, RefreshCw, Bug, Lightbulb, HelpCircle, MoreHorizontal, Instagram } from 'lucide-react'
+import { X, Mail, MessageCircle, RefreshCw, Bug, Lightbulb, HelpCircle, MoreHorizontal, Instagram, Trash } from 'lucide-react'
 import { supabase } from '../../supabase/Supabase'
 import './AdminMessagesPanel.css'
+import { Copy, CopySuccess } from 'iconsax-react'
+
 
 interface ContactMessage {
     id: string
@@ -12,7 +14,9 @@ interface ContactMessage {
     reach_by: 'email' | 'whatsapp' | 'instagram' | 'none'
     contact_value: string | null
     user_email: string | null
+    status: 'open' | 'resolved'
 }
+
 
 const TYPE_META = {
     bug: { label: 'Bug', icon: Bug, color: '#f87171' },
@@ -48,11 +52,88 @@ export default function AdminMessagesPanel({ onClose }: Props) {
     const [error, setError] = useState<string | null>(null)
     const [filter, setFilter] = useState<'all' | 'bug' | 'suggestion' | 'question' | 'other'>('all')
     const [expanded, setExpanded] = useState<string | null>(null)
+    const [search, setSearch] = useState('')
+    const [copiedId, setCopiedId] = useState<string | null>(null)
+    const [deleteTimer, setDeleteTimer] = useState<number | null>(null)
+    const [holdingDelete, setHoldingDelete] = useState<string | null>(null)
 
     useEffect(() => {
         const t = setTimeout(() => setVisible(true), 10)
         return () => clearTimeout(t)
     }, [])
+
+
+    const startDelete = (id: string) => {
+        setHoldingDelete(id)
+
+        const timer = setTimeout(() => {
+            deleteMessage(id)
+            setHoldingDelete(null)
+        }, 900)
+
+        setDeleteTimer(timer)
+    }
+
+    const cancelDelete = () => {
+        if (deleteTimer) {
+            clearTimeout(deleteTimer)
+            setDeleteTimer(null)
+        }
+
+        setHoldingDelete(null)
+    }
+
+
+
+    const deleteMessage = async (id: string) => {
+        await supabase
+            .from('contact_messages')
+            .delete()
+            .eq('id', id)
+
+        setMessages(prev => prev.filter(m => m.id !== id))
+    }
+
+
+    const resolveMessage = async (id: string) => {
+        await supabase
+            .from('contact_messages')
+            .update({ status: 'resolved' })
+            .eq('id', id)
+
+        setMessages(prev =>
+            prev.map(m =>
+                m.id === id ? { ...m, status: 'resolved' } : m
+            )
+        )
+
+        setTimeout(() => {
+            setMessages(prev => prev.filter(m => m.id !== id))
+        }, 900)
+    }
+
+
+    useEffect(() => {
+        const channel = supabase
+            .channel('messages')
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'contact_messages'
+                },
+                payload => {
+                    setMessages(prev => [payload.new as ContactMessage, ...prev])
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [])
+
 
     const fetchMessages = async () => {
         setLoading(true)
@@ -60,6 +141,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
         const { data, error: err } = await supabase
             .from('contact_messages')
             .select('*')
+            .order('status', { ascending: true })
             .order('created_at', { ascending: false })
 
         if (err) setError(err.message)
@@ -74,7 +156,27 @@ export default function AdminMessagesPanel({ onClose }: Props) {
         setTimeout(onClose, 280)
     }
 
-    const filtered = filter === 'all' ? messages : messages.filter(m => m.type === filter)
+    const filtered = messages
+        .filter(m => filter === 'all' || m.type === filter)
+        .filter(m =>
+            m.message.toLowerCase().includes(search.toLowerCase()) ||
+            m.user_email?.toLowerCase().includes(search.toLowerCase())
+        )
+
+
+    const copyContact = async (id: string, text: string) => {
+        await navigator.clipboard.writeText(text)
+        navigator.vibrate?.(40)
+        setCopiedId(id)
+
+        setTimeout(() => {
+            setCopiedId(null)
+        }, 1500)
+    }
+
+
+
+
 
     const counts = {
         all: messages.length,
@@ -95,7 +197,6 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                 className={`adm-panel${visible ? ' adm-panel--visible' : ''}`}
                 data-menu-portal="true"
             >
-                {/* Header */}
                 <div className="adm-header">
                     <div className="adm-header__left">
                         <div className="adm-header__icon">
@@ -107,6 +208,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                         </div>
                     </div>
                     <div className="adm-header__actions">
+                       
                         <button className="adm-icon-btn" onClick={fetchMessages} title="Recargar">
                             <RefreshCw size={13} className={loading ? 'adm-spin' : ''} />
                         </button>
@@ -116,7 +218,6 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                     </div>
                 </div>
 
-                {/* Filtros */}
                 <div className="adm-filters">
                     {(['all', 'bug', 'suggestion', 'question', 'other'] as const).map(f => (
                         <button
@@ -132,7 +233,6 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                     ))}
                 </div>
 
-                {/* Body */}
                 <div className="adm-body">
                     {loading && (
                         <div className="adm-state">
@@ -164,7 +264,10 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                         return (
                             <div
                                 key={msg.id}
-                                className={`adm-msg${isExpanded ? ' adm-msg--expanded' : ''}`}
+                                className={`adm-msg 
+    ${isExpanded ? 'adm-msg--expanded' : ''} 
+    ${msg.status === 'resolved' ? 'adm-msg--resolved' : ''}
+  `}
                                 onClick={() => setExpanded(isExpanded ? null : msg.id)}
                             >
                                 <div className="adm-msg__top">
@@ -197,6 +300,64 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                                                 <span>{reachMeta.label}: <strong>{msg.contact_value}</strong></span>
                                             </div>
                                         )}
+                                        <div className="adm-msg__actions">
+                                            {msg.contact_value && (
+                                                <button
+                                                    className="adm-action-btn adm-action-btn--copy"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        copyContact(msg.id, msg.contact_value!)
+                                                    }}
+                                                >
+                                                    {copiedId === msg.id ? (
+                                                        <>
+                                                            <CopySuccess size={12} color='currentColor' />
+                                                            Copiado
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Copy size={12} color='currentColor' />
+                                                            Copiar
+                                                        </>
+                                                    )}
+                                                </button>
+                                            )}
+
+                                            {msg.status !== 'resolved' && (
+                                                <button
+                                                    className="adm-action-btn adm-action-btn--resolve"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        resolveMessage(msg.id)
+                                                    }}
+                                                >
+                                                    Resolver
+                                                </button>
+                                            )}
+
+                                            <button
+                                                className={`adm-action-btn adm-action-btn--delete ${holdingDelete === msg.id ? 'adm-action-btn--holding' : ''
+                                                    }`}
+                                                onMouseDown={(e) => {
+                                                    e.stopPropagation()
+                                                    startDelete(msg.id)
+                                                }}
+                                                onMouseUp={cancelDelete}
+                                                onMouseLeave={cancelDelete}
+                                                onTouchStart={(e) => {
+                                                    e.stopPropagation()
+                                                    startDelete(msg.id)
+                                                }}
+                                                onTouchEnd={cancelDelete}
+                                            >
+                                                <Trash size={12} color='currentColor' />
+                                            </button>
+
+
+                                        </div>
+
+
+
                                         {msg.reach_by === 'none' && (
                                             <div className="adm-msg__meta-row adm-msg__meta-row--muted">
                                                 <span>No pidió respuesta</span>

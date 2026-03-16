@@ -245,7 +245,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                 : 'Opcional · podés completarlo después'}
                     </p>
 
-                    {/* Stepper */}
                     {isRegister && !success && (
                         <div className="auth-modal__stepper">
                             <div className={`auth-modal__step${registerStep === 1 ? ' active' : ' done'}`}>
@@ -273,7 +272,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                             <p className="auth-modal__success-text">Te enviamos un email de confirmación. Revisá tu bandeja de entrada (y spam).</p>
                         </div>
                     ) : isRegister && registerStep === 1 ? (
-                        /* ── PASO 1 ── */
                         <div className="auth-modal__fields">
                             <div className="auth-modal__field">
                                 <label className="auth-modal__label">Nombre completo</label>
@@ -462,7 +460,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                             </p>
                         </div>
                     ) : (
-                        /* ── LOGIN ── */
                         <div className="auth-modal__fields">
                             <div className="auth-modal__field">
                                 <label className="auth-modal__label">Email</label>

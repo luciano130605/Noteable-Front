@@ -2,13 +2,14 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import type { User } from '@supabase/supabase-js'
 import {
-    Add, SearchNormal, Calendar as CalIcon,
+    Add, Calendar as CalIcon,
     MaximizeCircle, MinusSquare, NotificationBing,
     HambergerMenu, Setting2,
     ArrowRight2, Teacher, ArrowLeft2, Logout, Edit2, EyeSlash,
     Keyboard, Setting4, Copy, CopySuccess, MessageQuestion,
     TickSquare, Diagram, Chart, Location,
     Trash,
+    Video,
 } from 'iconsax-react'
 import type { Career, CareerConfig } from '../hooks/Usecareers'
 import type { UserPreferences } from '../../supabase/Supabase'
@@ -229,7 +230,6 @@ function NotionIcon({ size = 13 }: { size?: number }) {
     )
 }
 
-// ProgConfigPanel ya NO maneja el tema — es responsabilidad del AppHeader
 function ProgConfigPanel({ career, onSave, onClose }: { career: Career; onSave: (id: string, config: CareerConfig) => Promise<string | null>; onClose: () => void }) {
     const cfg = career.config
     const [subjects, setSubjects] = useState(String(cfg.totalSubjects || ''))
@@ -283,7 +283,7 @@ function ProgConfigPanel({ career, onSave, onClose }: { career: Career; onSave: 
     )
 }
 
-function EditProfilePanel({ profile, onUpdateProfile, onUpdatePassword, onDeleteAccount, onClose, onSignOut }: {
+function EditProfilePanel({ profile, onUpdateProfile, onUpdatePassword, onDeleteAccount, onSignOut }: {
     profile: { full_name?: string; university?: string } | null
     onUpdateProfile: (updates: { full_name?: string; university?: string }) => Promise<string | null>
     onUpdatePassword: (newPassword: string) => Promise<string | null>
@@ -514,6 +514,24 @@ function PreferencesPanel({
                 </div>
                 <p className="hdr-pref__hint">{prefs.showLocked ? 'Las materias bloqueadas son visibles' : 'Las materias bloqueadas están ocultas'}</p>
             </div>
+            <div className="hdr-menu__divider" />
+            <div className="hdr-pref__section-label">
+               <Video size={13} color='currentColor' />
+                Clases virtuales
+            </div>
+            <div className="hdr-pref__group">
+                <div className="hdr-pref__group-header">
+                    <span className="hdr-pref__group-label">Aviso de clase (Zoom/Meet)</span>
+                    <Toggle checked={prefs.classReminder ?? false} onChange={v => setPrefs(p => ({ ...p, classReminder: v }))} />
+                </div>
+                <p className="hdr-pref__hint">
+                    {prefs.classReminder
+                        ? 'Te avisa 5 min antes y al inicio de cada clase con link cargado'
+                        : 'Activalo para recibir avisos de tus clases virtuales'}
+                </p>
+            </div>
+
+
             {msg && <div className={msg.type === 'ok' ? 'hdr-cfg__ok' : 'hdr-cfg__error'}>{msg.text}</div>}
             <div className="hdr-cfg__actions">
                 <button className="btn btn--primary" onClick={handleSave} disabled={saving || (notif.enabled && (notif.daysBefore.length === 0 || notif.types.length === 0))}>
@@ -524,7 +542,7 @@ function PreferencesPanel({
     )
 }
 
-export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboarding, onCloseSemester, onOpenScheduleExport, onOpenAuth, onSignOut, onUpdateProfile, onUpdatePassword, onDeleteAccount, onUpdatePreferences, search, onSearch, careers, activeCareer, kanbanView, onToggleCompact, onToggleKanban, onSelectCareer, onAddCareer, onDeleteCareer, onSaveCareerConfig, onAddSubject, onOpenCalendar, onImportSiu, onExportXls, compactView, onToggleGpa, showGpa, onCopyWidget, onOpenAnalytics, upcomingExam }: Props) {
+export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboarding, onCloseSemester, onOpenScheduleExport, onOpenAuth, onSignOut, onUpdateProfile, onUpdatePassword, onDeleteAccount, onUpdatePreferences, careers, activeCareer, kanbanView, onToggleCompact, onToggleKanban, onSelectCareer, onAddCareer, onDeleteCareer, onSaveCareerConfig, onAddSubject, onOpenCalendar, onImportSiu, onExportXls, compactView, onToggleGpa, showGpa, onCopyWidget, onOpenAnalytics, upcomingExam }: Props) {
     const [menuOpen, setMenuOpen] = useState(false)
     const [menuSection, setMenuSection] = useState<'main' | 'account' | 'career' | 'config' | 'edit-profile' | 'preferences' | 'widget' | 'datos' | 'ver' | 'stats' | 'support'>('main')
     const [newCareerName, setNewCareerName] = useState('')
@@ -540,7 +558,6 @@ export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboar
     const [showAdmin, setShowAdmin] = useState(false)
     const [isAdmin, setIsAdmin] = useState(false)
 
-    // ── Tema global — vive acá arriba, una sola instancia ──────────
     const [theme, themeOption, setThemeOption] = useTheme()
     const cycleTheme = () => {
         const cycle: ThemeOption[] = ['dark', 'light', 'system']
@@ -613,11 +630,7 @@ export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboar
                     title="Mensajes de usuarios"
                     style={{ position: 'relative' }}
                 >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                        <polyline points="22,6 12,13 2,6" />
-                    </svg>
+                    Mensajes
                 </button>
             )}
 

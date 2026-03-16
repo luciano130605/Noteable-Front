@@ -501,7 +501,7 @@ export default function EventModal({ initialDate, event, onSave, onDelete, onClo
                                 <span className="evm-summary-meta">
                                     {form.date && formatDateDisplay(form.date)}
                                     {!form.allDay && form.startTime && ` · ${form.startTime}${form.endTime ? ' – ' + form.endTime : ''}`}
-                                    {locValidated && locInput && ` · 📍 ${locInput}`}
+                                    {locValidated && locInput && ` ·  ${locInput}`}
                                 </span>
                                 <span className="evm-summary-importance" style={{ color: selectedImportance.color }}>
                                     {selectedImportance.icon} Importancia {selectedImportance.label}

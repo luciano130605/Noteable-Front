@@ -98,7 +98,6 @@
     letter-spacing: .02em;
 }
 
-/* ─────────────── Notas ─────────────── */
 
 .csw-grades {
     display: flex;
@@ -136,7 +135,6 @@
     padding-bottom: 4px;
 }
 
-/* ─────────────── Inputs ─────────────── */
 
 .csw-grade-input {
     width: 64px;
@@ -192,7 +190,6 @@
     cursor: not-allowed;
 }
 
-/* ─────────────── Indicadores ─────────────── */
 
 .csw-grade-dot {
     width: 8px;
@@ -211,8 +208,6 @@
     opacity: .8;
 }
 
-/* ─────────────── Finales ─────────────── */
-
 .csw-skip-label {
     display: flex;
     align-items: center;
@@ -229,7 +224,6 @@
     accent-color: var(--accent);
 }
 
-/* ─────────────── Avance ─────────────── */
 
 .csw-advance {
     display: flex;
@@ -252,7 +246,6 @@
     font-weight: 700;
 }
 
-/* ─────────────── Confirm modal ─────────────── */
 
 .confirm-overlay {
     position: fixed;
@@ -309,7 +302,6 @@
     margin-top: 6px;
 }
 
-/* Animations */
 
 @keyframes confirmFade {
     from {
@@ -333,7 +325,6 @@
     }
 }
 
-/* ── Mobile ── */
 
 @media (max-width: 600px) {
 

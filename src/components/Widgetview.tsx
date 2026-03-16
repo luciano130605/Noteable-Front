@@ -151,7 +151,6 @@ export default function WidgetView() {
                     </div>
                 </div>
 
-                {/* ── Stats ── */}
                 <div style={s.statsRow}>
                     {[
                         { label: 'Aprobadas', value: approved, color: '#4ade80' },
@@ -166,7 +165,6 @@ export default function WidgetView() {
                     ))}
                 </div>
 
-                {/* ── Barra de progreso ── */}
                 <div style={s.progressWrap}>
                     <div style={s.progressTrack}>
                         <div style={{ ...s.progressFill, width: `${pct}%` }} />
@@ -174,7 +172,6 @@ export default function WidgetView() {
                     <span style={s.progressLabel}>{approved} / {total} materias</span>
                 </div>
 
-                {/* ── En cursada ── */}
                 {inProgress.length > 0 && (
                     <div style={s.section}>
                         <div style={s.sectionTitle}>En cursada</div>
@@ -192,7 +189,6 @@ export default function WidgetView() {
                     </div>
                 )}
 
-                {/* ── Próximos exámenes ── */}
                 {upcoming.length > 0 && (
                     <div style={s.section}>
                         <div style={s.sectionTitle}>Próximos exámenes</div>
@@ -222,7 +218,6 @@ export default function WidgetView() {
                     </div>
                 )}
 
-                {/* ── Footer ── */}
                 <div style={s.footer}>
                     Noteable · actualizado {now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })}
                 </div>

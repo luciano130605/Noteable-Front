@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════════════════════
-   THEME TOGGLE (tt-*)
-═══════════════════════════════════════════════════ */
+
 
 .tt-btn {
     all: unset;
@@ -24,7 +22,6 @@
     border-color: #f59e0b;
 }
 
-/* Estrellas */
 .tt-stars {
     position: absolute;
     inset: 0;
@@ -40,7 +37,6 @@
     background: #c7d2fe;
 }
 
-/* Thumb */
 .tt-thumb {
     position: absolute;
     top: 3px;
@@ -68,7 +64,6 @@
     box-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 }
 
-/* Íconos dentro del thumb */
 .tt-icon {
     position: absolute;
     inset: 0;
@@ -78,7 +73,6 @@
     transition: opacity 0.25s ease, transform 0.35s cubic-bezier(.34, 1.56, .64, 1);
 }
 
-/* Luna */
 .tt-moon {
     opacity: 1;
     transform: scale(1) rotate(0deg);
@@ -89,7 +83,6 @@
     transform: scale(0.4) rotate(-90deg);
 }
 
-/* Sol */
 .tt-sun {
     opacity: 0;
     transform: scale(0.4) rotate(90deg);
@@ -100,7 +93,6 @@
     transform: scale(1) rotate(0deg);
 }
 
-/* Rayos del sol */
 .tt-rays {
     transform-origin: 50% 50%;
     transition: transform 0.5s cubic-bezier(.34, 1.56, .64, 1), opacity 0.3s ease;

@@ -20,6 +20,8 @@ function dbToSubject(row: DbSubject): Subject {
     status: row.status as SubjectStatus,
     corrApproved: row.corr_approved ?? [],
     corrRegular: row.corr_regular ?? [],
+    zoomLink: (row as any).zoom_link ?? null,
+    aulaVirtualLink: (row as any).aula_virtual_link ?? null,
     finalDate: row.final_date ?? '',
     approvedDate: row.approved_date ?? '',
     notionPageId: row.notion_page_id ?? null,
@@ -48,7 +50,8 @@ function subjectToDb(
     id: s.id,
     user_id: userId,
     career_id: careerId,
-
+    zoom_link: s.zoomLink ?? null,
+    aula_virtual_link: s.aulaVirtualLink ?? null,
     name: s.name,
     grade_history: (s.gradeHistory ?? []) as unknown[],
     code: s.code,

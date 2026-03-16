@@ -41,7 +41,6 @@
     transform: translate(-50%, -50%) scale(1) translateY(0);
 }
 
-/* Franja acento arriba */
 .cm-modal::before {
     content: '';
     display: block;
@@ -50,7 +49,6 @@
     border-radius: 18px 18px 0 0;
 }
 
-/* ── Header ── */
 .cm-header {
     display: flex;
     align-items: center;
@@ -100,7 +98,6 @@
     color: var(--text);
 }
 
-/* ── Body ── */
 .cm-body {
     padding: 14px 16px 16px;
     display: flex;
@@ -123,7 +120,6 @@
     color: var(--text-tertiary);
 }
 
-/* ── Chips de tipo ── */
 .cm-chips {
     display: flex;
     flex-wrap: wrap;
@@ -154,7 +150,6 @@
     color: var(--accent2);
 }
 
-/* ── Textarea ── */
 .cm-textarea {
     width: 100%;
     box-sizing: border-box;
@@ -190,7 +185,6 @@
     pointer-events: none;
 }
 
-/* ── Grilla de cómo contactar ── */
 .cm-reach-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -237,7 +231,6 @@
     color: var(--accent2);
 }
 
-/* ── Input de contacto ── */
 .cm-contact-input-wrap {
     margin-top: 4px;
     animation: cmSlideIn 0.18s ease;
@@ -279,7 +272,6 @@
     color: var(--input-text-focus);
 }
 
-/* ── Footer ── */
 .cm-footer {
     display: flex;
     align-items: center;
@@ -321,7 +313,6 @@
     cursor: not-allowed;
 }
 
-/* ── Sent state ── */
 .cm-sent {
     padding: 28px 20px 24px;
     display: flex;
@@ -366,7 +357,6 @@
     margin-top: 8px;
 }
 
-/* ── Spinner ── */
 @keyframes cmSpin {
     to {
         transform: rotate(360deg);
@@ -377,7 +367,6 @@
     animation: cmSpin 0.8s linear infinite;
 }
 
-/* ── Mobile ── */
 @media (max-width: 480px) {
     .cm-modal {
         top: auto;

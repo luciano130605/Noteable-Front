@@ -1,6 +1,4 @@
-/* ═══════════════════════════════════
-   SIU IMPORTER
-═══════════════════════════════════ */
+
 
 .siu-importer-overlay {
     position: fixed;
@@ -29,9 +27,7 @@
     box-shadow: var(--shadow-menu);
 }
 
-/* ═══════════════════════════════════
-   HEADER
-═══════════════════════════════════ */
+
 
 .siu-importer-header {
     padding: 18px 22px;
@@ -55,9 +51,7 @@
     color: var(--text-tertiary);
 }
 
-/* ═══════════════════════════════════
-   BODY
-═══════════════════════════════════ */
+
 
 .siu-importer-body {
     flex: 1;
@@ -75,9 +69,6 @@
     border-top: 1px solid var(--border-faint);
 }
 
-/* ═══════════════════════════════════
-   DROPZONE
-═══════════════════════════════════ */
 
 .siu-dropzone {
     border: 2px dashed var(--accent-border);
@@ -123,9 +114,7 @@
     display: none;
 }
 
-/* ═══════════════════════════════════
-   ERROR
-═══════════════════════════════════ */
+
 
 .siu-error {
     margin-top: 14px;
@@ -139,9 +128,7 @@
     color: var(--danger);
 }
 
-/* ═══════════════════════════════════
-   PREVIEW
-═══════════════════════════════════ */
+
 
 .siu-preview {
     display: flex;
@@ -186,7 +173,7 @@
     text-align: right;
 }
 
-/* grades */
+
 
 .grade-high {
     color: var(--approved);
@@ -200,9 +187,6 @@
     color: var(--danger);
 }
 
-/* ═══════════════════════════════════
-   BADGES
-═══════════════════════════════════ */
 
 .siu-badge {
     font-size: 0.65rem;
@@ -224,9 +208,7 @@
     color: var(--success);
 }
 
-/* ═══════════════════════════════════
-   BUTTONS
-═══════════════════════════════════ */
+
 
 .btn {
     padding: 7px 16px;
@@ -272,9 +254,7 @@
     opacity: .9;
 }
 
-/* ═══════════════════════════════════
-   INSTRUCTIONS
-═══════════════════════════════════ */
+
 
 .siu-instructions {
     margin-top: 18px;
@@ -309,9 +289,6 @@
     color: var(--text-secondary);
 }
 
-/* ═══════════════════════════════════
-   MOBILE
-═══════════════════════════════════ */
 
 @media (max-width: 600px) {
 

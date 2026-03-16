@@ -107,7 +107,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
         if (navigator.share) {
             try {
                 await navigator.share({ text })
-            } catch { /* user cancelled */ }
+            } catch { /*  */ }
         } else {
             navigator.clipboard.writeText(text)
             toast('Texto copiado (Web Share no disponible en este navegador)', 'info')

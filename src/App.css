@@ -139,9 +139,7 @@
     --theme-toggle-hover-icon: #c8c8e0;
 }
 
-/* ═══════════════════════════════════════════════════
-   THEME VARIABLES — LIGHT
-═══════════════════════════════════════════════════ */
+
 [data-theme="light"] {
     /* Base */
     --bg: #f4f4f8;
@@ -276,9 +274,7 @@
     --theme-toggle-hover-icon: #2a2a42;
 }
 
-/* ═══════════════════════════════════════════════════════
-   RESET / BASE
-═══════════════════════════════════════════════════════ */
+
 *,
 *::before,
 *::after {
@@ -296,9 +292,6 @@ body {
     -webkit-font-smoothing: antialiased;
 }
 
-/* ═══════════════════════════════════════════════════════
-   LAYOUT PRINCIPAL
-═══════════════════════════════════════════════════════ */
 
 
 .app {
@@ -316,9 +309,7 @@ body {
     width: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   HEADER
-═══════════════════════════════════════════════════════ */
+
 .header {
     padding: 14px 28px;
     display: flex;
@@ -350,7 +341,6 @@ body {
     flex-wrap: wrap;
 }
 
-/* ─── Search ──────────────────────────────────────────────── */
 .header__search-wrap {
     position: relative;
     max-width: 240px;
@@ -375,7 +365,6 @@ body {
     cursor: pointer;
 }
 
-/* Select invisible pero activo */
 .header__career-select {
     position: absolute;
     inset: 0;
@@ -393,7 +382,6 @@ body {
     color-scheme: dark;
 }
 
-/* Flechita visible */
 .header__career-icon {
     display: flex;
     align-items: center;
@@ -432,9 +420,7 @@ body {
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
-/* ═══════════════════════════════════════════════════════
-   BOTONES GLOBALES
-═══════════════════════════════════════════════════════ */
+
 .btn {
     padding: 7px 16px;
     border-radius: var(--radius-md);
@@ -487,9 +473,6 @@ body {
     color: #fca5a5;
 }
 
-/* ═══════════════════════════════════════════════════════
-   STATS BAR
-═══════════════════════════════════════════════════════ */
 .stats-bar {
     display: flex;
     padding: 10px 16px;
@@ -528,9 +511,6 @@ body {
     font-weight: 600;
 }
 
-/* ═══════════════════════════════════════════════════════
-   PROGRESS BAR
-═══════════════════════════════════════════════════════ */
 .progress-bar {
     padding: 10px 24px;
     background: var(--surface);
@@ -574,9 +554,6 @@ body {
     text-align: right;
 }
 
-/* ═══════════════════════════════════════════════════════
-   FILTERS
-═══════════════════════════════════════════════════════ */
 
 .filters-row {
     display: flex;
@@ -753,16 +730,13 @@ body {
     font-weight: 600;
 }
 
-/* ── Color por estado cuando está activo ───────────────────── */
 
-/* Todos */
 .filter-btn[data-status="all"].filter-btn--active {
     background: rgba(99, 102, 241, 0.2);
     border-color: rgba(99, 102, 241, 0.5);
     box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25), 0 2px 8px rgba(99, 102, 241, 0.2);
 }
 
-/* Aprobadas — verde */
 .filter-btn[data-status="approved"].filter-btn--active {
     background: rgba(34, 197, 94, 0.15);
     border-color: rgba(34, 197, 94, 0.45);
@@ -776,7 +750,6 @@ body {
     color: #4ade80;
 }
 
-/* Final pendiente — amarillo */
 .filter-btn[data-status="pending_final"].filter-btn--active {
     background: rgba(250, 204, 21, 0.12);
     border-color: rgba(250, 204, 21, 0.4);
@@ -790,7 +763,6 @@ body {
     color: #fde047;
 }
 
-/* En cursada — cyan */
 .filter-btn[data-status="in_progress"].filter-btn--active {
     background: rgba(56, 189, 248, 0.13);
     border-color: rgba(56, 189, 248, 0.4);
@@ -804,7 +776,6 @@ body {
     color: #7dd3fc;
 }
 
-/* Disponibles — indigo */
 .filter-btn[data-status="available"].filter-btn--active {
     background: rgba(99, 102, 241, 0.18);
     border-color: rgba(99, 102, 241, 0.5);
@@ -818,7 +789,6 @@ body {
     color: #a5b4fc;
 }
 
-/* Bloqueadas — rojo */
 .filter-btn[data-status="locked"].filter-btn--active {
     background: rgba(196, 64, 64, 0.14);
     border-color: rgba(196, 64, 64, 0.4);
@@ -832,9 +802,7 @@ body {
     color: #f87171;
 }
 
-/* ═══════════════════════════════════════════════════════
-   MAIN LAYOUT
-═══════════════════════════════════════════════════════ */
+
 .main {
     display: flex;
     flex: 1;
@@ -863,9 +831,7 @@ body {
     border-radius: 4px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   YEAR SECTION
-═══════════════════════════════════════════════════════ */
+
 .year-section {
     margin-bottom: 28px;
 }
@@ -896,18 +862,13 @@ body {
     letter-spacing: 0.04em;
 }
 
-/* ═══════════════════════════════════════════════════════
-   SUBJECTS GRID
-═══════════════════════════════════════════════════════ */
 .subjects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 10px;
 }
 
-/* ═══════════════════════════════════════════════════════
-   EMPTY STATE
-═══════════════════════════════════════════════════════ */
+
 .empty-state {
     text-align: center;
     padding: 5rem 2rem;
@@ -943,9 +904,7 @@ body {
     color: var(--muted);
 }
 
-/* ═══════════════════════════════════════════════════════
-   NO RESULTS
-═══════════════════════════════════════════════════════ */
+
 .no-results {
     text-align: center;
     padding: 3rem;
@@ -954,11 +913,8 @@ body {
     letter-spacing: 0.03em;
 }
 
-/* ══════════════════════════════════════════════════════
-   ADD THESE TO THE BOTTOM OF App.css
-══════════════════════════════════════════════════════ */
 
-/* ── Header calendar button ── */
+
 .btn--icon {
     display: flex;
     align-items: center;
@@ -982,7 +938,6 @@ body {
     color: #a5b4fc;
 }
 
-/* ── Progress section wrapper ── */
 .progress-section {
     position: relative;
     padding: 12px 24px 0;
@@ -991,7 +946,6 @@ body {
     gap: 8px;
 }
 
-/* ── Progress bar row ── */
 .progress-bar {
     display: flex;
     align-items: center;
@@ -1049,7 +1003,6 @@ body {
     box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
 
-/* Year tick markers on the track */
 .progress-bar__marker {
     position: absolute;
     top: -3px;
@@ -1090,7 +1043,6 @@ body {
     color: #a5b4fc;
 }
 
-/* ── Per-year mini bars ── */
 .progress-years {
     display: flex;
     gap: 8px;
@@ -1139,7 +1091,6 @@ body {
     font-weight: 600;
 }
 
-/* ── Progress config popover ── */
 .prog-popover {
     position: absolute;
     top: calc(100% + 100px);
@@ -1251,7 +1202,6 @@ body {
     opacity: 0.88;
 }
 
-/* ── Calendar drawer ── */
 .cal-drawer-overlay {
     position: fixed;
     inset: 0;
@@ -1323,11 +1273,8 @@ body {
     color: #f87171;
 }
 
-/* ══════════════════════════════════════════════════════
-   ADD THESE TO THE BOTTOM OF App.css
-══════════════════════════════════════════════════════ */
 
-/* ── Header calendar button ── */
+
 .btn--icon {
     display: flex;
     align-items: center;
@@ -1351,7 +1298,6 @@ body {
     color: #a5b4fc;
 }
 
-/* ── Progress section wrapper ── */
 .progress-section {
     position: relative;
     padding: 12px 24px 0;
@@ -1360,7 +1306,6 @@ body {
     gap: 8px;
 }
 
-/* ── Progress bar row ── */
 .progress-bar {
     display: flex;
     align-items: center;
@@ -1417,8 +1362,6 @@ body {
     background: #818cf8;
     box-shadow: 0 0 8px rgba(99, 102, 241, 0.6);
 }
-
-/* Year tick markers on the track */
 .progress-bar__marker {
     position: absolute;
     top: -2px;
@@ -1429,7 +1372,6 @@ body {
     border-radius: 1px;
 }
 
-/* Year boundary = taller and brighter */
 .progress-bar__marker--year {
     top: -4px;
     height: 14px;
@@ -1467,7 +1409,6 @@ body {
     color: #a5b4fc;
 }
 
-/* ── Per-year mini bars ── */
 .progress-years {
     display: flex;
     gap: 8px;
@@ -1516,7 +1457,6 @@ body {
     font-weight: 600;
 }
 
-/* Extra semester bar */
 .progress-years__item--sem {
     flex: 0 0 auto;
     min-width: 52px;
@@ -1535,7 +1475,6 @@ body {
     background: linear-gradient(90deg, #8b5cf6, #a78bfa);
 }
 
-/* ── Progress popover duration section ── */
 .prog-popover__duration {
     display: flex;
     flex-direction: column;
@@ -1591,7 +1530,6 @@ body {
     font-weight: 600;
 }
 
-/* ── Progress config popover ── */
 .prog-popover {
     position: absolute;
     top: calc(100% + 6px);
@@ -1703,7 +1641,6 @@ body {
     opacity: 0.88;
 }
 
-/* ── Calendar drawer ── */
 .cal-drawer-overlay {
     position: fixed;
     inset: 0;
@@ -1841,7 +1778,6 @@ body {
 }
 
 
-/* ───── NOTIFICACIÓN FINAL ───── */
 
 .notif-wrap {
     position: relative;
@@ -1850,7 +1786,6 @@ body {
 }
 
 
-/* Tooltip */
 
 .notif-tooltip {
     position: absolute;
@@ -1875,7 +1810,6 @@ body {
     z-index: 1000;
 }
 
-/* Mostrar tooltip */
 
 .notif-wrap.open .notif-tooltip {
     opacity: 1;
@@ -1884,7 +1818,6 @@ body {
 
 }
 
-/* Contenido */
 
 .notif-tooltip-title {
     font-size: 0.8rem;
@@ -1910,14 +1843,6 @@ body {
 }
 
 
-/* ══════════════════════════════════════════════════════════════
-   RESPONSIVE — agregar al final de App.css
-   Cubre: Stats bar · Progress section · Filters · Year grid
-══════════════════════════════════════════════════════════════ */
-
-/* ────────────────────────────────────────────
-   TABLET (≤ 1024px)
-──────────────────────────────────────────── */
 @media (max-width: 1024px) {
     .progress-bar__left {
         min-width: 120px;
@@ -1932,18 +1857,14 @@ body {
     }
 }
 
-/* ────────────────────────────────────────────
-   MOBILE (≤ 768px)
-──────────────────────────────────────────── */
+
 @media (max-width: 768px) {
 
-    /* ── Header ── */
     .header {
         padding: 10px 14px;
         gap: 8px;
     }
 
-    /* ── Status chips — más pequeños en mobile ── */
     .subject-card__status,
     .status-badge,
     [class*="status-chip"],
@@ -2009,7 +1930,6 @@ body {
         max-width: none;
     }
 
-    /* ══ STATS BAR: grid 2×2 ══════════════════ */
     .stats-bar {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
@@ -2037,7 +1957,6 @@ body {
         margin-top: 4px;
     }
 
-    /* ══ PROGRESS ═════════════════════════════ */
     .progress-section {
         padding: 10px 14px 4px;
     }
@@ -2048,7 +1967,6 @@ body {
         padding: 10px 0 6px;
     }
 
-    /* Fila superior: label truncado + subtítulo */
     .progress-bar__left {
         width: 100%;
         min-width: 0;
@@ -2074,7 +1992,6 @@ body {
         flex-shrink: 0;
     }
 
-    /* Fila inferior: barra + porcentaje */
     .progress-bar__track-wrap {
         flex: 1;
         min-width: 0;
@@ -2094,7 +2011,6 @@ body {
         display: none;
     }
 
-    /* ══ FILTERS ══════════════════════════════ */
     .filters {
         padding: 8px 12px;
         gap: 5px;
@@ -2120,7 +2036,6 @@ body {
         height: 30px;
     }
 
-    /* Botón settings pegado a la derecha, siempre visible */
     .filters>div:last-child {
         flex-shrink: 0;
         margin-left: 4px;
@@ -2130,7 +2045,6 @@ body {
         z-index: 1;
     }
 
-    /* ══ LAYOUT ════════════════════════════════ */
     .year-semesters {
         grid-template-columns: 1fr;
         gap: 16px;
@@ -2146,9 +2060,7 @@ body {
     }
 }
 
-/* ────────────────────────────────────────────
-   MOBILE PORTRAIT (≤ 480px)
-──────────────────────────────────────────── */
+
 @media (max-width: 480px) {
 
     .header {
@@ -2191,9 +2103,6 @@ body {
     }
 }
 
-/* ────────────────────────────────────────────
-   REDUCED MOTION
-──────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
 
     .progress-bar__fill,

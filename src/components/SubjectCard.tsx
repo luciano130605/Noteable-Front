@@ -3,7 +3,7 @@ import type { Subject, GradeHistoryEntry } from '../types/types'
 import { STATUS_CONFIG } from '../../src/assets/constants'
 import { getEffectiveStatus } from '../App'
 import './SubjectCard.css'
-import { Trash, InfoCircle, Copy, Edit, CloseCircle } from 'iconsax-react'
+import { Trash, InfoCircle, Copy, Edit, CloseCircle, Video } from 'iconsax-react'
 import { CheckCircle, X, Pencil, Calendar, BookOpen, TrendingUp, AlertCircle, MapPin } from 'lucide-react'
 
 interface Props {
@@ -86,21 +86,15 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
   const today = new Date()
 
   useEffect(() => { const t = requestAnimationFrame(() => setVisible(true)); return () => cancelAnimationFrame(t) }, [])
-
   const handleClose = () => { setVisible(false); setTimeout(onClose, 260) }
-
   useEffect(() => {
     const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
     window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h)
   }, [])
 
-
-
   const schedules: any[] = subject.schedules ?? []
   const examDates: any[] = subject.examDates ?? []
   const gradeHistory: GradeHistoryEntry[] = subject.gradeHistory ?? []
-  const attempts = subject.finalAttempts ?? 0
-
   const hasSchedules = schedules.length > 0
   const hasExams = examDates.length > 0
   const hasHistory = gradeHistory.length > 0
@@ -133,16 +127,10 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
                 <span className="dm__meta-dot" />
                 <span className="dm__meta-code">{subject.code}</span>
                 <span className="dm__meta-sep">·</span>
-                <span className="kb-card__year">
-                  {subject.year}° · {termLabel(subject.term)}
-                </span>
+                <span className="kb-card__year">{subject.year}° · {termLabel(subject.term)}</span>
                 <span className="dm__meta-sep">·</span>
                 <span className="dm__meta-item">
-                  {subject.term === 'ANNUAL'
-                    ? 'Anual'
-                    : subject.term === 'Q1'
-                      ? '1° cuatrimestre'
-                      : '2° cuatrimestre'}
+                  {subject.term === 'ANNUAL' ? 'Anual' : subject.term === 'Q1' ? '1° cuatrimestre' : '2° cuatrimestre'}
                 </span>
               </div>
             )}
@@ -185,7 +173,6 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
 
             {subject.grade != null && (
               <div className="dm__grade-hero">
-
                 <div className="dm__grade-hero-info">
                   <div className="dm__sec-label">Nota final</div>
                   <div className="dm__grade-hero-sub">
@@ -223,22 +210,22 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
               </div>
             )}
 
-            {attempts > 0 && (
+            {(subject.finalAttempts ?? 0) > 0 && (
               <div className="dm__sec">
                 <div className="dm__sec-header">
                   <AlertCircle size={12} className="dm__sec-icon" /><span className="dm__sec-title">Intentos de final</span>
                 </div>
                 <div className="dm__sec-body">
                   <div className="dm__attempts-row">
-                    <span className="dm__attempts-text">{attempts} de 3 intentos usados</span>
-                    {attempts >= 3 && <span className="dm__attempts-limit">LÍMITE</span>}
+                    <span className="dm__attempts-text">{subject.finalAttempts} de 3 intentos usados</span>
+                    {(subject.finalAttempts ?? 0) >= 3 && <span className="dm__attempts-limit">LÍMITE</span>}
                   </div>
                   <div className="dm__attempts-bar">
                     {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className={`dm__attempts-slot${i < attempts ? (attempts >= 3 ? ' dm__attempts-slot--danger' : ' dm__attempts-slot--used') : ''}`} />
+                      <div key={i} className={`dm__attempts-slot${i < (subject.finalAttempts ?? 0) ? ((subject.finalAttempts ?? 0) >= 3 ? ' dm__attempts-slot--danger' : ' dm__attempts-slot--used') : ''}`} />
                     ))}
                   </div>
-                  {attempts === 2 && <div className="dm__attempts-warn"><AlertCircle size={11} /> Último intento disponible</div>}
+                  {subject.finalAttempts === 2 && <div className="dm__attempts-warn"><AlertCircle size={11} /> Último intento disponible</div>}
                 </div>
               </div>
             )}
@@ -246,7 +233,7 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
             {(subject.approvedDate || subject.finalDate) && (
               <div className="dm__sec">
                 <div className="dm__sec-header">
-                  <Calendar size={12} className="dm__sec-title" color='currentColor' /><span className="dm__sec-title">Fechas</span>
+                  <Calendar size={12} className="dm__sec-icon" /><span className="dm__sec-title">Fechas</span>
                 </div>
                 <div className="dm__sec-body">
                   {subject.approvedDate && (
@@ -294,18 +281,49 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
               </div>
             )}
 
-            {subject.notionPageUrl && (
-              <a href={subject.notionPageUrl} target="_blank" rel="noopener noreferrer" className="dm__notion-link" onClick={e => e.stopPropagation()}>
-                <NotionIcon size={14} />
-                <span className="dm__notion-title">{subject.notionPageTitle ?? 'Abrir en Notion'}</span>
-                <span className="dm__notion-arrow">↗</span>
-              </a>
+            {((subject as any).zoomLink || (subject as any).aulaVirtualLink || subject.notionPageUrl) && (
+              <div className="dm__sec">
+                <div className="dm__sec-header">
+                  <BookOpen size={12} className="dm__sec-icon" />
+                  <span className="dm__sec-title">Recursos de cursada</span>
+                </div>
+                <div className="dm__sec-body" style={{ gap: 6 }}>
+                  {(subject as any).zoomLink && (
+                    <a href={(subject as any).zoomLink} target="_blank" rel="noopener noreferrer"
+                      className="dm__notion-link" onClick={e => e.stopPropagation()}>
+                        <Video size={12} color='currentColor' />
+                      <span className="dm__notion-title">Clase virtual (Zoom/Meet)</span>
+                      <span className="dm__notion-arrow">↗</span>
+                    </a>
+                  )}
+                  {(subject as any).aulaVirtualLink && (
+                    <a href={(subject as any).aulaVirtualLink} target="_blank" rel="noopener noreferrer"
+                      className="dm__notion-link" onClick={e => e.stopPropagation()}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 3L2 8l10 5 10-5-10-5zM2 13l10 5 10-5M2 18l10 5 10-5"
+                          stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="dm__notion-title">Aula virtual / Campus</span>
+                      <span className="dm__notion-arrow">↗</span>
+                    </a>
+                  )}
+                  {subject.notionPageUrl && (
+                    <a href={subject.notionPageUrl} target="_blank" rel="noopener noreferrer"
+                      className="dm__notion-link" onClick={e => e.stopPropagation()}>
+                      <NotionIcon size={14} />
+                      <span className="dm__notion-title">{subject.notionPageTitle ?? 'Abrir en Notion'}</span>
+                      <span className="dm__notion-arrow">↗</span>
+                    </a>
+                  )}
+                </div>
+              </div>
             )}
 
             {subject.notes && (
               <div className="dm__sec">
                 <div className="dm__sec-header">
-                  <BookOpen size={12} className="dm__sec-icon" /><span className="dm__sec-title">Notas personales</span>
+                  <BookOpen size={12} className="dm__sec-icon" />
+                  <span className="dm__sec-title">Notas personales</span>
                 </div>
                 <div className="dm__sec-body">
                   <p className="dm__notes-text">{subject.notes}</p>
@@ -313,7 +331,7 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
               </div>
             )}
 
-            {!subject.grade && !subject.gradeP1 && !subject.gradeP2 && !subject.approvedDate && !subject.finalDate && !subject.corrApproved.length && !subject.notes && (
+            {!subject.grade && !subject.gradeP1 && !subject.gradeP2 && !subject.approvedDate && !subject.finalDate && !subject.corrApproved.length && !subject.notes && !(subject as any).zoomLink && !(subject as any).aulaVirtualLink && (
               <div className="dm__empty">Sin información adicional registrada</div>
             )}
           </>)}
@@ -414,13 +432,14 @@ export function DetailModal({ subject, allSubjects, onClose, onEdit }: {
               <div className="dm__empty">Sin historial registrado</div>
             )}
           </>)}
+
         </div>
 
         <div className="dm__footer">
           <Pencil size={9} /> Doble click en la card para editar · Esc para cerrar
         </div>
       </div>
-    </div >
+    </div>
   )
 }
 

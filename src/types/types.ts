@@ -45,6 +45,8 @@ export interface SubjectSettings {
 
 export interface Subject {
     id: string
+    zoomLink?: string | null
+    aulaVirtualLink?: string | null
     name: string
     code: string
     year: number

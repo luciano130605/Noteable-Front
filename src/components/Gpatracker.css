@@ -1,4 +1,3 @@
-/* ── Overlay ── */
 .gpa-overlay {
     position: fixed;
     inset: 0;
@@ -22,7 +21,6 @@
     }
 }
 
-/* ── Modal shell ── */
 .gpa-modal {
     background: var(--surface, #13131f);
     border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
@@ -51,7 +49,6 @@
     }
 }
 
-/* ── Header ── */
 .gpa-modal__header {
     display: flex;
     align-items: center;
@@ -95,14 +92,12 @@
     background: rgba(255, 255, 255, 0.06);
 }
 
-/* ── Card wrap ── */
 .gpa-card-wrap {
     padding: 1.25rem 1.25rem 0.5rem;
     display: flex;
     justify-content: center;
 }
 
-/* ── THE SHAREABLE CARD ── */
 .gpa-card {
     width: 100%;
     max-width: 460px;
@@ -114,7 +109,6 @@
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
 }
 
-/* Subtle grid lines watermark */
 .gpa-card__grid {
     position: absolute;
     inset: 0;
@@ -125,7 +119,6 @@
     pointer-events: none;
 }
 
-/* Glow accent top-right */
 .gpa-card::before {
     content: '';
     position: absolute;
@@ -137,7 +130,6 @@
     pointer-events: none;
 }
 
-/* Glow accent bottom-left */
 .gpa-card::after {
     content: '';
     position: absolute;
@@ -166,7 +158,6 @@
     color: rgba(99, 102, 241, 0.7);
 }
 
-/* ── Hero avg ── */
 .gpa-card__hero {
     display: flex;
     flex-direction: column;
@@ -219,7 +210,6 @@
     margin-top: 0.1rem;
 }
 
-/* ── Distribution chart ── */
 .gpa-card__dist {
     display: flex;
     gap: 0.4rem;
@@ -267,7 +257,6 @@
     white-space: nowrap;
 }
 
-/* ── Top grades ── */
 .gpa-card__top {
     display: flex;
     flex-direction: column;
@@ -335,7 +324,6 @@
     text-align: right;
 }
 
-/* ── Empty state ── */
 .gpa-card__empty {
     display: flex;
     flex-direction: column;
@@ -365,7 +353,6 @@
     margin-top: -0.25rem;
 }
 
-/* ── Extra stats (outside card) ── */
 .gpa-modal__extra {
     margin: 0 1.25rem;
     padding: 0.75rem 1rem;
@@ -407,7 +394,6 @@
     flex-shrink: 0;
 }
 
-/* ── Actions ── */
 .gpa-modal__actions {
     display: flex;
     gap: 0.5rem;
@@ -439,7 +425,6 @@
     color: #f87171;
 }
 
-/* ── Responsive mobile ── */
 @media (max-width: 600px) {
     .gpa-overlay {
         padding: 0;

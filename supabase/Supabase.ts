@@ -28,6 +28,7 @@ export type Theme = 'dark' | 'light' | 'system'
 export interface UserPreferences {
     notifications: NotificationPreferences
     dateFormat: DateFormat
+    classReminder: boolean
     theme: Theme
     showLocked: boolean
     visibleFilters?: string[]
@@ -45,6 +46,7 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
     dateFormat: 'DD/MM/YYYY',
     theme: 'dark',
     showLocked: true,
+    classReminder: false,
     visibleFilters: ['all', 'approved', 'pending_final', 'in_progress', 'available', 'locked', 'retaking', 'failed_final', 'free'],
     promotionThreshold: 7,
     regularThreshold: 4,
@@ -67,6 +69,8 @@ export function formatDate(dateStr: string, format: DateFormat = 'DD/MM/YYYY'): 
 export interface DbSubject {
     id: string
     schedules?: unknown[]
+    zoom_link: string | null
+    aula_virtual_link: string | null
     user_id: string
     career_id: string | null
     name: string

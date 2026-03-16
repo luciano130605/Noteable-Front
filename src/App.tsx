@@ -38,6 +38,8 @@ import AnalyticsModal from './components/Analyticsmodal'
 import PinLocation from './Icon/PinLocation'
 import MobileFAB from './components/Mobilefab'
 import Onboarding from './components/Onboarding'
+import { useClassReminder } from './hooks/useClassReminder'
+import ClassReminderBubble from './components/ClassReminderBubble'
 
 export function getEffectiveStatus(
   subject: Subject,
@@ -228,7 +230,11 @@ export default function App() {
   const showLocked = currentPrefs.showLocked ?? true
   const promotionThreshold = currentPrefs.promotionThreshold ?? 7
   const regularThreshold = currentPrefs.regularThreshold ?? 4
-
+  const activeClass = useClassReminder(
+    subjects,
+    currentPrefs.classReminder ?? false,
+    5
+  )
 
 
   const filteredSubjects = subjects.filter(s => {
@@ -438,7 +444,7 @@ export default function App() {
         onToggleCompact={toggleCompact}
         onExportXls={handleExport}
         onOpenScheduleExport={() => setShowScheduleExport(true)}
-        onOpenOnboarding={() => setShowOnboarding(true)}  
+        onOpenOnboarding={() => setShowOnboarding(true)}
         onCloseSemester={() => setShowCloseSemester(true)}
         onUpdateProfile={updateProfile}
         onUpdatePassword={updatePassword}
@@ -526,7 +532,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* ── Filters row ── */}
       <div className="filters-row">
         <div className="filters">
           <span className="filters__label">Filtrar:</span>
@@ -889,6 +894,8 @@ export default function App() {
           />
         </div>
       )}
+
+      {activeClass && <ClassReminderBubble activeClass={activeClass} />}
 
       <style>{`
         .app-loading__spinner {

@@ -470,7 +470,6 @@ export default function UpcomingSidebar({
           </div>
         )}
 
-        {/* Edit modal */}
         {editingEvent && typeof editingEvent === 'object' && (
           <EventModal
             event={editingEvent}

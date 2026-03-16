@@ -70,6 +70,8 @@ type FormState = Omit<
   gradeP2: string
   gradeP3: string
   gradeFinalExam: string
+  zoomLink: string
+  aulaVirtualLink: string
   gradeOverride: string
   finalAttempts: number
   gradeHistory: GradeHistoryEntry[]
@@ -116,6 +118,8 @@ const EMPTY_FORM: FormState = {
   code: '',
   year: '',
   semester: '',
+  zoomLink: '',
+  aulaVirtualLink: '',
   term: "Q1",
   status: 'locked',
   corrApproved: [],
@@ -367,6 +371,8 @@ export default function SubjectModal({
       setStatusManuallySet(isTerminal || (subject.statusManual ?? false))
       setForm({
         ...subject,
+        zoomLink: s.zoomLink ?? '',
+        aulaVirtualLink: s.aulaVirtualLink ?? '',
         year: String(subject.year),
         semester: String(subject.semester),
         grade: subject.grade !== null ? String(subject.grade) : '',
@@ -570,6 +576,8 @@ export default function SubjectModal({
       id: form.id || crypto.randomUUID(),
       name: form.name.trim(),
       code: form.code.trim(),
+      zoomLink: form.zoomLink,
+      aulaVirtualLink: form.aulaVirtualLink,
       year: Number(form.year) as Subject['year'],
       semester: Number(form.semester) as Subject['semester'],
       corrApproved: form.corrApproved,
@@ -949,6 +957,28 @@ export default function SubjectModal({
                       </div>
                     )}
                 </div>
+
+                <div className="modal__section modal__section--corr">
+                  <div className="modal__section-header">
+                    <div className="modal__section-title">Notas y recursos</div>
+                  </div>
+
+                  <div className="modal__grid-2">
+                    <Field label="Zoom / Meet">
+                      <input className="form-control" value={form.zoomLink}
+                        onChange={onChange('zoomLink')} placeholder="https://zoom.us/j/..." />
+                    </Field>
+                    <Field label="Aula virtual">
+                      <input className="form-control" value={form.aulaVirtualLink}
+                        onChange={onChange('aulaVirtualLink')} placeholder="https://campus..." />
+                    </Field>
+                  </div>
+
+                  <Field label="Notas / observaciones">
+                    <textarea className="form-control" value={form.notes} onChange={onChange('notes')}
+                      placeholder="Apuntes, links, fechas tentativas..." />
+                  </Field>
+                </div>
               </>
             )}
 
@@ -1218,13 +1248,9 @@ export default function SubjectModal({
                 </div>
               </div>
             )}
-
-            <Field label="Notas / observaciones">
-              <textarea className="form-control" value={form.notes} onChange={onChange('notes')}
-                placeholder="Docentes, apuntes, links, fechas tentativas..." />
-            </Field>
-
           </div>
+
+
 
           <ToastContainer toasts={toasts} onRemove={remove} />
 

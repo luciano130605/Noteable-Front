@@ -128,7 +128,7 @@ export default function NotionWidgetTutorial({ userId, onClose }: Props) {
                             <div>
                                 <div className="nwt-info-box__title">En Notion</div>
                                 <div className="nwt-info-box__sub">
-                                    Escribí <kbd className="nwt-kbd">/embed</kbd> → pegá tu URL
+                                    Escribí <kbd className="nwt-kbd">/Insertar</kbd> → pegá tu URL
                                 </div>
                             </div>
                         </div>

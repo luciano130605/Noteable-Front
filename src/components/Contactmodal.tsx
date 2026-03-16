@@ -132,7 +132,6 @@ export default function ContactModal({ userEmail, onClose }: Props) {
 
         if (error) {
             console.error(error)
-            // opcionalmente mostrar error al usuario
             return
         }
 
