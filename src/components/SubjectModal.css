@@ -743,7 +743,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--placeholder);
+  color: var(--text);
 }
 
 .form-control {

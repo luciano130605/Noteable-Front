@@ -939,7 +939,7 @@
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--text);
 }
 
 .dm__sec-label {
@@ -947,7 +947,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #334155;
+  color: var(--text);
   margin-bottom: 6px;
 }
 
