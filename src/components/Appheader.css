@@ -1653,6 +1653,10 @@
         gap: 8px;
     }
 
+    .hdr-menu__item-label {
+        color: var(--text);
+    }
+
     .hdr-desktop-only {
         display: none;
 
