@@ -385,7 +385,7 @@
     opacity: 0.6;
 }
 
-    
+
 
 .hdr-menu__item {
     all: unset;
@@ -1651,6 +1651,11 @@
     .header {
         padding: 8px 10px;
         gap: 8px;
+    }
+
+    .hdr-desktop-only {
+        display: none;
+
     }
 
     .header__search-wrap {

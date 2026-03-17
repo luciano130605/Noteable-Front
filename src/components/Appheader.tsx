@@ -516,7 +516,7 @@ function PreferencesPanel({
             </div>
             <div className="hdr-menu__divider" />
             <div className="hdr-pref__section-label">
-               <Video size={13} color='currentColor' />
+                <Video size={13} color='currentColor' />
                 Clases virtuales
             </div>
             <div className="hdr-pref__group">
@@ -682,8 +682,18 @@ export default function AppHeader({ user, profile, onOpenShortcuts, onOpenOnboar
                                 <div className="hdr-menu__divider" />
                                 <button className="hdr-menu__item" onClick={() => { onCloseSemester(); closeMenu() }}><span className="hdr-menu__item-icon"><Archive size={16} stroke="currentColor" /></span><span className="hdr-menu__item-label">Cerrar cuatrimestre</span></button>
                                 <div className="hdr-menu__divider" />
-                                {user && <button className="hdr-menu__item" onClick={() => setMenuSection('widget')}><span className="hdr-menu__item-icon"><NotionIcon size={14} /></span><span className="hdr-menu__item-label">Widget Notion</span><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>}
+
+                                {user &&
+
+                                    <button className="hdr-menu__item" onClick={() => setMenuSection('widget')}>
+                                        <span className="hdr-menu__item-icon"><NotionIcon size={14} /   >
+                                        </span>
+                                        <span className="hdr-menu__item-label">Widget Notion</span>
+                                        <span className="hdr-menu__chevron">
+                                            <ArrowRight2 size={12} color='currentColor' /></span>
+                                    </button>}
                                 <div className="hdr-menu__divider" />
+
                                 <button className="hdr-menu__item" onClick={() => setMenuSection('ver')}><span className="hdr-menu__item-icon"><ViewAgendal size={14} /></span><span className="hdr-menu__item-label">Calendario y vista</span><div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>{upcomingExam && <span className="hdr-menu__badge">{new Date(upcomingExam.date).toLocaleDateString('es-AR', { day: '2-digit', month: 'short' })}</span>}</div><span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
                                 <div className="hdr-menu__divider" />
                                 <button className="hdr-menu__item" onClick={() => setMenuSection('stats')}><span className="hdr-menu__item-icon"><Diagram size={14} color="currentColor" /></span><span className="hdr-menu__item-label">Estadísticas</span>{showGpa && <span className="hdr-menu__badge">GPA visible</span>}<span className="hdr-menu__chevron"><ArrowRight2 size={12} color='currentColor' /></span></button>
