@@ -8,7 +8,7 @@ import type { NotionPage } from '../hooks/Usenotion'
 import { ToastContainer } from "./Toast"
 import { useToastSystem, toast } from "../hooks/Usetoast"
 import Ranking from "../Icon/Ranking"
-
+import { useScrollLock } from '../hooks/useScrollLock'
 
 interface SubjectSettings {
   finalAttempts: number
@@ -360,7 +360,7 @@ export default function SubjectModal({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [settings, setSettings] = useState<SubjectSettings>(loadLastSettings)
   const { toasts, remove } = useToastSystem()
-
+  useScrollLock(true)
   const dc = (n: number, src?: 'final' | 'promedio' | null) =>
     dotColor(n, src, promotionThreshold, regularThreshold)
 

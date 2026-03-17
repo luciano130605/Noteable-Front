@@ -4,6 +4,7 @@ import MapModal from './Mapmodal'
 import './Calendar.css'
 import { AddCircle, ArrowCircleLeft, ArrowCircleRight, CalendarCircle, CloseCircle, Edit, Location } from 'iconsax-react'
 import { useLongPress } from '../hooks/UseLongPress'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
 interface CalendarProps {
   events?: CalendarEvent[]
@@ -90,7 +91,6 @@ function EventPill({
   )
 }
 
-// ── DayCell extraído como componente propio para no violar la regla de hooks ──
 function DayCell({
   dateStr,
   d,
@@ -174,6 +174,36 @@ function DayCell({
       </div>
     </div>
   )
+}
+
+const ctxVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.95, y: -6 },
+  visible: {
+    opacity: 1, scale: 1, y: 0,
+    transition: { type: 'spring' as const, damping: 22, stiffness: 320 }
+  },
+  exit: {
+    opacity: 0, scale: 0.95, y: -4,
+    transition: { duration: 0.14, ease: [0.32, 0.72, 0, 1] as const }
+  },
+}
+
+const modalVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.97, y: 12 },
+  visible: {
+    opacity: 1, scale: 1, y: 0,
+    transition: { type: 'spring' as const, damping: 26, stiffness: 280 }
+  },
+  exit: {
+    opacity: 0, scale: 0.97, y: 8,
+    transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] as const }
+  },
+}
+
+const overlayVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
 }
 
 const Calendar = forwardRef<CalendarHandle, CalendarProps>(
@@ -315,7 +345,6 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
         weekday: 'short', day: 'numeric', month: 'short'
       })
 
-    // ── Construcción de celdas — sin hooks dentro del loop ──
     const cells = []
     for (let i = 0; i < firstDay; i++) {
       cells.push(<div key={`empty-${i}`} className="cal-cell cal-cell--empty" />)
@@ -376,84 +405,90 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
             </span>
           </div>
 
-          {contextMenu && (
-            <div
-              className="cal-ctx-menu"
-              style={{ top: contextMenu.y, left: contextMenu.x }}
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="cal-ctx-header">{formatDate(contextMenu.date)}</div>
+          <AnimatePresence>
+            {contextMenu && (
+              <motion.div
+                className="cal-ctx-menu"
+                style={{ top: contextMenu.y, left: contextMenu.x }}
+                variants={ctxVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                onClick={e => e.stopPropagation()}
+              >
+                <div className="cal-ctx-header">{formatDate(contextMenu.date)}</div>
 
-              <button className="cal-ctx-item" onClick={() => { openNewEvent(contextMenu.date); setContextMenu(null) }}>
-                <span className="cal-ctx-icon"><AddCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                Agregar evento
-              </button>
+                <button className="cal-ctx-item" onClick={() => { openNewEvent(contextMenu.date); setContextMenu(null) }}>
+                  <span className="cal-ctx-icon"><AddCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                  Agregar evento
+                </button>
 
-              {contextMenu.event && (
-                <>
-                  <div className="cal-ctx-divider" />
-                  <div className="cal-ctx-event-label">
-                    <span className="cal-ctx-event-dot" style={{ background: contextMenu.event.color }} />
-                    {contextMenu.event.title}
-                    {contextMenu.event.grade != null && (
-                      <span style={{ marginLeft: 6, fontSize: '0.7rem', opacity: 0.7 }}>· {contextMenu.event.grade}</span>
+                {contextMenu.event && (
+                  <>
+                    <div className="cal-ctx-divider" />
+                    <div className="cal-ctx-event-label">
+                      <span className="cal-ctx-event-dot" style={{ background: contextMenu.event.color }} />
+                      {contextMenu.event.title}
+                      {contextMenu.event.grade != null && (
+                        <span style={{ marginLeft: 6, fontSize: '0.7rem', opacity: 0.7 }}>· {contextMenu.event.grade}</span>
+                      )}
+                    </div>
+
+                    <button className="cal-ctx-item" onClick={() => {
+                      const ev = contextMenu.event!
+                      setModalDate(ev.date)
+                      setEditingEvent({ ...ev, subjectId: undefined })
+                      setModalOpen(true)
+                      setContextMenu(null)
+                    }}>
+                      <span className="cal-ctx-icon"><Edit size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                      Editar evento
+                    </button>
+
+                    {contextMenu.event.location && (
+                      <button className="cal-ctx-item cal-ctx-item--map" onClick={() => openMap(contextMenu.event!.location)}>
+                        <span className="cal-ctx-icon"><Location size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                        Cómo llegar
+                      </button>
                     )}
-                  </div>
 
-                  <button className="cal-ctx-item" onClick={() => {
-                    const ev = contextMenu.event!
-                    setModalDate(ev.date)
-                    setEditingEvent({ ...ev, subjectId: undefined })
-                    setModalOpen(true)
-                    setContextMenu(null)
-                  }}>
-                    <span className="cal-ctx-icon"><Edit size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                    Editar evento
-                  </button>
+                    {!contextMenu.event.location && (
+                      <button className="cal-ctx-item" onClick={() => openMap(undefined)}>
+                        <span className="cal-ctx-icon"><Location size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                        Cómo llegar
+                      </button>
+                    )}
 
-                  {contextMenu.event.location && (
-                    <button className="cal-ctx-item cal-ctx-item--map" onClick={() => openMap(contextMenu.event!.location)}>
-                      <span className="cal-ctx-icon"><Location size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                      Cómo llegar
+                    <button className="cal-ctx-item cal-ctx-item--danger" onClick={() => {
+                      if (contextMenu.event!.subjectId) {
+                        onEditSubject?.(contextMenu.event!.subjectId)
+                      } else {
+                        onRemoveEvent?.(contextMenu.event!.date, contextMenu.event!.title)
+                      }
+                      setContextMenu(null)
+                    }}>
+                      <span className="cal-ctx-icon"><CloseCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                      Eliminar evento
                     </button>
-                  )}
+                  </>
+                )}
 
-                  {!contextMenu.event.location && (
-                    <button className="cal-ctx-item" onClick={() => openMap(undefined)}>
-                      <span className="cal-ctx-icon"><Location size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                      Cómo llegar
-                    </button>
-                  )}
-
-                  <button className="cal-ctx-item cal-ctx-item--danger" onClick={() => {
-                    if (contextMenu.event!.subjectId) {
-                      onEditSubject?.(contextMenu.event!.subjectId)
-                    } else {
-                      onRemoveEvent?.(contextMenu.event!.date, contextMenu.event!.title)
-                    }
-                    setContextMenu(null)
-                  }}>
-                    <span className="cal-ctx-icon"><CloseCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                    Eliminar evento
-                  </button>
-                </>
-              )}
-
-              <div className="cal-ctx-divider" />
-              <button className="cal-ctx-item" onClick={() => { goToToday(); setContextMenu(null) }}>
-                <span className="cal-ctx-icon"><CalendarCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                Ir a hoy
-              </button>
-              <button className="cal-ctx-item" onClick={() => { prevMonth(); setContextMenu(null) }}>
-                <span className="cal-ctx-icon"><ArrowCircleLeft size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                Mes anterior
-              </button>
-              <button className="cal-ctx-item" onClick={() => { nextMonth(); setContextMenu(null) }}>
-                <span className="cal-ctx-icon"><ArrowCircleRight size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
-                Mes siguiente
-              </button>
-            </div>
-          )}
+                <div className="cal-ctx-divider" />
+                <button className="cal-ctx-item" onClick={() => { goToToday(); setContextMenu(null) }}>
+                  <span className="cal-ctx-icon"><CalendarCircle size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                  Ir a hoy
+                </button>
+                <button className="cal-ctx-item" onClick={() => { prevMonth(); setContextMenu(null) }}>
+                  <span className="cal-ctx-icon"><ArrowCircleLeft size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                  Mes anterior
+                </button>
+                <button className="cal-ctx-item" onClick={() => { nextMonth(); setContextMenu(null) }}>
+                  <span className="cal-ctx-icon"><ArrowCircleRight size={14} color="currentColor" style={{ position: 'relative', top: '2px' }} /></span>
+                  Mes siguiente
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         {selectedEvent && (
@@ -470,23 +505,45 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
           />
         )}
 
-        {modalOpen && (
-          <EventModal
-            initialDate={modalDate}
-            event={editingEvent}
-            onSave={handleSave}
-            onDelete={handleDelete}
-            onClose={() => { setModalOpen(false); setEditingEvent(null) }}
-            universityLocation={universityLocation}
-          />
-        )}
+        <AnimatePresence>
+          {modalOpen && (
+            <motion.div
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.18 }}
+              style={{ display: 'contents' }}
+            >
+              <EventModal
+                initialDate={modalDate}
+                event={editingEvent}
+                onSave={handleSave}
+                onDelete={handleDelete}
+                onClose={() => { setModalOpen(false); setEditingEvent(null) }}
+                universityLocation={universityLocation}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {mapOpen && (
-          <MapModal
-            initialDestination={mapDestination ?? universityLocation}
-            onClose={() => setMapOpen(false)}
-          />
-        )}
+        <AnimatePresence>
+          {mapOpen && (
+            <motion.div
+              variants={overlayVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.18 }}
+              style={{ display: 'contents' }}
+            >
+              <MapModal
+                initialDestination={mapDestination ?? universityLocation}
+                onClose={() => setMapOpen(false)}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </>
     )
   }

@@ -8,6 +8,7 @@ import Walking from '../Icon/Walking'
 import Waze from '../Icon/Waze'
 import GoogleMaps from '../Icon/GoogleMaps'
 import './Mapmodal.css'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
 interface NominatimResult {
     place_id: number
@@ -170,6 +171,60 @@ function makeEcobiciIcon(L: any, bikes: number | undefined) {
     })
 }
 
+
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+}
+
+const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring', damping: 26, stiffness: 280 },
+    },
+    exit: {
+        opacity: 0, scale: 0.96, y: 12,
+        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
+    },
+}
+
+const dropdownVariants: Variants = {
+    hidden: { opacity: 0, y: -6, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.15, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.1 } },
+}
+
+const slideVariants: Variants = {
+    hidden: { opacity: 0, height: 0, marginBottom: 0 },
+    visible: { opacity: 1, height: 'auto', marginBottom: 8, transition: { duration: 0.2, ease: 'easeOut' } },
+    exit: { opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.15, ease: 'easeIn' } },
+}
+
+const chipVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.85, y: 4 },
+    visible: (i: number) => ({
+        opacity: 1, scale: 1, y: 0,
+        transition: { delay: i * 0.07, type: 'spring', damping: 18, stiffness: 300 },
+    }),
+}
+
+const ecobiciVariants: Variants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { opacity: 1, height: 'auto', transition: { duration: 0.22, ease: 'easeOut' } },
+    exit: { opacity: 0, height: 0, transition: { duration: 0.15 } },
+}
+
+const navLinkVariants: Variants = {
+    hidden: { opacity: 0, y: 6 },
+    visible: (i: number) => ({
+        opacity: 1, y: 0,
+        transition: { delay: i * 0.08, duration: 0.2, ease: 'easeOut' },
+    }),
+}
+
+
 export default function MapModal({ onClose, initialDestination }: Props) {
     const mapRef = useRef<HTMLDivElement>(null)
     const leafletMap = useRef<any>(null)
@@ -180,6 +235,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
     const currentDest = useRef<{ pos: [number, number]; name: string } | null>(null)
     const autoSearchDone = useRef(false)
 
+    const [open, setOpen] = useState(true)
     const [query, setQuery] = useState(initialDestination ?? '')
     const [suggestions, setSuggestions] = useState<NominatimResult[]>([])
     const [suggestOpen, setSuggestOpen] = useState(false)
@@ -199,16 +255,20 @@ export default function MapModal({ onClose, initialDestination }: Props) {
     const [nearestDest, setNearestDest] = useState<EcobiciStation | null>(null)
     const [loadingEcobici, setLoadingEcobici] = useState(false)
 
+    const handleClose = () => setOpen(false)
+
     useEffect(() => {
-        const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-        window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h)
-    }, [onClose])
+        const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
+        window.addEventListener('keydown', h)
+        return () => window.removeEventListener('keydown', h)
+    }, [])
 
     useEffect(() => {
         const h = (e: MouseEvent) => {
             if (suggestRef.current && !suggestRef.current.contains(e.target as Node)) setSuggestOpen(false)
         }
-        document.addEventListener('mousedown', h); return () => document.removeEventListener('mousedown', h)
+        document.addEventListener('mousedown', h)
+        return () => document.removeEventListener('mousedown', h)
     }, [])
 
     const updateEcobici = useCallback(async (L: any, destPos: [number, number]) => {
@@ -384,176 +444,273 @@ export default function MapModal({ onClose, initialDestination }: Props) {
     })() : null
 
     const activeCfg = MODES.find(m => m.key === travelMode)!
-    const wazeUrl = destCoords ? `https://waze.com/ul?ll=${destCoords[0]},${destCoords[1]}&navigate=yes` : null
-    const gmapsUrl = destCoords ? `https://www.google.com/maps/dir/?api=1&destination=${destCoords[0]},${destCoords[1]}` : null
+    const wazeUrl = destCoords && travelMode === 'driving'
+        ? `https://waze.com/ul?ll=${destCoords[0]},${destCoords[1]}&navigate=yes`
+        : null
+
+    const gmapsModeMap: Record<TravelMode, string> = {
+        driving: 'driving',
+        walking: 'walking',
+        cycling: 'bicycling',
+        transit: 'transit',
+    }
+    const gmapsUrl = destCoords
+        ? `https://www.google.com/maps/dir/?api=1&destination=${destCoords[0]},${destCoords[1]}&travelmode=${gmapsModeMap[travelMode]}`
+        : null
+
+    const showRouteInfo = !!(route || status !== 'idle' || errorMsg)
+    const showEcobici = travelMode === 'cycling' && bikeType === 'ecobici' && (!!nearestOrigin || !!nearestDest || loadingEcobici)
 
     return (
-        <div className="map-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-            <div className="map-modal">
-
-                <div className="map-header">
-                    <MapPin size={16} color="#6366f1" />
-                    <span className="map-header__title">
-                        {initialDestination ? `Cómo llegar · ${initialDestination}` : 'Cómo llegar'}
-                    </span>
-                    <button className="map-header__close" onClick={onClose}>
-                        <X size={16} />
-                    </button>
-                </div>
-
-                <div className="map-search" ref={suggestRef}>
-                    <div className="map-search__input-wrap">
-                        <Navigation size={14} color="var(--muted, #888)" />
-                        <input
-                            className="map-search__input"
-                            value={query}
-                            onChange={e => handleQueryChange(e.target.value)}
-                            onFocus={() => query.length >= 3 && setSuggestOpen(true)}
-                            placeholder="¿A dónde querés ir?"
-                        />
-                        {loadingSugg && <Loader size={13} color="var(--muted)" className="map-spin" />}
-                    </div>
-                    {suggestOpen && suggestions.length > 0 && (
-                        <div className="map-search__dropdown">
-                            {suggestions.map(r => (
-                                <button key={r.place_id} className="map-search__item" onClick={() => handleSelect(r)}>
-                                    <span className="map-search__item-name">{r.display_name.split(',')[0]}</span>
-                                    <span className="map-search__item-sub">{r.display_name.split(',').slice(1, 3).join(',')}</span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div className="map-modes">
-                    {MODES.map(m => {
-                        const on = travelMode === m.key
-                        return (
-                            <button
-                                key={m.key}
-                                className="map-mode-btn"
-                                onClick={() => setTravelMode(m.key)}
-                                style={{
-                                    border: on ? `1px solid ${m.color}55` : '1px solid rgba(255,255,255,0.07)',
-                                    background: on ? `${m.color}18` : 'rgba(255,255,255,0.03)',
-                                }}
+        <AnimatePresence onExitComplete={onClose}>
+            {open && (
+                <motion.div
+                    className="map-overlay"
+                    variants={overlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.2 }}
+                    onClick={e => e.target === e.currentTarget && handleClose()}
+                >
+                    <motion.div
+                        className="map-modal"
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="map-header">
+                            <MapPin size={16} color="#6366f1" />
+                            <span className="map-header__title">
+                                {initialDestination ? `Cómo llegar · ${initialDestination}` : 'Cómo llegar'}
+                            </span>
+                            <motion.button
+                                className="map-header__close"
+                                onClick={handleClose}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                             >
-                                <span>{m.icon}</span>
-                                <span className="map-mode-btn__label" style={{ color: on ? m.color : 'var(--muted, #888)', fontWeight: on ? 600 : 400 }}>
-                                    {m.label}
-                                </span>
-                            </button>
-                        )
-                    })}
-                </div>
+                                <X size={16} />
+                            </motion.button>
+                        </div>
 
-                {travelMode === 'cycling' && (
-                    <div className="map-biketype">
-                        {(['propia', 'ecobici'] as const).map(bt => {
-                            const on = bikeType === bt
-                            return (
-                                <button
-                                    key={bt}
-                                    className="map-biketype-btn"
-                                    onClick={() => setBikeType(bt)}
-                                    style={{
-                                        border: on ? '1px solid #f59e0b55' : '1px solid rgba(255,255,255,0.07)',
-                                        background: on ? '#f59e0b18' : 'rgba(255,255,255,0.03)',
-                                        color: on ? '#f59e0b' : 'var(--muted, #888)',
-                                        fontWeight: on ? 600 : 400,
-                                    }}
+                        <div className="map-search" ref={suggestRef}>
+                            <div className="map-search__input-wrap">
+                                <Navigation size={14} color="var(--muted, #888)" />
+                                <input
+                                    className="map-search__input"
+                                    value={query}
+                                    onChange={e => handleQueryChange(e.target.value)}
+                                    onFocus={() => query.length >= 3 && setSuggestOpen(true)}
+                                    placeholder="¿A dónde querés ir?"
+                                />
+                                {loadingSugg && <Loader size={13} color="var(--muted)" className="map-spin" />}
+                            </div>
+
+                            <AnimatePresence>
+                                {suggestOpen && suggestions.length > 0 && (
+                                    <motion.div
+                                        className="map-search__dropdown"
+                                        variants={dropdownVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                    >
+                                        {suggestions.map(r => (
+                                            <button key={r.place_id} className="map-search__item" onClick={() => handleSelect(r)}>
+                                                <span className="map-search__item-name">{r.display_name.split(',')[0]}</span>
+                                                <span className="map-search__item-sub">{r.display_name.split(',').slice(1, 3).join(',')}</span>
+                                            </button>
+                                        ))}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <div className="map-modes">
+                            {MODES.map(m => {
+                                const on = travelMode === m.key
+                                return (
+                                    <motion.button
+                                        key={m.key}
+                                        className="map-mode-btn"
+                                        onClick={() => setTravelMode(m.key)}
+                                        whileTap={{ scale: 0.95 }}
+                                        style={{
+                                            border: on ? `1px solid ${m.color}55` : '1px solid rgba(255,255,255,0.07)',
+                                            background: on ? `${m.color}18` : 'rgba(255,255,255,0.03)',
+                                        }}
+                                    >
+                                        <span>{m.icon}</span>
+                                        <span className="map-mode-btn__label" style={{ color: on ? m.color : 'var(--muted, #888)', fontWeight: on ? 600 : 400 }}>
+                                            {m.label}
+                                        </span>
+                                    </motion.button>
+                                )
+                            })}
+                        </div>
+
+                        <AnimatePresence>
+                            {travelMode === 'cycling' && (
+                                <motion.div
+                                    className="map-biketype"
+                                    variants={slideVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    style={{ overflow: 'hidden' }}
                                 >
-                                    <Byke size={14} color='currentColor' />
-                                    {bt === 'propia' ? 'Bici propia' : 'EcoBici'}
-                                </button>
-                            )
-                        })}
-                    </div>
-                )}
+                                    {(['propia', 'ecobici'] as const).map(bt => {
+                                        const on = bikeType === bt
+                                        return (
+                                            <motion.button
+                                                key={bt}
+                                                className="map-biketype-btn"
+                                                onClick={() => setBikeType(bt)}
+                                                whileTap={{ scale: 0.95 }}
+                                                style={{
+                                                    border: on ? '1px solid #f59e0b55' : '1px solid rgba(255,255,255,0.07)',
+                                                    background: on ? '#f59e0b18' : 'rgba(255,255,255,0.03)',
+                                                    color: on ? '#f59e0b' : 'var(--muted, #888)',
+                                                    fontWeight: on ? 600 : 400,
+                                                }}
+                                            >
+                                                <Byke size={14} color='currentColor' />
+                                                {bt === 'propia' ? 'Bici propia' : 'EcoBici'}
+                                            </motion.button>
+                                        )
+                                    })}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                {(route || status !== 'idle' || errorMsg) && (
-                    <div className="map-route-info">
-                        {status !== 'idle' && (
-                            <span className="map-status">
-                                <Loader size={12} className="map-spin" />
-                                {status === 'locating' ? 'Obteniendo ubicación...' : 'Calculando ruta...'}
-                            </span>
-                        )}
-                        {route && status === 'idle' && (
-                            <>
-                                <div className="map-route-chip" style={{ background: `${activeCfg.color}20`, border: `1px solid ${activeCfg.color}44`, color: activeCfg.color }}>
-                                    <Navigation size={11} /> {route.distanceKm.toFixed(1)} km
-                                </div>
-                                <div className="map-route-chip" style={{ background: `${activeCfg.color}20`, border: `1px solid ${activeCfg.color}44`, color: activeCfg.color }}>
-                                    <Clock size={11} /> {fmt(route.durationMin)}
-                                </div>
-                                {arrivalTime && (
-                                    <div className="map-route-chip" style={{ background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', color: '#818cf8' }}>
-                                        <Clock size={11} /> Llegás a las {arrivalTime}
-                                    </div>
-                                )}
-                            </>
-                        )}
-                        {errorMsg && <div className="map-route-error">{errorMsg}</div>}
-                    </div>
-                )}
+                        <AnimatePresence>
+                            {showRouteInfo && (
+                                <motion.div
+                                    className="map-route-info"
+                                    variants={slideVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    style={{ overflow: 'hidden' }}
+                                >
+                                    {status !== 'idle' && (
+                                        <span className="map-status">
+                                            <Loader size={12} className="map-spin" />
+                                            {status === 'locating' ? 'Obteniendo ubicación...' : 'Calculando ruta...'}
+                                        </span>
+                                    )}
+                                    {route && status === 'idle' && (
+                                        <>
+                                            {[
+                                                { label: `${route.distanceKm.toFixed(1)} km`, icon: <Navigation size={11} /> },
+                                                { label: fmt(route.durationMin), icon: <Clock size={11} /> },
+                                                ...(arrivalTime ? [{ label: `Llegás a las ${arrivalTime}`, icon: <Clock size={11} />, alt: true }] : []),
+                                            ].map((chip, i) => (
+                                                <motion.div
+                                                    key={chip.label}
+                                                    className="map-route-chip"
+                                                    style={chip.alt
+                                                        ? { background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', color: '#818cf8' }
+                                                        : { background: `${activeCfg.color}20`, border: `1px solid ${activeCfg.color}44`, color: activeCfg.color }
+                                                    }
+                                                    variants={chipVariants}
+                                                    custom={i}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                >
+                                                    {chip.icon} {chip.label}
+                                                </motion.div>
+                                            ))}
+                                        </>
+                                    )}
+                                    {errorMsg && <div className="map-route-error">{errorMsg}</div>}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                {travelMode === 'cycling' && bikeType === 'ecobici' && (nearestOrigin || nearestDest || loadingEcobici) && (
-                    <div className="map-ecobici">
-                        {loadingEcobici && (
-                            <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
-                                <Loader size={11} className="map-spin" /> Buscando estaciones EcoBici...
-                            </span>
-                        )}
-                        {nearestOrigin && (
-                            <div className="map-ecobici__row">
-                                <span className="map-ecobici__label">Retirá en: </span>
-                                <strong>{nearestOrigin.name}</strong>
-                                {nearestOrigin.address && <span style={{ opacity: 0.6 }}> · {nearestOrigin.address}</span>}
-                                {nearestOrigin.bikes != null && (
-                                    <span style={{ marginLeft: 6, color: nearestOrigin.bikes > 0 ? '#4ade80' : '#f87171' }}>
-                                        <Byke size={14} color='currentColor' /> {nearestOrigin.bikes} disponibles
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {nearestDest && (
-                            <div className="map-ecobici__row">
-                                <span className="map-ecobici__label">Devolvé en: </span>
-                                <strong>{nearestDest.name}</strong>
-                                {nearestDest.address && <span style={{ opacity: 0.6 }}> · {nearestDest.address}</span>}
-                                {nearestDest.docks != null && (
-                                    <span style={{ marginLeft: 6, color: nearestDest.docks > 0 ? '#4ade80' : '#f87171' }}>
-                                        {nearestDest.docks} lugares libres
-                                    </span>
-                                )}
-                            </div>
-                        )}
-                        {!loadingEcobici && !nearestOrigin && !nearestDest && (
-                            <span style={{ color: '#f87171' }}>No se encontraron estaciones EcoBici cercanas.</span>
-                        )}
-                    </div>
-                )}
+                        <AnimatePresence>
+                            {showEcobici && (
+                                <motion.div
+                                    className="map-ecobici"
+                                    variants={ecobiciVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    style={{ overflow: 'hidden' }}
+                                >
+                                    {loadingEcobici && (
+                                        <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <Loader size={11} className="map-spin" /> Buscando estaciones EcoBici...
+                                        </span>
+                                    )}
+                                    {nearestOrigin && (
+                                        <div className="map-ecobici__row">
+                                            <span className="map-ecobici__label">Retirá en: </span>
+                                            <strong>{nearestOrigin.name}</strong>
+                                            {nearestOrigin.address && <span style={{ opacity: 0.6 }}> · {nearestOrigin.address}</span>}
+                                            {nearestOrigin.bikes != null && (
+                                                <span style={{ marginLeft: 6, color: nearestOrigin.bikes > 0 ? '#4ade80' : '#f87171' }}>
+                                                    <Byke size={14} color='currentColor' /> {nearestOrigin.bikes} disponibles
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {nearestDest && (
+                                        <div className="map-ecobici__row">
+                                            <span className="map-ecobici__label">Devolvé en: </span>
+                                            <strong>{nearestDest.name}</strong>
+                                            {nearestDest.address && <span style={{ opacity: 0.6 }}> · {nearestDest.address}</span>}
+                                            {nearestDest.docks != null && (
+                                                <span style={{ marginLeft: 6, color: nearestDest.docks > 0 ? '#4ade80' : '#f87171' }}>
+                                                    {nearestDest.docks} lugares libres
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
+                                    {!loadingEcobici && !nearestOrigin && !nearestDest && (
+                                        <span style={{ color: '#f87171' }}>No se encontraron estaciones EcoBici cercanas.</span>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                {destCoords && (
-                    <div className="map-nav-links">
-                        {wazeUrl && (
-                            <a href={wazeUrl} target="_blank" rel="noopener noreferrer" className="map-nav-link map-nav-link--waze">
-                                <Waze size={13} color="#60a5fa" /> Abrir en Waze
-                            </a>
-                        )}
-                        {gmapsUrl && (
-                            <a href={gmapsUrl} target="_blank" rel="noopener noreferrer" className="map-nav-link map-nav-link--gmaps">
-                                <GoogleMaps size={13} color="#4ade80" /> Abrir en Google Maps
-                            </a>
-                        )}
-                    </div>
-                )}
+                        <AnimatePresence>
+                            {destCoords && (
+                                <motion.div
+                                    className="map-nav-links"
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit={{ opacity: 0 }}
+                                >
+                                    {[
+                                        wazeUrl && { href: wazeUrl, cls: 'map-nav-link--waze', icon: <Waze size={13} color="#60a5fa" />, label: 'Abrir en Waze' },
+                                        gmapsUrl && { href: gmapsUrl, cls: 'map-nav-link--gmaps', icon: <GoogleMaps size={13} color="#4ade80" />, label: 'Abrir en Google Maps' },
+                                    ].filter(Boolean).map((link: any, i) => (
+                                        <motion.a
+                                            key={link.label}
+                                            href={link.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className={`map-nav-link ${link.cls}`}
+                                            variants={navLinkVariants}
+                                            custom={i}
+                                        >
+                                            {link.icon} {link.label}
+                                        </motion.a>
+                                    ))}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
 
-                <div ref={mapRef} className="map-leaflet" />
-            </div>
+                        <div ref={mapRef} className="map-leaflet" />
+                    </motion.div>
 
-            <style>{`.leaflet-container { background: #1a1a2e !important; }`}</style>
-        </div>
+                    <style>{`.leaflet-container { background: #1a1a2e !important; }`}</style>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }

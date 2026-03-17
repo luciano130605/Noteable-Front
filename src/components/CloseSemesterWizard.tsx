@@ -2,6 +2,8 @@ import { useState } from 'react'
 import type { Subject, SubjectStatus } from '../types/types'
 import { X } from 'lucide-react'
 import './CloseSemesterWizard.css'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { useScrollLock } from '../hooks/Usescrolllock'
 
 interface Props {
     subjects: Subject[]
@@ -37,6 +39,44 @@ interface FinalRow {
     skip: boolean
 }
 
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+}
+
+const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring' as const, damping: 26, stiffness: 280 }
+    },
+    exit: {
+        opacity: 0, scale: 0.96, y: 12,
+        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] as const }
+    },
+}
+
+const confirmVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.94, y: 8 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring' as const, damping: 24, stiffness: 320 }
+    },
+    exit: {
+        opacity: 0, scale: 0.94,
+        transition: { duration: 0.14 }
+    },
+}
+
+const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: (i: number) => ({
+        opacity: 1, y: 0,
+        transition: { delay: i * 0.05, duration: 0.22, ease: 'easeOut' as const }
+    }),
+}
+
 export default function CloseSemesterWizard({
     subjects, currentYear, currentSemester, onConfirm, onClose
 }: Props) {
@@ -46,7 +86,11 @@ export default function CloseSemesterWizard({
     const pendingFinal = subjects.filter(s =>
         s.status === 'pending_final' || s.status === 'failed_final'
     )
+
+
+    const [open, setOpen] = useState(true)
     const [showConfirm, setShowConfirm] = useState(false)
+    useScrollLock(open)
 
     const [coursingRows, setCoursingRows] = useState<Record<string, CoursingRow>>(() =>
         Object.fromEntries(inProgress.map(s => [s.id, {
@@ -131,230 +175,275 @@ export default function CloseSemesterWizard({
                 status: outcome.status,
                 gradeFinalExam: parseFloat(row.finalGrade),
                 grade: parseFloat(row.finalGrade),
-                finalAttempts: outcome.attempts ?? 0,
+                finalAttempts: outcome.attempts ?? (s.finalAttempts ?? 0) + 1,
             })
         })
 
         onConfirm?.(updates, nextYear, nextSemester)
     }
 
+    const handleClose = () => setOpen(false)
+
     return (
-        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
-            <div className="modal" style={{ maxWidth: 580 }}>
-                <div className="modal__title">
-                    <span>Cerrar {currentSemester}° cuatrimestre · {currentYear}° año</span>
-                    <button type="button" className="modal__close" onClick={onClose}><X size={16} /></button>
-                </div>
-
-                <div className="modal__body" style={{ gap: 24 }}>
-
-                    {inProgress.length > 0 && (
-                        <div className="csw-section">
-                            <div className="csw-section__header">
-                                <span className="csw-section__title">Materias en cursada</span>
-                                <span className="csw-section__hint">Cargá las notas para calcular el resultado</span>
-                            </div>
-                            {inProgress.map(s => {
-                                const row = coursingRows[s.id]
-                                const outcome = getOutcome(row)
-                                const g1eff = effectiveGrade(row.p1, row.recu1)
-                                const g2eff = effectiveGrade(row.p2, row.recu2)
-                                return (
-                                    <div key={s.id} className="csw-card">
-                                        <div className="csw-card__header">
-                                            <div>
-                                                <span className="csw-card__name">{s.name}</span>
-                                                {s.code && <span className="csw-card__code">{s.code}</span>}
-                                            </div>
-                                            {outcome && (
-                                                <span className="csw-card__outcome" style={{ color: outcome.color, borderColor: outcome.color + '44', background: outcome.color + '15' }}>
-                                                    {outcome.avg.toFixed(1)} · {outcome.label}
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <div className="csw-grades">
-                                            <div className="csw-grade-col">
-                                                <label className="csw-grade-label">1er Parcial</label>
-                                                <div className="csw-grade-row">
-                                                    <input
-                                                        className="csw-grade-input"
-                                                        type="number" min={1} max={10} step={0.5}
-                                                        placeholder="—"
-                                                        value={row.p1}
-                                                        onChange={e => updateCoursing(s.id, { p1: e.target.value })}
-                                                        style={row.p1 && !isNaN(+row.p1) ? { borderColor: dotColor(+row.p1) + '88' } : {}}
-                                                    />
-                                                    {row.p1 && !isNaN(+row.p1) && parseFloat(row.p1) < 4 && (
-                                                        <input
-                                                            className="csw-grade-input csw-grade-input--recu"
-                                                            type="number" min={1} max={10} step={0.5}
-                                                            placeholder="Recu"
-                                                            value={row.recu1}
-                                                            onChange={e => updateCoursing(s.id, { recu1: e.target.value })}
-                                                            style={row.recu1 && !isNaN(+row.recu1) ? { borderColor: dotColor(+row.recu1) + '88' } : {}}
-                                                        />
-                                                    )}
-                                                    {g1eff !== null && (
-                                                        <span className="csw-grade-dot" style={{ background: dotColor(g1eff) }} />
-                                                    )}
-                                                </div>
-                                            </div>
-
-                                            <div className="csw-grade-sep">+</div>
-
-                                            <div className="csw-grade-col">
-                                                <label className="csw-grade-label">2do Parcial</label>
-                                                <div className="csw-grade-row">
-                                                    <input
-                                                        className="csw-grade-input"
-                                                        type="number" min={1} max={10} step={0.5}
-                                                        placeholder="—"
-                                                        value={row.p2}
-                                                        onChange={e => updateCoursing(s.id, { p2: e.target.value })}
-                                                        style={row.p2 && !isNaN(+row.p2) ? { borderColor: dotColor(+row.p2) + '88' } : {}}
-                                                    />
-                                                    {row.p2 && !isNaN(+row.p2) && parseFloat(row.p2) < 4 && (
-                                                        <input
-                                                            className="csw-grade-input csw-grade-input--recu"
-                                                            type="number" min={1} max={10} step={0.5}
-                                                            placeholder="Recu"
-                                                            value={row.recu2}
-                                                            onChange={e => updateCoursing(s.id, { recu2: e.target.value })}
-                                                            style={row.recu2 && !isNaN(+row.recu2) ? { borderColor: dotColor(+row.recu2) + '88' } : {}}
-                                                        />
-                                                    )}
-                                                    {g2eff !== null && (
-                                                        <span className="csw-grade-dot" style={{ background: dotColor(g2eff) }} />
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        {row.p1 && !isNaN(+row.p1) && parseFloat(row.p1) < 4 && !row.recu1 && (
-                                            <p className="csw-hint">1er parcial &lt; 4 · ¿tenés recuperatorio? Cargalo arriba.</p>
-                                        )}
-                                        {row.p2 && !isNaN(+row.p2) && parseFloat(row.p2) < 4 && !row.recu2 && (
-                                            <p className="csw-hint">2do parcial &lt; 4 · ¿tenés recuperatorio? Cargalo arriba.</p>
-                                        )}
-                                    </div>
-                                )
-                            })}
+        <AnimatePresence onExitComplete={onClose}>
+            {open && (
+                <motion.div
+                    className="modal-overlay"
+                    variants={overlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.2 }}
+                    onClick={e => e.target === e.currentTarget && handleClose()}
+                >
+                    <motion.div
+                        className="modal"
+                        style={{ maxWidth: 580 }}
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="modal__title">
+                            <span>Cerrar {currentSemester}° cuatrimestre · {currentYear}° año</span>
+                            <motion.button
+                                type="button"
+                                className="modal__close"
+                                onClick={handleClose}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                <X size={16} />
+                            </motion.button>
                         </div>
-                    )}
 
-                    {pendingFinal.length > 0 && (
-                        <div className="csw-section">
-                            <div className="csw-section__header">
-                                <span className="csw-section__title"> Finales pendientes</span>
-                                <span className="csw-section__hint">Cargá la nota si ya rendiste</span>
-                            </div>
-                            {pendingFinal.map(s => {
-                                const row = finalRows[s.id]
-                                const outcome = getFinalOutcome(row, s)
-                                return (
-                                    <div key={s.id} className="csw-card">
-                                        <div className="csw-card__header">
-                                            <div>
-                                                <span className="csw-card__name">{s.name}</span>
-                                                {s.code && <span className="csw-card__code">{s.code}</span>}
-                                                {s.status === 'failed_final' && (
-                                                    <span className="csw-card__attempts">{s.finalAttempts ?? 1}/3 intentos previos</span>
+                        <div className="modal__body" style={{ gap: 24 }}>
+
+                            {inProgress.length > 0 && (
+                                <div className="csw-section">
+                                    <div className="csw-section__header">
+                                        <span className="csw-section__title">Materias en cursada</span>
+                                        <span className="csw-section__hint">Cargá las notas para calcular el resultado</span>
+                                    </div>
+                                    {inProgress.map((s, i) => {
+                                        const row = coursingRows[s.id]
+                                        const outcome = getOutcome(row)
+                                        const g1eff = effectiveGrade(row.p1, row.recu1)
+                                        const g2eff = effectiveGrade(row.p2, row.recu2)
+                                        return (
+                                            <motion.div
+                                                key={s.id}
+                                                className="csw-card"
+                                                variants={cardVariants}
+                                                custom={i}
+                                                initial="hidden"
+                                                animate="visible"
+                                            >
+                                                <div className="csw-card__header">
+                                                    <div>
+                                                        <span className="csw-card__name">{s.name}</span>
+                                                        {s.code && <span className="csw-card__code">{s.code}</span>}
+                                                    </div>
+                                                    {outcome && (
+                                                        <span className="csw-card__outcome" style={{ color: outcome.color, borderColor: outcome.color + '44', background: outcome.color + '15' }}>
+                                                            {outcome.avg.toFixed(1)} · {outcome.label}
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                <div className="csw-grades">
+                                                    <div className="csw-grade-col">
+                                                        <label className="csw-grade-label">1er Parcial</label>
+                                                        <div className="csw-grade-row">
+                                                            <input
+                                                                className="csw-grade-input"
+                                                                type="number" min={1} max={10} step={0.5}
+                                                                placeholder="—"
+                                                                value={row.p1}
+                                                                onChange={e => updateCoursing(s.id, { p1: e.target.value })}
+                                                                style={row.p1 && !isNaN(+row.p1) ? { borderColor: dotColor(+row.p1) + '88' } : {}}
+                                                            />
+                                                            {row.p1 && !isNaN(+row.p1) && parseFloat(row.p1) < 4 && (
+                                                                <input
+                                                                    className="csw-grade-input csw-grade-input--recu"
+                                                                    type="number" min={1} max={10} step={0.5}
+                                                                    placeholder="Recu"
+                                                                    value={row.recu1}
+                                                                    onChange={e => updateCoursing(s.id, { recu1: e.target.value })}
+                                                                    style={row.recu1 && !isNaN(+row.recu1) ? { borderColor: dotColor(+row.recu1) + '88' } : {}}
+                                                                />
+                                                            )}
+                                                            {g1eff !== null && (
+                                                                <span className="csw-grade-dot" style={{ background: dotColor(g1eff) }} />
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="csw-grade-sep">+</div>
+
+                                                    <div className="csw-grade-col">
+                                                        <label className="csw-grade-label">2do Parcial</label>
+                                                        <div className="csw-grade-row">
+                                                            <input
+                                                                className="csw-grade-input"
+                                                                type="number" min={1} max={10} step={0.5}
+                                                                placeholder="—"
+                                                                value={row.p2}
+                                                                onChange={e => updateCoursing(s.id, { p2: e.target.value })}
+                                                                style={row.p2 && !isNaN(+row.p2) ? { borderColor: dotColor(+row.p2) + '88' } : {}}
+                                                            />
+                                                            {row.p2 && !isNaN(+row.p2) && parseFloat(row.p2) < 4 && (
+                                                                <input
+                                                                    className="csw-grade-input csw-grade-input--recu"
+                                                                    type="number" min={1} max={10} step={0.5}
+                                                                    placeholder="Recu"
+                                                                    value={row.recu2}
+                                                                    onChange={e => updateCoursing(s.id, { recu2: e.target.value })}
+                                                                    style={row.recu2 && !isNaN(+row.recu2) ? { borderColor: dotColor(+row.recu2) + '88' } : {}}
+                                                                />
+                                                            )}
+                                                            {g2eff !== null && (
+                                                                <span className="csw-grade-dot" style={{ background: dotColor(g2eff) }} />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {row.p1 && !isNaN(+row.p1) && parseFloat(row.p1) < 4 && !row.recu1 && (
+                                                    <p className="csw-hint">1er parcial &lt; 4 · ¿tenés recuperatorio? Cargalo arriba.</p>
                                                 )}
-                                            </div>
-                                            {outcome && (
-                                                <span className="csw-card__outcome" style={{ color: outcome.color, borderColor: outcome.color + '44', background: outcome.color + '15' }}>
-                                                    {outcome.label}
-                                                </span>
-                                            )}
-                                        </div>
+                                                {row.p2 && !isNaN(+row.p2) && parseFloat(row.p2) < 4 && !row.recu2 && (
+                                                    <p className="csw-hint">2do parcial &lt; 4 · ¿tenés recuperatorio? Cargalo arriba.</p>
+                                                )}
+                                            </motion.div>
+                                        )
+                                    })}
+                                </div>
+                            )}
 
-                                        <div className="csw-grades" style={{ alignItems: 'center', gap: 12 }}>
-                                            <div className="csw-grade-col">
-                                                <label className="csw-grade-label">Nota del final</label>
-                                                <div className="csw-grade-row">
-                                                    <input
-                                                        className="csw-grade-input csw-grade-input--lg"
-                                                        type="number" min={1} max={10} step={0.5}
-                                                        placeholder={row.skip ? 'no rend.' : '—'}
-                                                        disabled={row.skip}
-                                                        value={row.finalGrade}
-                                                        onChange={e => updateFinal(s.id, { finalGrade: e.target.value })}
-                                                        style={row.finalGrade && !isNaN(+row.finalGrade) ? { borderColor: dotColor(+row.finalGrade) + '88' } : {}}
-                                                    />
-                                                    {row.finalGrade && !isNaN(+row.finalGrade) && (
-                                                        <span className="csw-grade-dot" style={{ background: dotColor(+row.finalGrade) }} />
+                            {pendingFinal.length > 0 && (
+                                <div className="csw-section">
+                                    <div className="csw-section__header">
+                                        <span className="csw-section__title"> Finales pendientes</span>
+                                        <span className="csw-section__hint">Cargá la nota si ya rendiste</span>
+                                    </div>
+                                    {pendingFinal.map((s, i) => {
+                                        const row = finalRows[s.id]
+                                        const outcome = getFinalOutcome(row, s)
+                                        return (
+                                            <motion.div
+                                                key={s.id}
+                                                className="csw-card"
+                                                variants={cardVariants}
+                                                custom={i}
+                                                initial="hidden"
+                                                animate="visible"
+                                            >
+                                                <div className="csw-card__header">
+                                                    <div>
+                                                        <span className="csw-card__name">{s.name}</span>
+                                                        {s.code && <span className="csw-card__code">{s.code}</span>}
+                                                        {s.status === 'failed_final' && (
+                                                            <span className="csw-card__attempts">{s.finalAttempts ?? 1}/3 intentos previos</span>
+                                                        )}
+                                                    </div>
+                                                    {outcome && (
+                                                        <span className="csw-card__outcome" style={{ color: outcome.color, borderColor: outcome.color + '44', background: outcome.color + '15' }}>
+                                                            {outcome.label}
+                                                        </span>
                                                     )}
                                                 </div>
-                                            </div>
-                                            <label className="csw-skip-label">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={row.skip}
-                                                    onChange={e => updateFinal(s.id, { skip: e.target.checked, finalGrade: '' })}
-                                                />
-                                                Todavía no rendí
-                                            </label>
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )}
 
-                    {inProgress.length === 0 && pendingFinal.length === 0 && (
-                        <p style={{ color: 'var(--muted)', textAlign: 'center', padding: '20px 0', fontSize: '0.85rem' }}>
-                            No hay materias en cursada ni finales pendientes.
-                        </p>
-                    )}
+                                                <div className="csw-grades" style={{ alignItems: 'center', gap: 12 }}>
+                                                    <div className="csw-grade-col">
+                                                        <label className="csw-grade-label">Nota del final</label>
+                                                        <div className="csw-grade-row">
+                                                            <input
+                                                                className="csw-grade-input csw-grade-input--lg"
+                                                                type="number" min={1} max={10} step={0.5}
+                                                                placeholder={row.skip ? 'no rend.' : '—'}
+                                                                disabled={row.skip}
+                                                                value={row.finalGrade}
+                                                                onChange={e => updateFinal(s.id, { finalGrade: e.target.value })}
+                                                                style={row.finalGrade && !isNaN(+row.finalGrade) ? { borderColor: dotColor(+row.finalGrade) + '88' } : {}}
+                                                            />
+                                                            {row.finalGrade && !isNaN(+row.finalGrade) && (
+                                                                <span className="csw-grade-dot" style={{ background: dotColor(+row.finalGrade) }} />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                    <label className="csw-skip-label">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={row.skip}
+                                                            onChange={e => updateFinal(s.id, { skip: e.target.checked, finalGrade: '' })}
+                                                        />
+                                                        Todavía no rendí
+                                                    </label>
+                                                </div>
+                                            </motion.div>
+                                        )
+                                    })}
+                                </div>
+                            )}
 
-                    <div className="csw-advance">
-                        <span>Al confirmar, avanzás a</span>
-                        <strong>{nextSemester}° cuatrimestre · {nextYear}° año</strong>
-                    </div>
-                </div>
+                            {inProgress.length === 0 && pendingFinal.length === 0 && (
+                                <p style={{ color: 'var(--muted)', textAlign: 'center', padding: '20px 0', fontSize: '0.85rem' }}>
+                                    No hay materias en cursada ni finales pendientes.
+                                </p>
+                            )}
 
-                <div className="modal__actions">
-                    <button type="button" className="btn" onClick={onClose}>Cancelar</button>
-                    <button type="button" className="btn btn--primary" onClick={() => setShowConfirm(true)}>
-                        Confirmar{changesCount > 0 ? ` · ${changesCount} materia${changesCount !== 1 ? 's' : ''}` : ''}
-                    </button>
-                </div>
-
-                {showConfirm && (
-                    <div className="confirm-overlay">
-                        <div className="confirm-modal">
-                            <h3>Confirmar cierre de cuatrimestre</h3>
-
-                            <p>
-                                Se actualizarán {changesCount} materia{changesCount !== 1 ? 's' : ''} y
-                                avanzarás al {nextSemester}° cuatrimestre · {nextYear}° año.
-                            </p>
-
-                            <div className="confirm-actions">
-                                <button
-                                    className="btn"
-                                    onClick={() => setShowConfirm(false)}
-                                >
-                                    Cancelar
-                                </button>
-
-                                <button
-                                    className="btn btn--primary"
-                                    onClick={() => {
-                                        setShowConfirm(false)
-                                        handleConfirm()
-                                    }}
-                                >
-                                    Confirmar cierre
-                                </button>
+                            <div className="csw-advance">
+                                <span>Al confirmar, avanzás a</span>
+                                <strong>{nextSemester}° cuatrimestre · {nextYear}° año</strong>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
 
+                        <div className="modal__actions">
+                            <button type="button" className="btn" onClick={handleClose}>Cancelar</button>
+                            <button type="button" className="btn btn--primary" onClick={() => setShowConfirm(true)}>
+                                Confirmar{changesCount > 0 ? ` · ${changesCount} materia${changesCount !== 1 ? 's' : ''}` : ''}
+                            </button>
+                        </div>
 
-        </div>
+                        <AnimatePresence>
+                            {showConfirm && (
+                                <motion.div
+                                    className="confirm-overlay"
+                                    variants={overlayVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    exit="exit"
+                                    transition={{ duration: 0.16 }}
+                                >
+                                    <motion.div
+                                        className="confirm-modal"
+                                        variants={confirmVariants}
+                                        initial="hidden"
+                                        animate="visible"
+                                        exit="exit"
+                                    >
+                                        <h3>Confirmar cierre de cuatrimestre</h3>
+
+                                        <p>
+                                            Se actualizarán {changesCount} materia{changesCount !== 1 ? 's' : ''} y
+                                            avanzarás al {nextSemester}° cuatrimestre · {nextYear}° año.
+                                        </p>
+
+                                        <div className="confirm-actions">
+                                            <motion.button className="btn" onClick={() => setShowConfirm(false)} whileTap={{ scale: 0.96 }}>Cancelar</motion.button>
+
+                                            <motion.button className="btn btn--primary" onClick={() => { setShowConfirm(false); handleConfirm() }} whileTap={{ scale: 0.96 }}>Confirmar cierre</motion.button>
+                                        </div>
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }

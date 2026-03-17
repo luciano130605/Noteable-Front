@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import type { ReactNode } from 'react'
 import './modal.css'
 import { X } from 'lucide-react'
+import { useScrollLock } from '../hooks/Usescrolllock'
 
 type Props = {
     open: boolean
@@ -16,8 +17,10 @@ export default function Modal({
     title,
     children,
 }: Props) {
+    if (!open) return
+
     useEffect(() => {
-        if (!open) return
+        useScrollLock(open)
 
         document.body.style.overflow = 'hidden'
 

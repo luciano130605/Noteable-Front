@@ -137,7 +137,7 @@
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .modal_backdrop {
         align-items: flex-end;
         padding: 0;

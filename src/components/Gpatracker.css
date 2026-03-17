@@ -425,7 +425,7 @@
     color: #f87171;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .gpa-overlay {
         padding: 0;
         align-items: flex-end;

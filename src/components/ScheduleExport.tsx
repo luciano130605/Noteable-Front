@@ -2,6 +2,8 @@ import { useRef, useState, useMemo } from "react"
 import { X } from "lucide-react"
 import type { Subject } from "../types/types"
 import "./ScheduleExport.css"
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { useScrollLock } from '../hooks/Usescrolllock'
 
 interface ScheduleExportProps {
     subjects: Subject[]
@@ -23,12 +25,8 @@ interface ScheduleBlock {
 const DAYS = ["lun", "mar", "mié", "jue", "vie", "sáb"]
 
 const DAY_LABELS: Record<string, string> = {
-    lun: "Lun",
-    mar: "Mar",
-    mié: "Mié",
-    jue: "Jue",
-    vie: "Vie",
-    sáb: "Sáb",
+    lun: "Lun", mar: "Mar", mié: "Mié",
+    jue: "Jue", vie: "Vie", sáb: "Sáb",
 }
 
 const HOUR_START = 7
@@ -55,6 +53,42 @@ function formatHour(h: number) {
     return `${String(h).padStart(2, "0")}:00`
 }
 
+
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.18 } },
+}
+
+const drawerVariants: Variants = {
+    hidden: { opacity: 0, y: '100%' },
+    visible: {
+        opacity: 1, y: 0,
+        transition: { type: 'spring', damping: 30, stiffness: 280 },
+    },
+    exit: {
+        opacity: 0, y: '100%',
+        transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] },
+    },
+}
+
+const dayVariants: Variants = {
+    hidden: { opacity: 0, y: 12 },
+    visible: (i: number) => ({
+        opacity: 1, y: 0,
+        transition: { delay: 0.08 + i * 0.06, duration: 0.22, ease: 'easeOut' },
+    }),
+}
+
+const blockVariants: Variants = {
+    hidden: { opacity: 0, scaleY: 0.6 },
+    visible: (i: number) => ({
+        opacity: 1, scaleY: 1,
+        transition: { delay: 0.2 + i * 0.05, type: 'spring', damping: 18, stiffness: 280 },
+    }),
+}
+
+
 export default function ScheduleExport({
     subjects,
     careerName,
@@ -63,42 +97,36 @@ export default function ScheduleExport({
     onClose,
 }: ScheduleExportProps) {
     const gridRef = useRef<HTMLDivElement>(null)
+    const [open, setOpen] = useState(true)
+    useScrollLock(open)
+    
     const [downloading, setDownloading] = useState(false)
+
+    const handleClose = () => setOpen(false)
 
     const colorMap = useMemo(() => {
         const map: Record<string, typeof SUBJECT_COLORS[0]> = {}
         let i = 0
-        subjects.forEach((s) => {
-            map[s.id] = SUBJECT_COLORS[i++ % SUBJECT_COLORS.length]
-        })
+        subjects.forEach((s) => { map[s.id] = SUBJECT_COLORS[i++ % SUBJECT_COLORS.length] })
         return map
     }, [subjects])
 
     const blocks = useMemo<ScheduleBlock[]>(() => {
         const result: ScheduleBlock[] = []
-
         subjects.forEach((s) => {
             if (!s.schedules?.length) return
-
             s.schedules.forEach((sch: any) => {
                 if (!sch.day || !sch.timeFrom || !sch.timeTo) return
-
                 const startMin = timeToMin(sch.timeFrom) - HOUR_START * 60
                 const endMin = timeToMin(sch.timeTo) - HOUR_START * 60
-
                 if (startMin < 0 || endMin <= startMin) return
-
                 result.push({
-                    subject: s,
-                    day: sch.day,
-                    startTime: sch.timeFrom,
-                    endTime: sch.timeTo,
-                    startMin,
-                    durationMin: endMin - startMin,
+                    subject: s, day: sch.day,
+                    startTime: sch.timeFrom, endTime: sch.timeTo,
+                    startMin, durationMin: endMin - startMin,
                 })
             })
         })
-
         return result
     }, [subjects])
 
@@ -125,16 +153,11 @@ export default function ScheduleExport({
     const handleDownload = async () => {
         if (!gridRef.current) return
         setDownloading(true)
-
         try {
             const html2canvas = (await import("html2canvas")).default
-
             const canvas = await html2canvas(gridRef.current, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: "#0a0a0f",
+                scale: 2, useCORS: true, backgroundColor: "#0a0a0f",
             })
-
             const link = document.createElement("a")
             link.download = `horario_${currentYear}año_${currentSemester}C.png`
             link.href = canvas.toDataURL("image/png")
@@ -145,126 +168,133 @@ export default function ScheduleExport({
     }
 
     return (
-        <div className="schedule-overlay" onClick={onClose}>
-            <div className="schedule-drawer" onClick={(e) => e.stopPropagation()}>
-                <div className="schedule-toolbar">
-                    <div>
-                        <div className="schedule-title">Exportar horario</div>
-                        <div className="schedule-subtitle">
-                            {currentYear}° año · {currentSemester}° cuatrimestre ·{" "}
-                            {activeDays.length} días
-                        </div>
-                    </div>
+        <AnimatePresence onExitComplete={onClose}>
+            {open && (
+                <motion.div
+                    className="schedule-overlay"
+                    variants={overlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    onClick={handleClose}
+                >
+                    <motion.div
+                        className="schedule-drawer"
+                        variants={drawerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="schedule-toolbar">
+                            <div>
+                                <div className="schedule-title">Exportar horario</div>
+                                <div className="schedule-subtitle">
+                                    {currentYear}° año · {currentSemester}° cuatrimestre · {activeDays.length} días
+                                </div>
+                            </div>
 
-                    <div className="schedule-actions">
-                        <button
-                            className="schedule-download"
-                            onClick={handleDownload}
-                            disabled={downloading}
-                        >
-                            {downloading ? "Exportando…" : "Descargar"}
-                        </button>
+                            <div className="schedule-actions">
+                                <motion.button
+                                    className="schedule-download"
+                                    onClick={handleDownload}
+                                    disabled={downloading}
+                                    whileTap={!downloading ? { scale: 0.96 } : {}}
+                                >
+                                    {downloading ? 'Exportando…' : 'Descargar'}
+                                </motion.button>
 
-                        <button className="modal__close" onClick={onClose}>
-                            <X size={16} />
-                        </button>
-                    </div>
-                </div>
-
-                <div className="schedule-previewWrap">
-                    <div ref={gridRef} className="schedule-preview">
-                        <div className="schedule-header">
-                            <div className="schedule-career">{careerName}</div>
-                            <div className="schedule-mainTitle">
-                                Horario · {currentYear}° año · {currentSemester}° cuatrimestre
+                                <motion.button
+                                    className="modal__close"
+                                    onClick={handleClose}
+                                    whileHover={{ scale: 1.1 }}
+                                    whileTap={{ scale: 0.9 }}
+                                >
+                                    <X size={16} />
+                                </motion.button>
                             </div>
                         </div>
 
-                        <div className="schedule-grid">
-                            <div className="schedule-hours" style={{ height: gridHeight }}>
-                                {Array.from(
-                                    { length: visibleEnd - visibleStart + 1 },
-                                    (_, i) => {
-                                        const h = visibleStart + i
-                                        const top = (h - visibleStart) * 60 * PX_PER_MIN
+                        <div className="schedule-previewWrap">
+                            <div ref={gridRef} className="schedule-preview">
+                                <div className="schedule-header">
+                                    <div className="schedule-career">{careerName}</div>
+                                    <div className="schedule-mainTitle">
+                                        Horario · {currentYear}° año · {currentSemester}° cuatrimestre
+                                    </div>
+                                </div>
 
-                                        return (
-                                            <div
-                                                key={h}
-                                                className="schedule-hour"
-                                                style={{ top }}
-                                            >
-                                                {formatHour(h)}
-                                            </div>
-                                        )
-                                    }
-                                )}
-                            </div>
+                                <div className="schedule-grid">
+                                    <div className="schedule-hours" style={{ height: gridHeight }}>
+                                        {Array.from({ length: visibleEnd - visibleStart + 1 }, (_, i) => {
+                                            const h = visibleStart + i
+                                            const top = (h - visibleStart) * 60 * PX_PER_MIN
+                                            return (
+                                                <div key={h} className="schedule-hour" style={{ top }}>
+                                                    {formatHour(h)}
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
 
-                            <div className="schedule-days">
-                                {activeDays.map((day) => {
-                                    const dayBlocks = blocks.filter((b) => b.day === day)
+                                    <div className="schedule-days">
+                                        {activeDays.map((day, di) => {
+                                            const dayBlocks = blocks.filter((b) => b.day === day)
 
-                                    return (
-                                        <div key={day} className="schedule-day">
-                                            <div className="schedule-dayLabel">
-                                                {DAY_LABELS[day]}
-                                            </div>
+                                            return (
+                                                <motion.div
+                                                    key={day}
+                                                    className="schedule-day"
+                                                    variants={dayVariants}
+                                                    custom={di}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                >
+                                                    <div className="schedule-dayLabel">{DAY_LABELS[day]}</div>
 
-                                            <div
-                                                className="schedule-dayGrid"
-                                                style={{ height: gridHeight }}
-                                            >
-                                                {dayBlocks.map((b, idx) => {
-                                                    const col =
-                                                        colorMap[b.subject.id] ?? SUBJECT_COLORS[0]
+                                                    <div className="schedule-dayGrid" style={{ height: gridHeight }}>
+                                                        {dayBlocks.map((b, idx) => {
+                                                            const col = colorMap[b.subject.id] ?? SUBJECT_COLORS[0]
+                                                            const top = (b.startMin - visibleMin) * PX_PER_MIN
+                                                            const height = Math.max(b.durationMin * PX_PER_MIN, 28)
 
-                                                    const top =
-                                                        (b.startMin - visibleMin) * PX_PER_MIN
-
-                                                    const height = Math.max(
-                                                        b.durationMin * PX_PER_MIN,
-                                                        28
-                                                    )
-
-                                                    return (
-                                                        <div
-                                                            key={idx}
-                                                            className="schedule-block"
-                                                            style={{
-                                                                top,
-                                                                height,
-                                                                background: col.bg,
-                                                                borderLeft: `3px solid ${col.border}`,
-                                                            }}
-                                                        >
-                                                            <div
-                                                                className="schedule-blockTitle"
-                                                                style={{ color: col.text }}
-                                                            >
-                                                                {b.subject.name}
-                                                            </div>
-
-                                                            {height > 36 && (
-                                                                <div
-                                                                    className="schedule-blockTime"
-                                                                    style={{ color: col.border }}
+                                                            return (
+                                                                <motion.div
+                                                                    key={idx}
+                                                                    className="schedule-block"
+                                                                    style={{
+                                                                        top, height,
+                                                                        background: col.bg,
+                                                                        borderLeft: `3px solid ${col.border}`,
+                                                                        transformOrigin: 'top',
+                                                                    }}
+                                                                    variants={blockVariants}
+                                                                    custom={di * 3 + idx}
+                                                                    initial="hidden"
+                                                                    animate="visible"
                                                                 >
-                                                                    {b.startTime} – {b.endTime}
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    )
-                                                })}
-                                            </div>
-                                        </div>
-                                    )
-                                })}
+                                                                    <div className="schedule-blockTitle" style={{ color: col.text }}>
+                                                                        {b.subject.name}
+                                                                    </div>
+                                                                    {height > 36 && (
+                                                                        <div className="schedule-blockTime" style={{ color: col.border }}>
+                                                                            {b.startTime} – {b.endTime}
+                                                                        </div>
+                                                                    )}
+                                                                </motion.div>
+                                                            )
+                                                        })}
+                                                    </div>
+                                                </motion.div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }

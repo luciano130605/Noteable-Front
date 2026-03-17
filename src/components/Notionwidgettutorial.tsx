@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { CircleCheckBig, X } from 'lucide-react'
 import { CopySuccess, Copy, Link, Book } from 'iconsax-react'
 import './Notionwidgettutorial.css'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
 interface Props {
     userId: string
@@ -38,22 +39,55 @@ function NotionIcon({ size = 13 }: { size?: number }) {
     )
 }
 
+
+const backdropVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.18 } },
+}
+
+const tooltipVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95, y: 10 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring', damping: 24, stiffness: 300 },
+    },
+    exit: {
+        opacity: 0, scale: 0.95, y: 8,
+        transition: { duration: 0.16, ease: 'easeIn' },
+    },
+}
+
+const stepVariants: Variants = {
+    enter: (dir: number) => ({
+        opacity: 0, x: dir > 0 ? 28 : -28,
+    }),
+    center: {
+        opacity: 1, x: 0,
+        transition: { type: 'spring', damping: 22, stiffness: 300 },
+    },
+    exit: (dir: number) => ({
+        opacity: 0, x: dir > 0 ? -20 : 20,
+        transition: { duration: 0.15, ease: 'easeIn' },
+    }),
+}
+
+const copyLabelVariants: Variants = {
+    hidden: { opacity: 0, y: 5 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.14 } },
+    exit: { opacity: 0, y: -5, transition: { duration: 0.1 } },
+}
+
+
 export default function NotionWidgetTutorial({ userId, onClose }: Props) {
+    const [open, setOpen] = useState(true)
     const [step, setStep] = useState(0)
+    const [dir, setDir] = useState(1)        
     const [copied, setCopied] = useState(false)
-    const [visible, setVisible] = useState(false)
 
     const widgetUrl = `${window.location.origin}/widget/${userId}`
 
-    useEffect(() => {
-        const t = setTimeout(() => setVisible(true), 10)
-        return () => clearTimeout(t)
-    }, [])
-
-    const handleClose = () => {
-        setVisible(false)
-        setTimeout(onClose, 220)
-    }
+    const handleClose = () => setOpen(false)
 
     const handleCopy = async () => {
         await navigator.clipboard.writeText(widgetUrl)
@@ -61,8 +95,13 @@ export default function NotionWidgetTutorial({ userId, onClose }: Props) {
         setTimeout(() => setCopied(false), 2000)
     }
 
+    const goTo = (next: number) => {
+        setDir(next > step ? 1 : -1)
+        setStep(next)
+    }
+
     const handleNext = () => {
-        if (step < STEPS.length - 1) setStep(s => s + 1)
+        if (step < STEPS.length - 1) goTo(step + 1)
         else handleClose()
     }
 
@@ -70,100 +109,156 @@ export default function NotionWidgetTutorial({ userId, onClose }: Props) {
     const isLast = step === STEPS.length - 1
 
     return (
-        <>
-            <div
-                className={`nwt-backdrop${visible ? ' nwt-backdrop--visible' : ''}`}
-                onClick={handleClose}
-            />
+        <AnimatePresence onExitComplete={onClose}>
+            {open && (
+                <>
+                    <motion.div
+                        className="nwt-backdrop"
+                        variants={backdropVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        onClick={handleClose}
+                    />
 
-            <div className={`nwt-tooltip${visible ? ' nwt-tooltip--visible' : ''}`}>
+                    <motion.div
+                        className="nwt-tooltip"
+                        variants={tooltipVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        <div className="nwt-accent" />
 
-                <div className="nwt-accent" />
-
-                <div className="nwt-header">
-                    <div className="nwt-dots">
-                        {STEPS.map((_, i) => (
-                            <div
-                                key={i}
-                                className={`nwt-dot ${i === step ? 'nwt-dot--active'
-                                    : i < step ? 'nwt-dot--done'
-                                        : 'nwt-dot--pending'
-                                    }`}
-                            />
-                        ))}
-                    </div>
-                    <button className="nwt-close" onClick={handleClose}>
-                        <X size={14} />
-                    </button>
-                </div>
-
-                <div className="nwt-content">
-                    <div className="nwt-emoji">{current.emoji}</div>
-                    <div className="nwt-title">{current.title}</div>
-                    <div className="nwt-description">{current.description}</div>
-
-                    {'hint' in current && current.hint && (
-                        <div className="nwt-hint">{current.hint}</div>
-                    )}
-
-                    {current.action === 'copy' && (
-                        <div className="nwt-copy-box">
-                            <span className="nwt-copy-url">{widgetUrl}</span>
-                            <button
-                                className={`nwt-copy-btn ${copied ? 'nwt-copy-btn--copied' : 'nwt-copy-btn--default'}`}
-                                onClick={handleCopy}
+                        <div className="nwt-header">
+                            <div className="nwt-dots">
+                                {STEPS.map((_, i) => (
+                                    <motion.div
+                                        key={i}
+                                        className={`nwt-dot ${i === step ? 'nwt-dot--active' : i < step ? 'nwt-dot--done' : 'nwt-dot--pending'}`}
+                                        animate={{ scale: i === step ? 1.2 : 1 }}
+                                        transition={{ type: 'spring', damping: 18, stiffness: 300 }}
+                                    />
+                                ))}
+                            </div>
+                            <motion.button
+                                className="nwt-close"
+                                onClick={handleClose}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
                             >
-                                {copied
-                                    ? <CopySuccess size={11} color="currentColor" />
-                                    : <Copy size={11} color="currentColor" />
-                                }
-                                {copied ? 'Copiado' : 'Copiar'}
-                            </button>
+                                <X size={14} />
+                            </motion.button>
                         </div>
-                    )}
 
-                    {current.action === 'info' && (
-                        <div className="nwt-info-box">
-                            <NotionIcon size={14} />
-                            <div>
-                                <div className="nwt-info-box__title">En Notion</div>
-                                <div className="nwt-info-box__sub">
-                                    Escribí <kbd className="nwt-kbd">/Insertar</kbd> → pegá tu URL
-                                </div>
+                        <AnimatePresence mode="wait" custom={dir}>
+                            <motion.div
+                                key={step}
+                                className="nwt-content"
+                                custom={dir}
+                                variants={stepVariants}
+                                initial="enter"
+                                animate="center"
+                                exit="exit"
+                            >
+                                <div className="nwt-emoji">{current.emoji}</div>
+                                <div className="nwt-title">{current.title}</div>
+                                <div className="nwt-description">{current.description}</div>
+
+                                {'hint' in current && current.hint && (
+                                    <div className="nwt-hint">{current.hint}</div>
+                                )}
+
+                                {current.action === 'copy' && (
+                                    <div className="nwt-copy-box">
+                                        <span className="nwt-copy-url">{widgetUrl}</span>
+                                        <motion.button
+                                            className={`nwt-copy-btn ${copied ? 'nwt-copy-btn--copied' : 'nwt-copy-btn--default'}`}
+                                            onClick={handleCopy}
+                                            whileTap={{ scale: 0.95 }}
+                                        >
+                                            <AnimatePresence mode="wait">
+                                                {copied ? (
+                                                    <motion.span
+                                                        key="copied"
+                                                        style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                                                        variants={copyLabelVariants}
+                                                        initial="hidden" animate="visible" exit="exit"
+                                                    >
+                                                        <CopySuccess size={11} color="currentColor" /> Copiado
+                                                    </motion.span>
+                                                ) : (
+                                                    <motion.span
+                                                        key="copy"
+                                                        style={{ display: 'flex', alignItems: 'center', gap: 4 }}
+                                                        variants={copyLabelVariants}
+                                                        initial="hidden" animate="visible" exit="exit"
+                                                    >
+                                                        <Copy size={11} color="currentColor" /> Copiar
+                                                    </motion.span>
+                                                )}
+                                            </AnimatePresence>
+                                        </motion.button>
+                                    </div>
+                                )}
+
+                                {current.action === 'info' && (
+                                    <div className="nwt-info-box">
+                                        <NotionIcon size={14} />
+                                        <div>
+                                            <div className="nwt-info-box__title">En Notion</div>
+                                            <div className="nwt-info-box__sub">
+                                                Escribí <kbd className="nwt-kbd">/Insertar</kbd> → pegá tu URL
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {current.action === 'done' && (
+                                    <div className="nwt-done-box">
+                                        <span>
+                                            Tu widget muestra <strong>progreso</strong>, <strong>materias en cursada</strong> y <strong>próximos exámenes</strong>.
+                                        </span>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
+
+                        <div className="nwt-footer">
+                            <span className="nwt-footer__counter">
+                                Paso {step + 1} de {STEPS.length}
+                            </span>
+                            <div className="nwt-footer__actions">
+                                <AnimatePresence>
+                                    {step > 0 && (
+                                        <motion.button
+                                            className="nwt-btn-back"
+                                            onClick={() => goTo(step - 1)}
+                                            initial={{ opacity: 0, x: -8 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -8 }}
+                                            transition={{ duration: 0.15 }}
+                                            whileTap={{ scale: 0.96 }}
+                                        >
+                                            Atrás
+                                        </motion.button>
+                                    )}
+                                </AnimatePresence>
+                                <motion.button
+                                    className={`nwt-btn-next ${isLast ? 'nwt-btn-next--done' : 'nwt-btn-next--default'}`}
+                                    onClick={handleNext}
+                                    whileTap={{ scale: 0.96 }}
+                                    layout
+                                >
+                                    {isLast ? 'Entendido' : 'Siguiente'}
+                                </motion.button>
                             </div>
                         </div>
-                    )}
 
-                    {current.action === 'done' && (
-                        <div className="nwt-done-box">
-                            <span>
-                                Tu widget muestra <strong>progreso</strong>, <strong>materias en cursada</strong> y <strong>próximos exámenes</strong>.
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="nwt-footer">
-                    <span className="nwt-footer__counter">
-                        Paso {step + 1} de {STEPS.length}
-                    </span>
-                    <div className="nwt-footer__actions">
-                        {step > 0 && (
-                            <button className="nwt-btn-back" onClick={() => setStep(s => s - 1)}>
-                                Atrás
-                            </button>
-                        )}
-                        <button
-                            className={`nwt-btn-next ${isLast ? 'nwt-btn-next--done' : 'nwt-btn-next--default'}`}
-                            onClick={handleNext}
-                        >
-                            {isLast ? 'Entendido' : 'Siguiente'}
-                        </button>
-                    </div>
-                </div>
-
-                <div className="nwt-arrow" />
-            </div>
-        </>
+                        <div className="nwt-arrow" />
+                    </motion.div>
+                </>
+            )}
+        </AnimatePresence>
     )
 }

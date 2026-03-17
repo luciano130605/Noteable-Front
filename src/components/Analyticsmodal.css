@@ -1,5 +1,3 @@
-
-
 .an-overlay {
     position: fixed;
     inset: 0;
@@ -62,7 +60,6 @@
     border-radius: 4px;
 }
 
-/* ── Header ── */
 .an-header {
     display: flex;
     align-items: flex-start;
@@ -115,7 +112,6 @@
     color: var(--danger);
 }
 
-/* ── Body ── */
 .an-body {
     padding: 20px 22px 28px;
     display: flex;
@@ -123,7 +119,6 @@
     gap: 14px;
 }
 
-/* ── KPI row ── */
 .an-kpi-row {
     display: flex;
     align-items: center;
@@ -165,7 +160,6 @@
     text-align: center;
 }
 
-/* ── Sections ── */
 .an-section {
     background: var(--surface-faint);
     border: 1px solid var(--border-faint);
@@ -191,7 +185,6 @@
     margin: 0;
 }
 
-/* ── Progress rings ── */
 .an-rings-row {
     display: flex;
     gap: 8px;
@@ -216,7 +209,6 @@
     max-width: 80px;
 }
 
-/* ── Donut ── */
 .an-donut-wrap {
     display: flex;
     align-items: center;
@@ -262,7 +254,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-/* ── Histogram ── */
 .an-histogram {
     display: flex;
     gap: 6px;
@@ -313,7 +304,6 @@
     text-align: center;
 }
 
-/* ── GPA chip ── */
 .an-gpa-chip {
     margin-top: 12px;
     display: inline-flex;
@@ -326,7 +316,6 @@
     background: var(--surface-faint);
 }
 
-/* ── Velocity ── */
 .an-velocity-row {
     display: flex;
     gap: 8px;
@@ -378,14 +367,12 @@
     white-space: nowrap;
 }
 
-/* ── 2-col grid ── */
 .an-grid-2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
 }
 
-/* ── Year progress ── */
 .an-year-list {
     display: flex;
     flex-direction: column;
@@ -456,7 +443,6 @@
     transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ── Rank list ── */
 .an-rank-list {
     display: flex;
     flex-direction: column;
@@ -490,10 +476,12 @@
 .an-rank-name {
     flex: 1;
     font-size: 0.8rem;
-    color: var(--muted);
-    white-space: nowrap;
+    max-width: 250px;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--muted);
+    white-space: nowrap;
+ 
 }
 
 .an-rank-grade {
@@ -503,7 +491,6 @@
     flex-shrink: 0;
 }
 
-/* ── Spark ── */
 .an-spark {
     display: flex;
     align-items: flex-end;
@@ -518,12 +505,12 @@
     transition: height 0.4s ease;
 }
 
-/* ── Responsive ── */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .an-overlay {
         padding: 0;
         align-items: flex-end;
     }
+
 
     .an-modal {
         max-width: 100%;

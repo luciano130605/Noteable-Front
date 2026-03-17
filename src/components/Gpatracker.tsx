@@ -4,6 +4,8 @@ import { toast } from '../hooks/Usetoast'
 import './Gpatracker.css'
 import { Copy, CopySuccess, Share } from 'iconsax-react'
 import { X } from 'lucide-react'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { useScrollLock } from '../hooks/Usescrolllock'
 
 interface Props {
     subjects: Subject[]
@@ -28,7 +30,6 @@ function getGpaLabel(gpa: number): string {
     return 'Insuficiente'
 }
 
-
 const BUCKETS = [
     { range: '4–5', min: 4, max: 5.99, color: '#f87171' },
     { range: '6', min: 6, max: 6.99, color: '#fb923c' },
@@ -38,8 +39,60 @@ const BUCKETS = [
     { range: '10', min: 10, max: 10, color: '#22c55e' },
 ]
 
+
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+}
+
+const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring', damping: 26, stiffness: 280 },
+    },
+    exit: {
+        opacity: 0, scale: 0.96, y: 12,
+        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
+    },
+}
+
+const rowVariants: Variants = {
+    hidden: { opacity: 0, x: -10 },
+    visible: (i: number) => ({
+        opacity: 1, x: 0,
+        transition: { delay: 0.15 + i * 0.06, duration: 0.22, ease: 'easeOut' },
+    }),
+}
+
+const barVariants: Variants = {
+    hidden: { scaleY: 0, originY: 1 },
+    visible: (i: number) => ({
+        scaleY: 1,
+        transition: { delay: 0.1 + i * 0.05, duration: 0.3, ease: 'easeOut' },
+    }),
+}
+
+const topBarVariants: Variants = {
+    hidden: { scaleX: 0, originX: 0 },
+    visible: (i: number) => ({
+        scaleX: 1,
+        transition: { delay: 0.2 + i * 0.07, duration: 0.35, ease: 'easeOut' },
+    }),
+}
+
+const copyLabelVariants: Variants = {
+    hidden: { opacity: 0, y: 6 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
+    exit: { opacity: 0, y: -6, transition: { duration: 0.1 } },
+}
+
+
 export default function GpaModal({ subjects, careerName, onClose }: Props) {
     const cardRef = useRef<HTMLDivElement>(null)
+    const [open, setOpen] = useState(true)
+    useScrollLock(open)
     const [loading, setLoading] = useState(false)
     const [copied, setCopied] = useState(false)
 
@@ -57,6 +110,8 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
     const maxBucketCount = Math.max(...BUCKETS.map(b =>
         approvedWithGrade.filter(s => Number(s.grade) >= b.min && Number(s.grade) <= b.max).length
     ), 1)
+
+    const handleClose = () => setOpen(false)
 
     const handleDownload = async () => {
         if (!cardRef.current) return
@@ -84,19 +139,15 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
     const handleCopy = () => {
         if (!avg) { toast('Sin notas cargadas todavía', 'warning'); return }
         const lines = [
-            `${careerName} — Promedio`,
-            ``,
+            `${careerName} — Promedio`, ``,
             `Promedio general: ${avg}/10  ${getGpaLabel(avg)}`,
-            `Materias con nota: ${approvedWithGrade.length} de ${approvedTotal} aprobadas`,
-            ``,
+            `Materias con nota: ${approvedWithGrade.length} de ${approvedTotal} aprobadas`, ``,
             `Mejores notas:`,
-            ...best.map(s => `  ${s.name}: ${s.grade}`),
-            ``,
+            ...best.map(s => `  ${s.name}: ${s.grade}`), ``,
             '— generado con Noteable',
         ]
         navigator.clipboard.writeText(lines.join('\n'))
         toast('Resumen copiado al portapapeles', 'success')
-
         setCopied(true)
         setTimeout(() => setCopied(false), 2000)
     }
@@ -105,9 +156,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
         if (!avg) { toast('Sin notas cargadas todavía', 'warning'); return }
         const text = `Mi promedio en ${careerName}: ${avg}/10 — ${getGpaLabel(avg)} ${approvedWithGrade.length} materias con nota cargada. #Noteable`
         if (navigator.share) {
-            try {
-                await navigator.share({ text })
-            } catch { /*  */ }
+            try { await navigator.share({ text }) } catch { /**/ }
         } else {
             navigator.clipboard.writeText(text)
             toast('Texto copiado (Web Share no disponible en este navegador)', 'info')
@@ -115,121 +164,212 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
     }
 
     return (
-        <div className="gpa-overlay" onClick={onClose}>
-            <div className="gpa-modal" onClick={e => e.stopPropagation()}>
+        <AnimatePresence onExitComplete={onClose}>
+            {open && (
+                <motion.div
+                    className="gpa-overlay"
+                    variants={overlayVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    transition={{ duration: 0.2 }}
+                    onClick={handleClose}
+                >
+                    <motion.div
+                        className="gpa-modal"
+                        variants={modalVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="gpa-modal__header">
+                            <div className="gpa-modal__header-left">
+                                <span className="gpa-modal__header-title">Promedio académico</span>
+                                <span className="gpa-modal__header-sub">{careerName}</span>
+                            </div>
+                            <motion.button
+                                className="modal__close"
+                                onClick={handleClose}
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                            >
+                                <X size={16} />
+                            </motion.button>
+                        </div>
 
-                <div className="gpa-modal__header">
-                    <div className="gpa-modal__header-left">
-                        <span className="gpa-modal__header-title">Promedio académico</span>
-                        <span className="gpa-modal__header-sub">{careerName}</span>
-                    </div>
-                    <button className="modal__close" onClick={onClose}><X size={16} /></button>
-                </div>
+                        <div className="gpa-card-wrap">
+                            <div className="gpa-card" ref={cardRef}>
+                                <div className="gpa-card__grid" aria-hidden />
+                                <div className="gpa-card__inner">
+                                    <div className="gpa-card__app-label">Noteable · {careerName}</div>
 
-                <div className="gpa-card-wrap">
-                    <div className="gpa-card" ref={cardRef}>
-
-                        <div className="gpa-card__grid" aria-hidden />
-
-                        <div className="gpa-card__inner">
-                            <div className="gpa-card__app-label">Noteable · {careerName}</div>
-
-                            {avg !== null ? (
-                                <>
-                                    <div className="gpa-card__hero">
-                                        <div className="gpa-card__avg-wrap">
-                                            <span className="gpa-card__avg" style={{ color: getGpaColor(avg) }}>
-                                                {avg}
-                                            </span>
-                                            <span className="gpa-card__avg-denom">/10</span>
-                                        </div>
-                                        <div className="gpa-card__label-row">
-                                            <span className="gpa-card__label-text" style={{ color: getGpaColor(avg) }}>
-                                                {getGpaLabel(avg)}
-                                            </span>
-                                        </div>
-                                        <div className="gpa-card__count">
-                                            {approvedWithGrade.length} materia{approvedWithGrade.length !== 1 ? 's' : ''} con nota · {approvedTotal} aprobadas
-                                        </div>
-                                    </div>
-
-                                    <div className="gpa-card__dist">
-                                        {BUCKETS.map(b => {
-                                            const count = approvedWithGrade.filter(s => Number(s.grade) >= b.min && Number(s.grade) <= b.max).length
-                                            const heightPct = count > 0 ? Math.max((count / maxBucketCount) * 100, 12) : 0
-                                            return (
-                                                <div key={b.range} className="gpa-card__bucket">
-                                                    <div className="gpa-card__bucket-bar-wrap">
-                                                        <div
-                                                            className="gpa-card__bucket-fill"
-                                                            style={{ height: `${heightPct}%`, background: b.color }}
-                                                        />
-                                                    </div>
-                                                    {count > 0 && (
-                                                        <span className="gpa-card__bucket-count" style={{ color: b.color }}>{count}</span>
-                                                    )}
-                                                    <span className="gpa-card__bucket-label">{b.range}</span>
+                                    {avg !== null ? (
+                                        <>
+                                            <div className="gpa-card__hero">
+                                                <div className="gpa-card__avg-wrap">
+                                                    <motion.span
+                                                        className="gpa-card__avg"
+                                                        style={{ color: getGpaColor(avg) }}
+                                                        initial={{ opacity: 0, scale: 0.7 }}
+                                                        animate={{ opacity: 1, scale: 1 }}
+                                                        transition={{ type: 'spring', damping: 18, stiffness: 260, delay: 0.05 }}
+                                                    >
+                                                        {avg}
+                                                    </motion.span>
+                                                    <span className="gpa-card__avg-denom">/10</span>
                                                 </div>
-                                            )
-                                        })}
-                                    </div>
-
-                                    {best.length > 0 && (
-                                        <div className="gpa-card__top">
-                                            <div className="gpa-card__section-title">Mejores notas</div>
-                                            {best.map((s, i) => (
-                                                <div key={s.id} className="gpa-card__top-row">
-                                                    <span className="gpa-card__top-rank">#{i + 1}</span>
-                                                    <span className="gpa-card__top-name">{s.name}</span>
-                                                    <div className="gpa-card__top-bar-wrap">
-                                                        <div
-                                                            className="gpa-card__top-bar"
-                                                            style={{
-                                                                width: `${(Number(s.grade) / 10) * 100}%`,
-                                                                background: getGpaColor(Number(s.grade)),
-                                                            }}
-                                                        />
-                                                    </div>
-                                                    <span className="gpa-card__top-grade" style={{ color: getGpaColor(Number(s.grade)) }}>
-                                                        {s.grade}
-                                                    </span>
+                                                <div className="gpa-card__label-row">
+                                                    <motion.span
+                                                        className="gpa-card__label-text"
+                                                        style={{ color: getGpaColor(avg) }}
+                                                        initial={{ opacity: 0, y: 6 }}
+                                                        animate={{ opacity: 1, y: 0 }}
+                                                        transition={{ delay: 0.12, duration: 0.2 }}
+                                                    >
+                                                        {getGpaLabel(avg)}
+                                                    </motion.span>
                                                 </div>
-                                            ))}
+                                                <motion.div
+                                                    className="gpa-card__count"
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    transition={{ delay: 0.18, duration: 0.2 }}
+                                                >
+                                                    {approvedWithGrade.length} materia{approvedWithGrade.length !== 1 ? 's' : ''} con nota · {approvedTotal} aprobadas
+                                                </motion.div>
+                                            </div>
+
+                                            <div className="gpa-card__dist">
+                                                {BUCKETS.map((b, i) => {
+                                                    const count = approvedWithGrade.filter(s => Number(s.grade) >= b.min && Number(s.grade) <= b.max).length
+                                                    const heightPct = count > 0 ? Math.max((count / maxBucketCount) * 100, 12) : 0
+                                                    return (
+                                                        <div key={b.range} className="gpa-card__bucket">
+                                                            <div className="gpa-card__bucket-bar-wrap">
+                                                                <motion.div
+                                                                    className="gpa-card__bucket-fill"
+                                                                    style={{ height: `${heightPct}%`, background: b.color }}
+                                                                    variants={barVariants}
+                                                                    custom={i}
+                                                                    initial="hidden"
+                                                                    animate="visible"
+                                                                />
+                                                            </div>
+                                                            {count > 0 && (
+                                                                <motion.span
+                                                                    className="gpa-card__bucket-count"
+                                                                    style={{ color: b.color }}
+                                                                    initial={{ opacity: 0 }}
+                                                                    animate={{ opacity: 1 }}
+                                                                    transition={{ delay: 0.1 + i * 0.05 + 0.2 }}
+                                                                >
+                                                                    {count}
+                                                                </motion.span>
+                                                            )}
+                                                            <span className="gpa-card__bucket-label">{b.range}</span>
+                                                        </div>
+                                                    )
+                                                })}
+                                            </div>
+
+                                            {best.length > 0 && (
+                                                <div className="gpa-card__top">
+                                                    <div className="gpa-card__section-title">Mejores notas</div>
+                                                    {best.map((s, i) => (
+                                                        <motion.div
+                                                            key={s.id}
+                                                            className="gpa-card__top-row"
+                                                            variants={rowVariants}
+                                                            custom={i}
+                                                            initial="hidden"
+                                                            animate="visible"
+                                                        >
+                                                            <span className="gpa-card__top-rank">#{i + 1}</span>
+                                                            <span className="gpa-card__top-name">{s.name}</span>
+                                                            <div className="gpa-card__top-bar-wrap">
+                                                                <motion.div
+                                                                    className="gpa-card__top-bar"
+                                                                    style={{
+                                                                        width: `${(Number(s.grade) / 10) * 100}%`,
+                                                                        background: getGpaColor(Number(s.grade)),
+                                                                    }}
+                                                                    variants={topBarVariants}
+                                                                    custom={i}
+                                                                    initial="hidden"
+                                                                    animate="visible"
+                                                                />
+                                                            </div>
+                                                            <span className="gpa-card__top-grade" style={{ color: getGpaColor(Number(s.grade)) }}>
+                                                                {s.grade}
+                                                            </span>
+                                                        </motion.div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="gpa-card__empty">
+                                            <span className="gpa-card__empty-text">
+                                                Cargá notas en tus materias aprobadas para ver el promedio
+                                            </span>
                                         </div>
                                     )}
-                                </>
-                            ) : (
-                                <div className="gpa-card__empty">
-                                    <span className="gpa-card__empty-text">
-                                        Cargá notas en tus materias aprobadas para ver el promedio
-                                    </span>
+
+                                    <div className="gpa-card__footer-label">Noteable.app</div>
                                 </div>
-                            )}
-
-                            <div className="gpa-card__footer-label">Noteable.app</div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div className="gpa-modal__actions">
-                    <button
-                        className={`btn share-copy-btn${copied ? ' share-copy-btn--copied' : ''}`}
-                        onClick={handleCopy}
-                    >
-                        {copied
-                            ? <><CopySuccess size={16} color="currentColor" /> Copiado</>
-                            : <><Copy size={16} color="currentColor" /> Copiar resumen</>
-                        }
-                    </button>
-                    <button className="btn" onClick={handleShare}>
-                        <Share size={16} color="currentColor" /> Compartir
-                    </button>
-                    <button className="btn btn--primary" onClick={handleDownload} disabled={loading}>
-                        {loading ? 'Generando...' : ' Descargar imagen'}
-                    </button>
-                </div>
+                        <div className="gpa-modal__actions">
+                            <motion.button
+                                className={`btn share-copy-btn${copied ? ' share-copy-btn--copied' : ''}`}
+                                onClick={handleCopy}
+                                whileTap={{ scale: 0.96 }}
+                            >
+                                <AnimatePresence mode="wait">
+                                    {copied ? (
+                                        <motion.span
+                                            key="copied"
+                                            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                                            variants={copyLabelVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                        >
+                                            <CopySuccess size={16} color="currentColor" /> Copiado
+                                        </motion.span>
+                                    ) : (
+                                        <motion.span
+                                            key="copy"
+                                            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                                            variants={copyLabelVariants}
+                                            initial="hidden"
+                                            animate="visible"
+                                            exit="exit"
+                                        >
+                                            <Copy size={16} color="currentColor" /> Copiar resumen
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
+                            </motion.button>
 
-            </div>
-        </div>
+                            <motion.button className="btn" onClick={handleShare} whileTap={{ scale: 0.96 }}>
+                                <Share size={16} color="currentColor" /> Compartir
+                            </motion.button>
+
+                            <motion.button
+                                className="btn btn--primary"
+                                onClick={handleDownload}
+                                disabled={loading}
+                                whileTap={!loading ? { scale: 0.96 } : {}}
+                            >
+                                {loading ? 'Generando...' : 'Descargar imagen'}
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
     )
 }

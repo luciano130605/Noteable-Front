@@ -350,7 +350,7 @@
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .kb__board {
         grid-template-columns: repeat(5, minmax(120px, 1fr));
         gap: 7px;

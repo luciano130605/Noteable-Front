@@ -399,7 +399,7 @@
   max-width: 180px;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   .cal-wrapper {
     border-radius: 0;
     box-shadow: none;

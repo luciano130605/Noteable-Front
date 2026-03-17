@@ -149,7 +149,7 @@
     color: #f87171;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .crb {
         bottom: 80px;
         right: 12px;

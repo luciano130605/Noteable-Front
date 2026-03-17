@@ -1477,7 +1477,7 @@ input[type="number"].form-control::-webkit-outer-spin-button {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
 
   .modal-overlay {
     padding: 0;

@@ -352,7 +352,7 @@
     cursor: not-allowed;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .notion-picker__overlay {
         align-items: flex-end;
         padding: 0;

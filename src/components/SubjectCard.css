@@ -138,6 +138,7 @@
   min-width: 0;
   padding-right: 2rem;
 }
+
 .subject-card__code {
   font-size: 0.65rem;
   color: var(--muted);
@@ -1580,10 +1581,67 @@
   flex-shrink: 0;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+
+
 
   .subject-card:hover {
     transform: none;
+  }
+  
+
+  .subject-card {
+    padding: 10px 12px 9px;
+    gap: 5px;
+    border-radius: 11px;
+  }
+
+  .subject-card__name {
+    font-size: 0.78rem;
+    padding-right: 1.6rem;
+  }
+
+  .subject-card__code {
+    font-size: 0.6rem;
+    margin-top: -2px;
+  }
+
+  .subject-card__badge {
+    font-size: 0.6rem;
+    padding: 2px 6px;
+    gap: 4px;
+  }
+
+  .subject-card__badge-dot {
+    width: 4px;
+    height: 4px;
+  }
+
+  .subject-card__grade {
+    font-size: 1.1rem;
+    top: 9px;
+    right: 11px;
+  }
+
+  .subject-card__date {
+    font-size: 0.62rem;
+  }
+
+  .subject-card__attempts {
+    font-size: 0.62rem;
+  }
+
+  .subject-card__corr-list {
+    gap: 3px;
+  }
+
+  .subject-card__corr-tag {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+  }
+
+  .subject-card__notes {
+    font-size: 0.62rem;
   }
 
   .subject-card__actions {

@@ -761,7 +761,7 @@ body:has(.evm-overlay) {
 }
 
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .evm-overlay {
         padding: 0;
         align-items: flex-end;

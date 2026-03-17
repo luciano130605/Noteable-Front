@@ -399,7 +399,7 @@
     animation: adm-spin 0.7s linear infinite;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .adm-panel {
         width: 100vw;
         border-left: none;
