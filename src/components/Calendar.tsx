@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, useEffect, useCallback, forwardRef, useImperativeHandle, useMemo, memo } from 'react'
 import EventModal, { type CalendarEvent } from './Eventmodal'
 import MapModal from './Mapmodal'
 import './Calendar.css'
@@ -39,7 +39,7 @@ const IMPORTANCE_COLORS: Record<string, string> = {
   critica: '#ec4899',
 }
 
-function EventPill({
+const EventPill = memo(function EventPill({
   ev,
   isPast,
   gradeColor,
@@ -89,9 +89,9 @@ function EventPill({
       )}
     </div>
   )
-}
+})
 
-function DayCell({
+const DayCell = memo(function DayCell({
   dateStr,
   d,
   dayEvents,
@@ -118,7 +118,7 @@ function DayCell({
   isPastEvent: (ev: CalendarEvent) => boolean
   contextHandledByPill: React.MutableRefObject<boolean>
 }) {
-  const [hovered, setHovered] = useState(false)
+
 
   const lpCell = useLongPress(
     () =>
@@ -132,7 +132,7 @@ function DayCell({
 
   return (
     <div
-      className={['cal-cell', todayCell ? 'cal-cell--today' : '', hovered ? 'cal-cell--hovered' : ''].filter(Boolean).join(' ')}
+      className={['cal-cell', todayCell ? 'cal-cell--today' : ''].filter(Boolean).join(' ')}
       {...lpCell}
       onClick={(e) => {
         const target = e.target as HTMLElement
@@ -148,8 +148,6 @@ function DayCell({
         }
         openContextMenu(e, dateStr)
       }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <span className="cal-cell__num">{d}</span>
       <div className="cal-cell__events">
@@ -174,7 +172,7 @@ function DayCell({
       </div>
     </div>
   )
-}
+})
 
 const ctxVariants: Variants = {
   hidden: { opacity: 0, scale: 0.95, y: -6 },
@@ -187,8 +185,6 @@ const ctxVariants: Variants = {
     transition: { duration: 0.14, ease: [0.32, 0.72, 0, 1] as const }
   },
 }
-
-
 
 const overlayVariants: Variants = {
   hidden: { opacity: 0 },
@@ -208,14 +204,14 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
     const [editingEvent, setEditingEvent] = useState<CalendarEvent | null>(null)
     const contextHandledByPill = useRef(false)
     const [mapOpen, setMapOpen] = useState(false)
-    const isMobile = window.matchMedia('(pointer: coarse)').matches
+    const isMobile = useMemo(() => window.matchMedia('(pointer: coarse)').matches, [])
     const [mapDestination, setMapDestination] = useState<string | undefined>(undefined)
 
     const wrapperRef = useRef<HTMLDivElement>(null)
 
-    const openEventDetail = (ev: CalendarEvent) => {
+    const openEventDetail = useCallback((ev: CalendarEvent) => {
       setSelectedEvent(ev)
-    }
+    }, [])
 
     useImperativeHandle(ref, () => ({
       navigateTo: (date: string) => {
@@ -251,10 +247,17 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
       }
     }, [contextMenu])
 
-    const isPastEvent = (ev: CalendarEvent) => {
+    const eventsByDate = useMemo(() => {
+      return events.reduce((acc, ev) => {
+        (acc[ev.date] ??= []).push(ev)
+        return acc
+      }, {} as Record<string, CalendarEvent[]>)
+    }, [events])
+
+    const isPastEvent = useCallback((ev: CalendarEvent) => {
       const eventDateTime = new Date(ev.date + 'T' + (ev.startTime ?? '23:59'))
       return eventDateTime.getTime() < Date.now()
-    }
+    }, [])
 
     const openContextMenu = useCallback(
       (
@@ -278,32 +281,38 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
       []
     )
 
-    const prevMonth = () => {
-      if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
-      else setViewMonth(m => m - 1)
-    }
-    const nextMonth = () => {
-      if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
-      else setViewMonth(m => m + 1)
-    }
-    const goToToday = () => {
+    const prevMonth = useCallback(() => {
+      setViewMonth(m => {
+        if (m === 0) { setViewYear(y => y - 1); return 11 }
+        return m - 1
+      })
+    }, [])
+
+    const nextMonth = useCallback(() => {
+      setViewMonth(m => {
+        if (m === 11) { setViewYear(y => y + 1); return 0 }
+        return m + 1
+      })
+    }, [])
+
+    const goToToday = useCallback(() => {
       setViewYear(today.getFullYear())
       setViewMonth(today.getMonth())
-    }
+    }, [])
 
-    const openNewEvent = (dateStr: string) => {
+    const openNewEvent = useCallback((dateStr: string) => {
       setModalDate(dateStr)
       setEditingEvent(null)
       setModalOpen(true)
-    }
+    }, [])
 
-    const openEditEvent = (event: CalendarEvent) => {
+    const openEditEvent = useCallback((event: CalendarEvent) => {
       setModalDate(event.date)
       setEditingEvent({ ...event, subjectId: undefined })
       setModalOpen(true)
-    }
+    }, [])
 
-    const handleSave = (newEvent: CalendarEvent) => {
+    const handleSave = useCallback((newEvent: CalendarEvent) => {
       if (editingEvent) {
         onUpdateEvent?.(editingEvent, newEvent)
       } else {
@@ -311,52 +320,55 @@ const Calendar = forwardRef<CalendarHandle, CalendarProps>(
       }
       setModalOpen(false)
       setEditingEvent(null)
-    }
+    }, [editingEvent, onUpdateEvent, onAddEvent])
 
-    const handleDelete = (event: CalendarEvent) => {
+    const handleDelete = useCallback((event: CalendarEvent) => {
       onRemoveEvent?.(event.date, event.title)
       setModalOpen(false)
       setEditingEvent(null)
-    }
+    }, [onRemoveEvent])
 
-    const openMap = (location?: string) => {
+    const openMap = useCallback((location?: string) => {
       setMapDestination(location)
       setMapOpen(true)
       setContextMenu(null)
-    }
+    }, [])
 
-    const getEventsForDate = (dateStr: string) => events.filter(e => e.date === dateStr)
-
-    const isToday = (dateStr: string) =>
-      dateStr === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+    const isToday = useCallback((dateStr: string) =>
+      dateStr === `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`,
+      []
+    )
 
     const formatDate = (dateStr: string) =>
       new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
         weekday: 'short', day: 'numeric', month: 'short'
       })
 
-    const cells = []
-    for (let i = 0; i < firstDay; i++) {
-      cells.push(<div key={`empty-${i}`} className="cal-cell cal-cell--empty" />)
-    }
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
-      cells.push(
-        <DayCell
-          key={dateStr}
-          dateStr={dateStr}
-          d={d}
-          dayEvents={getEventsForDate(dateStr)}
-          todayCell={isToday(dateStr)}
-          openContextMenu={openContextMenu}
-          openNewEvent={openNewEvent}
-          openEventDetail={openEventDetail}
-          openEditEvent={openEditEvent}
-          isPastEvent={isPastEvent}
-          contextHandledByPill={contextHandledByPill}
-        />
-      )
-    }
+    const cells = useMemo(() => {
+      const result = []
+      for (let i = 0; i < firstDay; i++) {
+        result.push(<div key={`empty-${i}`} className="cal-cell cal-cell--empty" />)
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+        result.push(
+          <DayCell
+            key={dateStr}
+            dateStr={dateStr}
+            d={d}
+            dayEvents={eventsByDate[dateStr] ?? []}
+            todayCell={isToday(dateStr)}
+            openContextMenu={openContextMenu}
+            openNewEvent={openNewEvent}
+            openEventDetail={openEventDetail}
+            openEditEvent={openEditEvent}
+            isPastEvent={isPastEvent}
+            contextHandledByPill={contextHandledByPill}
+          />
+        )
+      }
+      return result
+    }, [viewYear, viewMonth, firstDay, daysInMonth, eventsByDate, isToday, openContextMenu, openNewEvent, openEventDetail, openEditEvent, isPastEvent])
 
     return (
       <>

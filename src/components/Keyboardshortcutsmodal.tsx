@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { X } from 'lucide-react'
 import './KeyboardShortcutsModal.css'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
@@ -43,7 +43,6 @@ interface Props {
     onClose: () => void
 }
 
-
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -86,17 +85,17 @@ const kbdVariants: Variants = {
     }),
 }
 
-
 export default function KeyboardShortcutsModal({ onClose }: Props) {
     const [open, setOpen] = useState(true)
     useScrollLock(open)
-    const handleClose = () => setOpen(false)
+
+    const handleClose = useCallback(() => setOpen(false), [])
 
     useEffect(() => {
         const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
         window.addEventListener('keydown', h)
         return () => window.removeEventListener('keydown', h)
-    }, [])
+    }, [handleClose])
 
     return (
         <AnimatePresence onExitComplete={onClose}>

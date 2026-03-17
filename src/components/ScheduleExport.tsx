@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo } from "react"
+import { useRef, useState, useMemo, useCallback } from "react"
 import { X } from "lucide-react"
 import type { Subject } from "../types/types"
 import "./ScheduleExport.css"
@@ -53,7 +53,6 @@ function formatHour(h: number) {
     return `${String(h).padStart(2, "0")}:00`
 }
 
-
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.2 } },
@@ -88,7 +87,6 @@ const blockVariants: Variants = {
     }),
 }
 
-
 export default function ScheduleExport({
     subjects,
     careerName,
@@ -99,10 +97,9 @@ export default function ScheduleExport({
     const gridRef = useRef<HTMLDivElement>(null)
     const [open, setOpen] = useState(true)
     useScrollLock(open)
-    
     const [downloading, setDownloading] = useState(false)
 
-    const handleClose = () => setOpen(false)
+    const handleClose = useCallback(() => setOpen(false), [])
 
     const colorMap = useMemo(() => {
         const map: Record<string, typeof SUBJECT_COLORS[0]> = {}
@@ -130,27 +127,42 @@ export default function ScheduleExport({
         return result
     }, [subjects])
 
-    const occupiedMins = blocks
-        .map((b) => b.startMin + HOUR_START * 60)
-        .concat(blocks.map((b) => b.startMin + b.durationMin + HOUR_START * 60))
 
-    const visibleStart = blocks.length
-        ? Math.max(HOUR_START, Math.floor(Math.min(...occupiedMins) / 60) - 1)
-        : HOUR_START
+    const { visibleMin, gridHeight, activeDays, hourLabels } = useMemo(() => {
+        const occupiedMins = blocks
+            .map((b) => b.startMin + HOUR_START * 60)
+            .concat(blocks.map((b) => b.startMin + b.durationMin + HOUR_START * 60))
 
-    const visibleEnd = blocks.length
-        ? Math.min(HOUR_END, Math.ceil(Math.max(...occupiedMins) / 60) + 1)
-        : HOUR_END
+        const vStart = blocks.length
+            ? Math.max(HOUR_START, Math.floor(Math.min(...occupiedMins) / 60) - 1)
+            : HOUR_START
+        const vEnd = blocks.length
+            ? Math.min(HOUR_END, Math.ceil(Math.max(...occupiedMins) / 60) + 1)
+            : HOUR_END
 
-    const visibleMin = (visibleStart - HOUR_START) * 60
-    const visibleTotal = (visibleEnd - visibleStart) * 60
-    const gridHeight = visibleTotal * PX_PER_MIN
+        const vMin = (vStart - HOUR_START) * 60
+        const height = (vEnd - vStart) * 60 * PX_PER_MIN
 
-    const activeDays = blocks.length
-        ? DAYS.filter((d) => blocks.some((b) => b.day === d))
-        : DAYS
+        const days = blocks.length
+            ? DAYS.filter((d) => blocks.some((b) => b.day === d))
+            : DAYS
 
-    const handleDownload = async () => {
+        const hours = Array.from({ length: vEnd - vStart + 1 }, (_, i) => {
+            const h = vStart + i
+            return { h, top: (h - vStart) * 60 * PX_PER_MIN, label: formatHour(h) }
+        })
+
+        return {
+            visibleStart: vStart,
+            visibleEnd: vEnd,
+            visibleMin: vMin,
+            gridHeight: height,
+            activeDays: days,
+            hourLabels: hours,
+        }
+    }, [blocks])
+
+    const handleDownload = useCallback(async () => {
         if (!gridRef.current) return
         setDownloading(true)
         try {
@@ -165,7 +177,7 @@ export default function ScheduleExport({
         } finally {
             setDownloading(false)
         }
-    }
+    }, [currentYear, currentSemester])
 
     return (
         <AnimatePresence onExitComplete={onClose}>
@@ -226,15 +238,11 @@ export default function ScheduleExport({
 
                                 <div className="schedule-grid">
                                     <div className="schedule-hours" style={{ height: gridHeight }}>
-                                        {Array.from({ length: visibleEnd - visibleStart + 1 }, (_, i) => {
-                                            const h = visibleStart + i
-                                            const top = (h - visibleStart) * 60 * PX_PER_MIN
-                                            return (
-                                                <div key={h} className="schedule-hour" style={{ top }}>
-                                                    {formatHour(h)}
-                                                </div>
-                                            )
-                                        })}
+                                        {hourLabels.map(({ h, top, label }) => (
+                                            <div key={h} className="schedule-hour" style={{ top }}>
+                                                {label}
+                                            </div>
+                                        ))}
                                     </div>
 
                                     <div className="schedule-days">

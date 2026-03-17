@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import * as XLSX from 'xlsx'
 import Xls from '../Icon/Xls'
 import './Siuimporter.css'
@@ -45,7 +45,6 @@ function parseDate(raw: string): string {
     return ''
 }
 
-
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.2 } },
@@ -65,9 +64,7 @@ const modalVariants: Variants = {
 }
 
 const stepVariants: Variants = {
-    enter: (dir: number) => ({
-        opacity: 0, x: dir > 0 ? 32 : -32,
-    }),
+    enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 32 : -32 }),
     center: {
         opacity: 1, x: 0,
         transition: { type: 'spring', damping: 22, stiffness: 300 },
@@ -84,14 +81,6 @@ const errorVariants: Variants = {
     exit: { opacity: 0, y: -4, height: 0, transition: { duration: 0.14 } },
 }
 
-const cardVariants: Variants = {
-    hidden: { opacity: 0, y: 8 },
-    visible: (i: number) => ({
-        opacity: 1, y: 0,
-        transition: { delay: i * 0.035, duration: 0.2, ease: 'easeOut' },
-    }),
-}
-
 const ctxMenuVariants: Variants = {
     hidden: { opacity: 0, scale: 0.95, y: -6 },
     visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.14, ease: 'easeOut' } },
@@ -104,7 +93,6 @@ const footerVariants: Variants = {
     exit: { opacity: 0, y: 6, transition: { duration: 0.12 } },
 }
 
-
 export default function SiuImporter({ onImport, onClose }: Props) {
     const inputRef = useRef<HTMLInputElement>(null)
     const [open, setOpen] = useState(true)
@@ -112,13 +100,13 @@ export default function SiuImporter({ onImport, onClose }: Props) {
     const [preview, setPreview] = useState<SiuSubject[]>([])
     const [error, setError] = useState<string | null>(null)
     const [step, setStep] = useState<'upload' | 'preview'>('upload')
-    const [stepDir, setStepDir] = useState(1)   
+    const [stepDir, setStepDir] = useState(1)
     const [ctxMenu, setCtxMenu] = useState<{ visible: boolean; x: number; y: number; idx: number }>({
         visible: false, x: 0, y: 0, idx: -1,
     })
     const ctxMenuRef = useRef<HTMLDivElement>(null)
 
-    const handleClose = () => setOpen(false)
+    const handleClose = useCallback(() => setOpen(false), [])
 
     useEffect(() => {
         if (!ctxMenu.visible) return
@@ -130,20 +118,20 @@ export default function SiuImporter({ onImport, onClose }: Props) {
         return () => window.removeEventListener('mousedown', h)
     }, [ctxMenu.visible])
 
-    const handlePreviewContextMenu = (e: React.MouseEvent, idx: number) => {
+    const handlePreviewContextMenu = useCallback((e: React.MouseEvent, idx: number) => {
         e.preventDefault()
         const menuW = 200, menuH = 160
         const x = e.clientX + menuW > window.innerWidth ? e.clientX - menuW : e.clientX
         const y = e.clientY + menuH > window.innerHeight ? e.clientY - menuH : e.clientY
         setCtxMenu({ visible: true, x, y, idx })
-    }
+    }, [])
 
-    const goToStep = (next: 'upload' | 'preview') => {
+    const goToStep = useCallback((next: 'upload' | 'preview') => {
         setStepDir(next === 'preview' ? 1 : -1)
         setStep(next)
-    }
+    }, [])
 
-    const handleFile = (file: File) => {
+    const handleFile = useCallback((file: File) => {
         setError(null)
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -214,13 +202,13 @@ export default function SiuImporter({ onImport, onClose }: Props) {
             }
         }
         reader.readAsArrayBuffer(file)
-    }
+    }, [goToStep])
 
-    const handleDrop = (e: React.DragEvent) => {
+    const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault()
         const file = e.dataTransfer.files[0]
         if (file) handleFile(file)
-    }
+    }, [handleFile])
 
     return (
         <AnimatePresence onExitComplete={onClose}>
@@ -342,14 +330,10 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                 >
                                     <div className="siu-preview">
                                         {preview.map((s, i) => (
-                                            <motion.div
+                                            <div
                                                 key={i}
                                                 className="siu-preview-card"
                                                 onContextMenu={e => handlePreviewContextMenu(e, i)}
-                                                variants={cardVariants}
-                                                custom={i}
-                                                initial="hidden"
-                                                animate="visible"
                                             >
                                                 <div>
                                                     <div className="siu-preview-name">{s.name}</div>
@@ -364,7 +348,7 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                                 <div className={`siu-badge ${s.gradeFinalExam === null ? 'badge-promo' : 'badge-exam'}`}>
                                                     {s.gradeFinalExam === null ? 'Promoción' : 'Examen'}
                                                 </div>
-                                            </motion.div>
+                                            </div>
                                         ))}
                                     </div>
                                 </motion.div>
@@ -395,8 +379,8 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                         </div>
 
                                         <button className="context-menu__item" onClick={() => {
-                                            setPreview(p => p.map((item, i) =>
-                                                i === ctxMenu.idx
+                                            setPreview(p => p.map((item, idx) =>
+                                                idx === ctxMenu.idx
                                                     ? { ...item, gradeFinalExam: item.gradeFinalExam === null ? item.grade : null }
                                                     : item
                                             ))
@@ -418,7 +402,7 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                         <div className="context-menu__divider" />
 
                                         <button className="context-menu__item context-menu__item--danger" onClick={() => {
-                                            setPreview(p => p.filter((_, i) => i !== ctxMenu.idx))
+                                            setPreview(p => p.filter((_, idx) => idx !== ctxMenu.idx))
                                             setCtxMenu(m => ({ ...m, visible: false }))
                                         }}>
                                             <Trash size={14} color="currentColor" /> Quitar de la importación

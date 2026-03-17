@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { renderToString } from 'react-dom/server'
 import type { ReactNode } from 'react'
 import { X, Navigation, Clock, MapPin, Loader } from 'lucide-react'
@@ -53,6 +53,59 @@ const MODES: ModeConfig[] = [
 const ORS_KEY = '5b3ce3597851110001cf6248a355efb1d2e94c7bb3f1b739bcaeb32c'
 const ECOBICI_STATION_INFO = 'https://buenosaires.publicbikesystem.net/customer/gbfs/v2/en/station_information.json'
 const ECOBICI_STATION_STATUS = 'https://buenosaires.publicbikesystem.net/customer/gbfs/v2/en/station_status.json'
+
+const gmapsModeMap: Record<TravelMode, string> = {
+    driving: 'driving',
+    walking: 'walking',
+    cycling: 'bicycling',
+    transit: 'transit',
+}
+
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+}
+
+const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 26, stiffness: 280 } },
+    exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } },
+}
+
+const dropdownVariants: Variants = {
+    hidden: { opacity: 0, y: -6, scale: 0.98 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.15, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.1 } },
+}
+
+const slideVariants: Variants = {
+    hidden: { opacity: 0, height: 0, marginBottom: 0 },
+    visible: { opacity: 1, height: 'auto', marginBottom: 8, transition: { duration: 0.2, ease: 'easeOut' } },
+    exit: { opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.15, ease: 'easeIn' } },
+}
+
+const chipVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.85, y: 4 },
+    visible: (i: number) => ({
+        opacity: 1, scale: 1, y: 0,
+        transition: { delay: i * 0.07, type: 'spring', damping: 18, stiffness: 300 },
+    }),
+}
+
+const ecobiciVariants: Variants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { opacity: 1, height: 'auto', transition: { duration: 0.22, ease: 'easeOut' } },
+    exit: { opacity: 0, height: 0, transition: { duration: 0.15 } },
+}
+
+const navLinkVariants: Variants = {
+    hidden: { opacity: 0, y: 6 },
+    visible: (i: number) => ({
+        opacity: 1, y: 0,
+        transition: { delay: i * 0.08, duration: 0.2, ease: 'easeOut' },
+    }),
+}
 
 interface Props {
     onClose: () => void
@@ -171,60 +224,6 @@ function makeEcobiciIcon(L: any, bikes: number | undefined) {
     })
 }
 
-
-const overlayVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { opacity: 0 },
-}
-
-const modalVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.96, y: 16 },
-    visible: {
-        opacity: 1, scale: 1, y: 0,
-        transition: { type: 'spring', damping: 26, stiffness: 280 },
-    },
-    exit: {
-        opacity: 0, scale: 0.96, y: 12,
-        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-    },
-}
-
-const dropdownVariants: Variants = {
-    hidden: { opacity: 0, y: -6, scale: 0.98 },
-    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.15, ease: 'easeOut' } },
-    exit: { opacity: 0, y: -4, scale: 0.98, transition: { duration: 0.1 } },
-}
-
-const slideVariants: Variants = {
-    hidden: { opacity: 0, height: 0, marginBottom: 0 },
-    visible: { opacity: 1, height: 'auto', marginBottom: 8, transition: { duration: 0.2, ease: 'easeOut' } },
-    exit: { opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.15, ease: 'easeIn' } },
-}
-
-const chipVariants: Variants = {
-    hidden: { opacity: 0, scale: 0.85, y: 4 },
-    visible: (i: number) => ({
-        opacity: 1, scale: 1, y: 0,
-        transition: { delay: i * 0.07, type: 'spring', damping: 18, stiffness: 300 },
-    }),
-}
-
-const ecobiciVariants: Variants = {
-    hidden: { opacity: 0, height: 0 },
-    visible: { opacity: 1, height: 'auto', transition: { duration: 0.22, ease: 'easeOut' } },
-    exit: { opacity: 0, height: 0, transition: { duration: 0.15 } },
-}
-
-const navLinkVariants: Variants = {
-    hidden: { opacity: 0, y: 6 },
-    visible: (i: number) => ({
-        opacity: 1, y: 0,
-        transition: { delay: i * 0.08, duration: 0.2, ease: 'easeOut' },
-    }),
-}
-
-
 export default function MapModal({ onClose, initialDestination }: Props) {
     const mapRef = useRef<HTMLDivElement>(null)
     const leafletMap = useRef<any>(null)
@@ -255,13 +254,13 @@ export default function MapModal({ onClose, initialDestination }: Props) {
     const [nearestDest, setNearestDest] = useState<EcobiciStation | null>(null)
     const [loadingEcobici, setLoadingEcobici] = useState(false)
 
-    const handleClose = () => setOpen(false)
+    const handleClose = useCallback(() => setOpen(false), [])
 
     useEffect(() => {
         const h = (e: KeyboardEvent) => { if (e.key === 'Escape') handleClose() }
         window.addEventListener('keydown', h)
         return () => window.removeEventListener('keydown', h)
-    }, [])
+    }, [handleClose])
 
     useEffect(() => {
         const h = (e: MouseEvent) => {
@@ -355,6 +354,13 @@ export default function MapModal({ onClose, initialDestination }: Props) {
         await drawDestination((window as any).L, destPos, name, travelMode)
     }, [drawDestination, travelMode])
 
+
+    const travelModeRef = useRef(travelMode)
+    useEffect(() => { travelModeRef.current = travelMode }, [travelMode])
+
+    const drawDestinationRef = useRef(drawDestination)
+    useEffect(() => { drawDestinationRef.current = drawDestination }, [drawDestination])
+
     useEffect(() => {
         if (!mapRef.current) return
         const init = async () => {
@@ -397,7 +403,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                         const destPos: [number, number] = [parseFloat(best.lat), parseFloat(best.lon)]
                         const name = best.display_name.split(',').slice(0, 2).join(', ')
                         setQuery(name)
-                        await drawDestination(L, destPos, name, travelMode)
+                        await drawDestinationRef.current(L, destPos, name, travelModeRef.current)
                     } else setErrorMsg(`No se encontró "${initialDestination}". Buscalo manualmente.`)
                 }
             }
@@ -414,7 +420,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
                         const destPos: [number, number] = [parseFloat(best.lat), parseFloat(best.lon)]
                         const name = best.display_name.split(',').slice(0, 2).join(', ')
                         setQuery(name)
-                        await drawDestination(L, destPos, name, travelMode)
+                        await drawDestinationRef.current(L, destPos, name, travelModeRef.current)
                     }
                 }
             }
@@ -427,36 +433,50 @@ export default function MapModal({ onClose, initialDestination }: Props) {
         return () => { if (leafletMap.current) { leafletMap.current.remove(); leafletMap.current = null } }
     }, [])
 
-    const handleQueryChange = (val: string) => {
+    const handleQueryChange = useCallback((val: string) => {
         setQuery(val); setSuggestOpen(true)
         if (debounceRef.current) clearTimeout(debounceRef.current)
         if (val.length < 3) { setSuggestions([]); return }
         setLoadingSugg(true)
         debounceRef.current = setTimeout(async () => { setSuggestions(await geocode(val)); setLoadingSugg(false) }, 400)
-    }
+    }, [])
 
-    const fmt = (min: number) => min < 60 ? `${Math.round(min)} min` : `${Math.floor(min / 60)}h ${Math.round(min % 60)}min`
+    const fmt = useCallback((min: number) =>
+        min < 60 ? `${Math.round(min)} min` : `${Math.floor(min / 60)}h ${Math.round(min % 60)}min`,
+        []
+    )
 
-    const arrivalTime = route ? (() => {
+    const arrivalTime = useMemo(() => {
+        if (!route) return null
         const now = new Date()
         now.setMinutes(now.getMinutes() + Math.round(route.durationMin))
         return now.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })
-    })() : null
+    }, [route])
 
-    const activeCfg = MODES.find(m => m.key === travelMode)!
-    const wazeUrl = destCoords && travelMode === 'driving'
-        ? `https://waze.com/ul?ll=${destCoords[0]},${destCoords[1]}&navigate=yes`
-        : null
+    const activeCfg = useMemo(() => MODES.find(m => m.key === travelMode)!, [travelMode])
 
-    const gmapsModeMap: Record<TravelMode, string> = {
-        driving: 'driving',
-        walking: 'walking',
-        cycling: 'bicycling',
-        transit: 'transit',
-    }
-    const gmapsUrl = destCoords
-        ? `https://www.google.com/maps/dir/?api=1&destination=${destCoords[0]},${destCoords[1]}&travelmode=${gmapsModeMap[travelMode]}`
-        : null
+    const wazeUrl = useMemo(() =>
+        destCoords && travelMode === 'driving'
+            ? `https://waze.com/ul?ll=${destCoords[0]},${destCoords[1]}&navigate=yes`
+            : null,
+        [destCoords, travelMode]
+    )
+
+    const gmapsUrl = useMemo(() =>
+        destCoords
+            ? `https://www.google.com/maps/dir/?api=1&destination=${destCoords[0]},${destCoords[1]}&travelmode=${gmapsModeMap[travelMode]}`
+            : null,
+        [destCoords, travelMode]
+    )
+
+    const routeChips = useMemo(() => {
+        if (!route) return []
+        return [
+            { label: `${route.distanceKm.toFixed(1)} km`, icon: <Navigation size={11} />, alt: false },
+            { label: fmt(route.durationMin), icon: <Clock size={11} />, alt: false },
+            ...(arrivalTime ? [{ label: `Llegás a las ${arrivalTime}`, icon: <Clock size={11} />, alt: true }] : []),
+        ]
+    }, [route, arrivalTime, fmt])
 
     const showRouteInfo = !!(route || status !== 'idle' || errorMsg)
     const showEcobici = travelMode === 'cycling' && bikeType === 'ecobici' && (!!nearestOrigin || !!nearestDest || loadingEcobici)
@@ -554,14 +574,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
 
                         <AnimatePresence>
                             {travelMode === 'cycling' && (
-                                <motion.div
-                                    className="map-biketype"
-                                    variants={slideVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    style={{ overflow: 'hidden' }}
-                                >
+                                <motion.div className="map-biketype" variants={slideVariants} initial="hidden" animate="visible" exit="exit" style={{ overflow: 'hidden' }}>
                                     {(['propia', 'ecobici'] as const).map(bt => {
                                         const on = bikeType === bt
                                         return (
@@ -588,44 +601,29 @@ export default function MapModal({ onClose, initialDestination }: Props) {
 
                         <AnimatePresence>
                             {showRouteInfo && (
-                                <motion.div
-                                    className="map-route-info"
-                                    variants={slideVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    style={{ overflow: 'hidden' }}
-                                >
+                                <motion.div className="map-route-info" variants={slideVariants} initial="hidden" animate="visible" exit="exit" style={{ overflow: 'hidden' }}>
                                     {status !== 'idle' && (
                                         <span className="map-status">
                                             <Loader size={12} className="map-spin" />
                                             {status === 'locating' ? 'Obteniendo ubicación...' : 'Calculando ruta...'}
                                         </span>
                                     )}
-                                    {route && status === 'idle' && (
-                                        <>
-                                            {[
-                                                { label: `${route.distanceKm.toFixed(1)} km`, icon: <Navigation size={11} /> },
-                                                { label: fmt(route.durationMin), icon: <Clock size={11} /> },
-                                                ...(arrivalTime ? [{ label: `Llegás a las ${arrivalTime}`, icon: <Clock size={11} />, alt: true }] : []),
-                                            ].map((chip, i) => (
-                                                <motion.div
-                                                    key={chip.label}
-                                                    className="map-route-chip"
-                                                    style={chip.alt
-                                                        ? { background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', color: '#818cf8' }
-                                                        : { background: `${activeCfg.color}20`, border: `1px solid ${activeCfg.color}44`, color: activeCfg.color }
-                                                    }
-                                                    variants={chipVariants}
-                                                    custom={i}
-                                                    initial="hidden"
-                                                    animate="visible"
-                                                >
-                                                    {chip.icon} {chip.label}
-                                                </motion.div>
-                                            ))}
-                                        </>
-                                    )}
+                                    {route && status === 'idle' && routeChips.map((chip, i) => (
+                                        <motion.div
+                                            key={chip.label}
+                                            className="map-route-chip"
+                                            style={chip.alt
+                                                ? { background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', color: '#818cf8' }
+                                                : { background: `${activeCfg.color}20`, border: `1px solid ${activeCfg.color}44`, color: activeCfg.color }
+                                            }
+                                            variants={chipVariants}
+                                            custom={i}
+                                            initial="hidden"
+                                            animate="visible"
+                                        >
+                                            {chip.icon} {chip.label}
+                                        </motion.div>
+                                    ))}
                                     {errorMsg && <div className="map-route-error">{errorMsg}</div>}
                                 </motion.div>
                             )}
@@ -633,14 +631,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
 
                         <AnimatePresence>
                             {showEcobici && (
-                                <motion.div
-                                    className="map-ecobici"
-                                    variants={ecobiciVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                    style={{ overflow: 'hidden' }}
-                                >
+                                <motion.div className="map-ecobici" variants={ecobiciVariants} initial="hidden" animate="visible" exit="exit" style={{ overflow: 'hidden' }}>
                                     {loadingEcobici && (
                                         <span style={{ color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
                                             <Loader size={11} className="map-spin" /> Buscando estaciones EcoBici...
@@ -679,12 +670,7 @@ export default function MapModal({ onClose, initialDestination }: Props) {
 
                         <AnimatePresence>
                             {destCoords && (
-                                <motion.div
-                                    className="map-nav-links"
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit={{ opacity: 0 }}
-                                >
+                                <motion.div className="map-nav-links" initial="hidden" animate="visible" exit={{ opacity: 0 }}>
                                     {[
                                         wazeUrl && { href: wazeUrl, cls: 'map-nav-link--waze', icon: <Waze size={13} color="#60a5fa" />, label: 'Abrir en Waze' },
                                         gmapsUrl && { href: gmapsUrl, cls: 'map-nav-link--gmaps', icon: <GoogleMaps size={13} color="#4ade80" />, label: 'Abrir en Google Maps' },

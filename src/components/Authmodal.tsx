@@ -1,10 +1,7 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import './Authmodal.css'
 import { Danger, Eye, EyeSlash, Link2, Location } from 'iconsax-react'
-import {
-    CheckCircle, Mail, X, Loader, Check,
-
-} from 'lucide-react'
+import { CheckCircle, Mail, X, Loader, Check } from 'lucide-react'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 
 interface UniversityResult {
@@ -13,8 +10,6 @@ interface UniversityResult {
     lat: string
     lon: string
 }
-
-
 
 interface Props {
     onClose: () => void
@@ -40,6 +35,37 @@ interface Props {
     onSignInWithOAuth: (provider: 'github' | 'discord' | 'google') => Promise<string | null>
 }
 
+
+const overlayVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+    exit: { opacity: 0 },
+}
+
+const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.96, y: 16 },
+    visible: {
+        opacity: 1, scale: 1, y: 0,
+        transition: { type: 'spring' as const, damping: 26, stiffness: 280 }
+    },
+    exit: {
+        opacity: 0, scale: 0.96, y: 12,
+        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] as const }
+    },
+}
+
+const stepVariants: Variants = {
+    hidden: { opacity: 0, x: 18 },
+    visible: {
+        opacity: 1, x: 0,
+        transition: { duration: 0.2, ease: 'easeOut' as const }
+    },
+    exit: {
+        opacity: 0, x: -18,
+        transition: { duration: 0.14 }
+    },
+}
+
 async function searchUniversities(query: string): Promise<UniversityResult[]> {
     if (query.length < 3) return []
     try {
@@ -55,11 +81,29 @@ function cleanUniversityName(displayName: string): string {
     return displayName.split(',')[0].trim()
 }
 
+const LOGIN_ERRORS: Record<string, string> = {
+    'Invalid login credentials': 'Email o contraseña incorrectos.',
+    'Email not confirmed': 'Confirmá tu email antes de iniciar sesión.',
+    'User already registered': 'Ya existe una cuenta con ese email.',
+}
+const SIGNUP_ERRORS: Record<string, string> = {
+    'User already registered': 'Ya existe una cuenta con ese email.',
+    'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres.',
+    'signup_disabled': 'El registro está deshabilitado temporalmente.',
+}
+const RESET_ERRORS: Record<string, string> = {
+    'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos.',
+    'User not found': 'No existe una cuenta con ese email.',
+}
+const MAGIC_ERRORS: Record<string, string> = {
+    'Signups not allowed for otp': 'No existe una cuenta con ese email.',
+    'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos.',
+}
+
 export default function AuthModal({ onClose, onResetPassword, initialMode = 'login', onSignIn, onSignUp, onSignInWithMagicLink, onSignInWithOAuth }: Props) {
     const [mode, setMode] = useState<'login' | 'register'>(initialMode)
     const [registerStep, setRegisterStep] = useState<1 | 2>(1)
     const [isClosing, setIsClosing] = useState(false)
-    const handleClose = () => setIsClosing(true)
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [fullName, setFullName] = useState('')
@@ -92,7 +136,10 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
 
     const emailRef = useRef<HTMLInputElement>(null)
 
+    const handleClose = useCallback(() => setIsClosing(true), [])
+
     useEffect(() => { if (mode === 'login') emailRef.current?.focus() }, [mode])
+
     useEffect(() => {
         const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
         window.addEventListener('keydown', h)
@@ -108,7 +155,7 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
         return () => document.removeEventListener('mousedown', h)
     }, [uniOpen])
 
-    const handleUniInput = (val: string) => {
+    const handleUniInput = useCallback((val: string) => {
         setUniversityInput(val); setUniversitySelected(''); setUniversityLat(null); setUniversityLon(null); setUniOpen(true)
         if (uniDebounce.current) clearTimeout(uniDebounce.current)
         if (val.length < 3) { setUniResults([]); return }
@@ -117,104 +164,58 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
             const results = await searchUniversities(val)
             setUniResults(results); setUniLoading(false)
         }, 400)
-    }
+    }, [])
 
-    const overlayVariants: Variants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1 },
-        exit: { opacity: 0 },
-    }
-
-    const modalVariants: Variants = {
-        hidden: { opacity: 0, scale: 0.96, y: 16 },
-        visible: {
-            opacity: 1, scale: 1, y: 0,
-            transition: { type: 'spring' as const, damping: 26, stiffness: 280 }
-        },
-        exit: {
-            opacity: 0, scale: 0.96, y: 12,
-            transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] as const }
-        },
-    }
-
-    const stepVariants: Variants = {
-        hidden: { opacity: 0, x: 18 },
-        visible: {
-            opacity: 1, x: 0,
-            transition: { duration: 0.2, ease: 'easeOut' as const }
-        },
-        exit: {
-            opacity: 0, x: -18,
-            transition: { duration: 0.14 }
-        },
-    }
-
-    const selectUniversity = (r: UniversityResult) => {
+    const selectUniversity = useCallback((r: UniversityResult) => {
         const name = cleanUniversityName(r.display_name)
         setUniversityInput(name); setUniversitySelected(name)
         setUniversityLat(parseFloat(r.lat)); setUniversityLon(parseFloat(r.lon))
         setUniResults([]); setUniOpen(false)
-    }
+    }, [])
 
-    const clearUniversity = () => {
+    const clearUniversity = useCallback(() => {
         setUniversityInput(''); setUniversitySelected('')
         setUniversityLat(null); setUniversityLon(null)
         setUniResults([]); setUniOpen(false)
-    }
+    }, [])
 
-    const handleOAuth = async (provider: 'github' | 'discord' | 'google') => {
+    const handleOAuth = useCallback(async (provider: 'github' | 'discord' | 'google') => {
         setError(null)
         const err = await onSignInWithOAuth(provider)
         if (err) setError(err)
-    }
+    }, [onSignInWithOAuth])
 
-    const handleNextStep = () => {
+    const handleNextStep = useCallback(() => {
         setError(null)
         if (!fullName.trim()) { setError('Ingresá tu nombre completo.'); return }
         if (!email.trim()) { setError('Ingresá tu email.'); return }
         if (password.length < 6) { setError('La contraseña debe tener al menos 6 caracteres.'); return }
         if (password !== confirm) { setError('Las contraseñas no coinciden.'); return }
         setRegisterStep(2)
-    }
+    }, [fullName, email, password, confirm])
 
-    const handleResetPassword = async () => {
+    const handleResetPassword = useCallback(async () => {
         setError(null)
         if (!email.trim()) { setError('Ingresá tu email primero.'); return }
         setResetLoading(true)
         const err = await onResetPassword(email.trim())
         setResetLoading(false)
-        if (err) {
-            const t: Record<string, string> = {
-                'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos.',
-                'User not found': 'No existe una cuenta con ese email.',
-            }
-            setError(t[err] ?? err)
-        } else {
-            setResetSent(true)
-        }
-    }
+        if (err) setError(RESET_ERRORS[err] ?? err)
+        else setResetSent(true)
+    }, [email, onResetPassword])
 
-    const handleSubmit = async () => {
+    const handleSubmit = useCallback(async () => {
         setError(null); setSuccess(null)
         if (mode === 'login') {
             if (!email.trim() || !password) { setError('Completá email y contraseña.'); return }
             setLoading(true)
             try {
                 const err = await onSignIn(email.trim(), password)
-                if (err) {
-                    const translations: Record<string, string> = {
-                        'Invalid login credentials': 'Email o contraseña incorrectos.',
-                        'Email not confirmed': 'Confirmá tu email antes de iniciar sesión.',
-                        'User already registered': 'Ya existe una cuenta con ese email.',
-                    }
-                    setError(translations[err] ?? err)
-                } else {
-                    onClose()
-                }
+                if (err) setError(LOGIN_ERRORS[err] ?? err)
+                else onClose()
             } finally { setLoading(false) }
             return
         }
-
         setLoading(true)
         try {
             const err = await onSignUp(email.trim(), password, {
@@ -229,37 +230,27 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                 career_current_semester: currentSemester,
             })
             if (err) {
-                const translations: Record<string, string> = {
-                    'User already registered': 'Ya existe una cuenta con ese email.',
-                    'Password should be at least 6 characters': 'La contraseña debe tener al menos 6 caracteres.',
-                    'signup_disabled': 'El registro está deshabilitado temporalmente.',
-                }
-                setError(translations[err] ?? err)
+                setError(SIGNUP_ERRORS[err] ?? err)
                 setRegisterStep(1)
             } else {
                 setSuccess('¡Cuenta creada! Revisá tu email para confirmar.')
             }
         } finally { setLoading(false) }
-    }
+    }, [mode, email, password, fullName, universitySelected, universityInput, universityLat, universityLon, careerName, totalYears, totalSubjects, currentYear, currentSemester, onSignIn, onSignUp, onClose])
 
-    const handleMagicLink = async () => {
+    const handleMagicLink = useCallback(async () => {
         setError(null)
         if (!email.trim()) { setError('Ingresá tu email primero.'); return }
         setMagicLoading(true)
         const err = await onSignInWithMagicLink(email.trim())
         setMagicLoading(false)
-        if (err) {
-            const t: Record<string, string> = {
-                'Signups not allowed for otp': 'No existe una cuenta con ese email.',
-                'Email rate limit exceeded': 'Demasiados intentos. Esperá unos minutos.',
-            }
-            setError(t[err] ?? err)
-        } else { setMagicSent(true) }
-    }
+        if (err) setError(MAGIC_ERRORS[err] ?? err)
+        else setMagicSent(true)
+    }, [email, onSignInWithMagicLink])
 
-    const switchMode = (m: 'login' | 'register') => {
+    const switchMode = useCallback((m: 'login' | 'register') => {
         setMode(m); setError(null); setSuccess(null); setMagicSent(false); setRegisterStep(1)
-    }
+    }, [])
 
     const isRegister = mode === 'register'
 
@@ -332,7 +323,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                     animate="visible"
                                     exit="exit"
                                 >
-
                                     {success ? (
                                         <div className="auth-modal__success-full">
                                             <div className="auth-modal__success-title">¡Cuenta creada!</div>
@@ -345,16 +335,12 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                 <input type="text" className="auth-modal__input" value={fullName}
                                                     onChange={e => setFullName(e.target.value)} placeholder="Juan García" autoComplete="name" />
                                             </div>
-
-
-
                                             <div className="auth-modal__field">
                                                 <label className="auth-modal__label">Email</label>
                                                 <input ref={emailRef} type="email" className="auth-modal__input" value={email}
                                                     onChange={e => { setEmail(e.target.value); setMagicSent(false) }}
                                                     placeholder="tu@email.com" autoComplete="email" />
                                             </div>
-
                                             <div className="auth-modal__field">
                                                 <label className="auth-modal__label">Contraseña</label>
                                                 <div className="auth-modal__password-wrap">
@@ -365,9 +351,7 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                         {showPassword ? <EyeSlash size={14} color='currentColor' /> : <Eye size={14} color='currentColor' />}
                                                     </button>
                                                 </div>
-
                                             </div>
-
                                             <div className="auth-modal__field">
                                                 <label className="auth-modal__label">Confirmar contraseña</label>
                                                 <div className="auth-modal__password-wrap">
@@ -392,9 +376,7 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                             </p>
                                         </div>
                                     ) : isRegister && registerStep === 2 ? (
-
                                         <div className="auth-modal__fields">
-
                                             <div className="auth-modal__field" ref={uniRef}>
                                                 <label className="auth-modal__label">
                                                     Universidad / Facultad <span className="auth-modal__optional">(opcional)</span>
@@ -433,15 +415,13 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                     {universitySelected && !universityLat && <p className="evm-loc-hint evm-loc-hint--warn"><Danger size={12} color='currentColor' /> Sin ubicación exacta</p>}
                                                 </div>
                                             </div>
+
                                             <div className="auth-modal__field">
                                                 <div className="auth-modal__career-header">
                                                     <label className="auth-modal__label">
                                                         Nombre de tu carrera <span className="auth-modal__optional">(Podés saltear esto y cargarlo después)</span>
                                                     </label>
-
-
                                                 </div>
-
                                                 <input
                                                     type="text"
                                                     className="auth-modal__input"
@@ -451,7 +431,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                     maxLength={60}
                                                     autoComplete="off"
                                                 />
-
 
                                                 {careerName.trim() && (<>
                                                     <div className="auth-modal__field">
@@ -466,7 +445,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                             ))}
                                                         </div>
                                                     </div>
-
                                                     <div className="auth-modal__field">
                                                         <label className="auth-modal__label">
                                                             Total de materias <span className="auth-modal__optional">(opcional)</span>
@@ -475,7 +453,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                             onChange={e => setTotalSubjects(e.target.value)}
                                                             placeholder="ej. 42" min={1} max={999} />
                                                     </div>
-
                                                     <div className="auth-modal__field">
                                                         <label className="auth-modal__label">¿En qué año estás?</label>
                                                         <div className="auth-modal__chip-row">
@@ -488,7 +465,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                             ))}
                                                         </div>
                                                     </div>
-
                                                     <div className="auth-modal__field">
                                                         <label className="auth-modal__label">¿En qué cuatrimestre?</label>
                                                         <div className="auth-modal__chip-row">
@@ -501,9 +477,8 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                             ))}
                                                         </div>
                                                     </div>
-
                                                     <div className="auth-modal__career-preview">
-                                                        <span> {currentYear}° año · {currentSemester}° cuatri</span>
+                                                        <span>{currentYear}° año · {currentSemester}° cuatri</span>
                                                         {totalSubjects && <span>· {totalSubjects} materias</span>}
                                                         <span>· {totalYears} años</span>
                                                     </div>
@@ -534,7 +509,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                     onChange={e => { setEmail(e.target.value); setMagicSent(false) }}
                                                     placeholder="tu@email.com" onKeyDown={e => e.key === 'Enter' && handleSubmit()} autoComplete="email" />
                                             </div>
-
                                             <div className="auth-modal__field">
                                                 <label className="auth-modal__label">Contraseña</label>
                                                 <div className="auth-modal__password-wrap">
@@ -553,7 +527,6 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                                                 >
                                                     {resetLoading ? 'Enviando...' : resetSent ? 'Link enviado' : '¿Olvidaste tu contraseña?'}
                                                 </button>
-
                                                 {resetSent && (
                                                     <div className="auth-modal__reset-sent">
                                                         <Mail size={15} color="#6366f1" style={{ flexShrink: 0, marginTop: 1 }} />

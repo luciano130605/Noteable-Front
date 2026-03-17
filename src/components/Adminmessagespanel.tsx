@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo, memo } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { X, Mail, MessageCircle, RefreshCw, Bug, Lightbulb, HelpCircle, MoreHorizontal, Instagram, Trash } from 'lucide-react'
@@ -32,6 +32,8 @@ const REACH_META = {
     none: { label: 'Sin respuesta', icon: null },
 }
 
+const isMobile = window.innerWidth <= 768
+
 function timeAgo(dateStr: string) {
     const diff = (Date.now() - new Date(dateStr).getTime()) / 1000
     if (diff < 60) return 'hace un momento'
@@ -42,7 +44,6 @@ function timeAgo(dateStr: string) {
 }
 
 interface Props { onClose: () => void }
-
 
 const backdropVariants: Variants = {
     hidden: { opacity: 0 },
@@ -75,6 +76,153 @@ const metaVariants: Variants = {
 }
 
 
+const MessageCard = memo(function MessageCard({
+    msg,
+    isExpanded,
+    copiedId,
+    holdingDelete,
+    onToggle,
+    onCopy,
+    onResolve,
+    onDeleteStart,
+    onDeleteCancel,
+}: {
+    msg: ContactMessage
+    isExpanded: boolean
+    copiedId: string | null
+    holdingDelete: string | null
+    onToggle: (id: string) => void
+    onCopy: (id: string, value: string) => void
+    onResolve: (id: string) => void
+    onDeleteStart: (id: string) => void
+    onDeleteCancel: () => void
+}) {
+    const typeMeta = TYPE_META[msg.type] ?? TYPE_META.other
+    const TypeIcon = typeMeta.icon
+    const reachMeta = REACH_META[msg.reach_by] ?? REACH_META.none
+    const ReachIcon = reachMeta.icon
+
+    return (
+        <motion.div
+            key={msg.id}
+            className={`adm-msg${isExpanded ? ' adm-msg--expanded' : ''}${msg.status === 'resolved' ? ' adm-msg--resolved' : ''}`}
+            variants={msgVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            transition={{ duration: 0.18 }}
+            layout
+            onClick={() => onToggle(msg.id)}
+            whileTap={{ scale: 0.985 }}
+        >
+            <div className="adm-msg__top">
+                <span className="adm-msg__type-dot" style={{ background: typeMeta.color }} />
+                <span className="adm-msg__type">
+                    <TypeIcon size={11} color={typeMeta.color} />
+                    {typeMeta.label}
+                </span>
+                <span className="adm-msg__time">{timeAgo(msg.created_at)}</span>
+            </div>
+
+            <p className={`adm-msg__text${isExpanded ? ' adm-msg__text--full' : ''}`}>
+                {msg.message}
+            </p>
+
+            <AnimatePresence>
+                {isExpanded && (
+                    <motion.div
+                        className="adm-msg__meta"
+                        variants={metaVariants}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
+                    >
+                        {msg.user_email && (
+                            <div className="adm-msg__meta-row">
+                                <Mail size={11} />
+                                <span>{msg.user_email}</span>
+                            </div>
+                        )}
+                        {msg.reach_by !== 'none' && msg.contact_value && (
+                            <div className="adm-msg__meta-row">
+                                {ReachIcon && <ReachIcon size={11} />}
+                                <span>{reachMeta.label}: <strong>{msg.contact_value}</strong></span>
+                            </div>
+                        )}
+
+                        <div className="adm-msg__actions">
+                            {msg.contact_value && (
+                                <motion.button
+                                    className="adm-action-btn adm-action-btn--copy"
+                                    onClick={e => { e.stopPropagation(); onCopy(msg.id, msg.contact_value!) }}
+                                    whileTap={{ scale: 0.92 }}
+                                >
+                                    <AnimatePresence mode="wait">
+                                        {copiedId === msg.id ? (
+                                            <motion.span
+                                                key="copied"
+                                                style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+                                                initial={{ opacity: 0, y: -4 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 4 }}
+                                            >
+                                                <CopySuccess size={12} color="currentColor" /> Copiado
+                                            </motion.span>
+                                        ) : (
+                                            <motion.span
+                                                key="copy"
+                                                style={{ display: 'flex', alignItems: 'center', gap: 5 }}
+                                                initial={{ opacity: 0, y: -4 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 4 }}
+                                            >
+                                                <Copy size={12} color="currentColor" /> Copiar
+                                            </motion.span>
+                                        )}
+                                    </AnimatePresence>
+                                </motion.button>
+                            )}
+
+                            {msg.status !== 'resolved' && (
+                                <motion.button
+                                    className="adm-action-btn adm-action-btn--resolve"
+                                    onClick={e => { e.stopPropagation(); onResolve(msg.id) }}
+                                    whileTap={{ scale: 0.92 }}
+                                >
+                                    Resolver
+                                </motion.button>
+                            )}
+
+                            <motion.button
+                                className={`adm-action-btn adm-action-btn--delete${holdingDelete === msg.id ? ' adm-action-btn--holding' : ''}`}
+                                onMouseDown={e => { e.stopPropagation(); onDeleteStart(msg.id) }}
+                                onMouseUp={cancelDeleteNoop}
+                                onMouseLeave={onDeleteCancel}
+                                onTouchStart={e => { e.stopPropagation(); onDeleteStart(msg.id) }}
+                                onTouchEnd={onDeleteCancel}
+                                whileTap={{ scale: 0.88 }}
+                            >
+                                <Trash size={12} color="currentColor" />
+                            </motion.button>
+                        </div>
+
+                        {msg.reach_by === 'none' && (
+                            <div className="adm-msg__meta-row adm-msg__meta-row--muted">
+                                <span>No pidió respuesta</span>
+                            </div>
+                        )}
+                        <div className="adm-msg__meta-row adm-msg__meta-row--muted">
+                            <span>{new Date(msg.created_at).toLocaleString('es-AR')}</span>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </motion.div>
+    )
+})
+
+const cancelDeleteNoop = () => { }
+
 export default function AdminMessagesPanel({ onClose }: Props) {
     const [open, setOpen] = useState(true)
     const [messages, setMessages] = useState<ContactMessage[]>([])
@@ -84,36 +232,45 @@ export default function AdminMessagesPanel({ onClose }: Props) {
     const [expanded, setExpanded] = useState<string | null>(null)
     const [search] = useState('')
     const [copiedId, setCopiedId] = useState<string | null>(null)
-    const [deleteTimer, setDeleteTimer] = useState<number | null>(null)
+    const [_deleteTimer, setDeleteTimer] = useState<number | null>(null)
     const [holdingDelete, setHoldingDelete] = useState<string | null>(null)
-
-    const isMobile = window.innerWidth <= 768
 
     useScrollLock(open)
 
-    const handleClose = () => setOpen(false)
+    const handleClose = useCallback(() => setOpen(false), [])
 
-    const startDelete = (id: string) => {
+    const handleToggle = useCallback((id: string) => {
+        setExpanded(prev => prev === id ? null : id)
+    }, [])
+
+    const cancelDelete = useCallback(() => {
+        setDeleteTimer(prev => { if (prev) clearTimeout(prev); return null })
+        setHoldingDelete(null)
+    }, [])
+
+    const deleteMessage = useCallback(async (id: string) => {
+        await supabase.from('contact_messages').delete().eq('id', id)
+        setMessages(prev => prev.filter(m => m.id !== id))
+    }, [])
+
+    const startDelete = useCallback((id: string) => {
         setHoldingDelete(id)
         const timer = setTimeout(() => { deleteMessage(id); setHoldingDelete(null) }, 900)
         setDeleteTimer(timer as unknown as number)
-    }
+    }, [deleteMessage])
 
-    const cancelDelete = () => {
-        if (deleteTimer) { clearTimeout(deleteTimer); setDeleteTimer(null) }
-        setHoldingDelete(null)
-    }
-
-    const deleteMessage = async (id: string) => {
-        await supabase.from('contact_messages').delete().eq('id', id)
-        setMessages(prev => prev.filter(m => m.id !== id))
-    }
-
-    const resolveMessage = async (id: string) => {
+    const resolveMessage = useCallback(async (id: string) => {
         await supabase.from('contact_messages').update({ status: 'resolved' }).eq('id', id)
         setMessages(prev => prev.map(m => m.id === id ? { ...m, status: 'resolved' } : m))
         setTimeout(() => setMessages(prev => prev.filter(m => m.id !== id)), 600)
-    }
+    }, [])
+
+    const copyContact = useCallback(async (id: string, text: string) => {
+        await navigator.clipboard.writeText(text)
+        navigator.vibrate?.(40)
+        setCopiedId(id)
+        setTimeout(() => setCopiedId(null), 1500)
+    }, [])
 
     useEffect(() => {
         const channel = supabase
@@ -124,7 +281,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
         return () => { supabase.removeChannel(channel) }
     }, [])
 
-    const fetchMessages = async () => {
+    const fetchMessages = useCallback(async () => {
         setLoading(true); setError(null)
         const { data, error: err } = await supabase
             .from('contact_messages').select('*')
@@ -133,34 +290,29 @@ export default function AdminMessagesPanel({ onClose }: Props) {
         if (err) setError(err.message)
         else setMessages((data as ContactMessage[]) ?? [])
         setLoading(false)
-    }
+    }, [])
 
-    useEffect(() => { fetchMessages() }, [])
+    useEffect(() => { fetchMessages() }, [fetchMessages])
 
-    const copyContact = async (id: string, text: string) => {
-        await navigator.clipboard.writeText(text)
-        navigator.vibrate?.(40)
-        setCopiedId(id)
-        setTimeout(() => setCopiedId(null), 1500)
-    }
-
-    const filtered = messages
-        .filter(m => filter === 'all' || m.type === filter)
-        .filter(m =>
-            m.message.toLowerCase().includes(search.toLowerCase()) ||
-            m.user_email?.toLowerCase().includes(search.toLowerCase())
-        )
-
-    const counts = {
+    const counts = useMemo(() => ({
         all: messages.length,
         bug: messages.filter(m => m.type === 'bug').length,
         suggestion: messages.filter(m => m.type === 'suggestion').length,
         question: messages.filter(m => m.type === 'question').length,
         other: messages.filter(m => m.type === 'other').length,
-    }
+    }), [messages])
+
+    const filtered = useMemo(() =>
+        messages
+            .filter(m => filter === 'all' || m.type === filter)
+            .filter(m =>
+                m.message.toLowerCase().includes(search.toLowerCase()) ||
+                m.user_email?.toLowerCase().includes(search.toLowerCase())
+            ),
+        [messages, filter, search]
+    )
 
     return createPortal(
-
         <AnimatePresence onExitComplete={onClose}>
             {open && (
                 <>
@@ -270,132 +422,22 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                                 </motion.div>
                             )}
 
+
                             <AnimatePresence mode="popLayout">
-                                {!loading && !error && filtered.map((msg, i) => {
-                                    const typeMeta = TYPE_META[msg.type] ?? TYPE_META.other
-                                    const TypeIcon = typeMeta.icon
-                                    const reachMeta = REACH_META[msg.reach_by] ?? REACH_META.none
-                                    const ReachIcon = reachMeta.icon
-                                    const isExpanded = expanded === msg.id
-
-                                    return (
-                                        <motion.div
-                                            key={msg.id}
-                                            className={`adm-msg${isExpanded ? ' adm-msg--expanded' : ''}${msg.status === 'resolved' ? ' adm-msg--resolved' : ''}`}
-                                            variants={msgVariants}
-                                            initial="hidden"
-                                            animate="visible"
-                                            exit="exit"
-                                            transition={{ duration: 0.18, delay: i * 0.03 }}
-                                            layout
-                                            onClick={() => setExpanded(isExpanded ? null : msg.id)}
-                                            whileTap={{ scale: 0.985 }}
-                                        >
-                                            <div className="adm-msg__top">
-                                                <span className="adm-msg__type-dot" style={{ background: typeMeta.color }} />
-                                                <span className="adm-msg__type">
-                                                    <TypeIcon size={11} color={typeMeta.color} />
-                                                    {typeMeta.label}
-                                                </span>
-                                                <span className="adm-msg__time">{timeAgo(msg.created_at)}</span>
-                                            </div>
-
-                                            <p className={`adm-msg__text${isExpanded ? ' adm-msg__text--full' : ''}`}>
-                                                {msg.message}
-                                            </p>
-
-                                            <AnimatePresence>
-                                                {isExpanded && (
-                                                    <motion.div
-                                                        className="adm-msg__meta"
-                                                        variants={metaVariants}
-                                                        initial="hidden"
-                                                        animate="visible"
-                                                        exit="exit"
-                                                    >
-                                                        {msg.user_email && (
-                                                            <div className="adm-msg__meta-row">
-                                                                <Mail size={11} />
-                                                                <span>{msg.user_email}</span>
-                                                            </div>
-                                                        )}
-                                                        {msg.reach_by !== 'none' && msg.contact_value && (
-                                                            <div className="adm-msg__meta-row">
-                                                                {ReachIcon && <ReachIcon size={11} />}
-                                                                <span>{reachMeta.label}: <strong>{msg.contact_value}</strong></span>
-                                                            </div>
-                                                        )}
-
-                                                        <div className="adm-msg__actions">
-                                                            {msg.contact_value && (
-                                                                <motion.button
-                                                                    className="adm-action-btn adm-action-btn--copy"
-                                                                    onClick={e => { e.stopPropagation(); copyContact(msg.id, msg.contact_value!) }}
-                                                                    whileTap={{ scale: 0.92 }}
-                                                                >
-                                                                    <AnimatePresence mode="wait">
-                                                                        {copiedId === msg.id ? (
-                                                                            <motion.span
-                                                                                key="copied"
-                                                                                style={{ display: 'flex', alignItems: 'center', gap: 5 }}
-                                                                                initial={{ opacity: 0, y: -4 }}
-                                                                                animate={{ opacity: 1, y: 0 }}
-                                                                                exit={{ opacity: 0, y: 4 }}
-                                                                            >
-                                                                                <CopySuccess size={12} color="currentColor" /> Copiado
-                                                                            </motion.span>
-                                                                        ) : (
-                                                                            <motion.span
-                                                                                key="copy"
-                                                                                style={{ display: 'flex', alignItems: 'center', gap: 5 }}
-                                                                                initial={{ opacity: 0, y: -4 }}
-                                                                                animate={{ opacity: 1, y: 0 }}
-                                                                                exit={{ opacity: 0, y: 4 }}
-                                                                            >
-                                                                                <Copy size={12} color="currentColor" /> Copiar
-                                                                            </motion.span>
-                                                                        )}
-                                                                    </AnimatePresence>
-                                                                </motion.button>
-                                                            )}
-
-                                                            {msg.status !== 'resolved' && (
-                                                                <motion.button
-                                                                    className="adm-action-btn adm-action-btn--resolve"
-                                                                    onClick={e => { e.stopPropagation(); resolveMessage(msg.id) }}
-                                                                    whileTap={{ scale: 0.92 }}
-                                                                >
-                                                                    Resolver
-                                                                </motion.button>
-                                                            )}
-
-                                                            <motion.button
-                                                                className={`adm-action-btn adm-action-btn--delete${holdingDelete === msg.id ? ' adm-action-btn--holding' : ''}`}
-                                                                onMouseDown={e => { e.stopPropagation(); startDelete(msg.id) }}
-                                                                onMouseUp={cancelDelete}
-                                                                onMouseLeave={cancelDelete}
-                                                                onTouchStart={e => { e.stopPropagation(); startDelete(msg.id) }}
-                                                                onTouchEnd={cancelDelete}
-                                                                whileTap={{ scale: 0.88 }}
-                                                            >
-                                                                <Trash size={12} color="currentColor" />
-                                                            </motion.button>
-                                                        </div>
-
-                                                        {msg.reach_by === 'none' && (
-                                                            <div className="adm-msg__meta-row adm-msg__meta-row--muted">
-                                                                <span>No pidió respuesta</span>
-                                                            </div>
-                                                        )}
-                                                        <div className="adm-msg__meta-row adm-msg__meta-row--muted">
-                                                            <span>{new Date(msg.created_at).toLocaleString('es-AR')}</span>
-                                                        </div>
-                                                    </motion.div>
-                                                )}
-                                            </AnimatePresence>
-                                        </motion.div>
-                                    )
-                                })}
+                                {!loading && !error && filtered.map(msg => (
+                                    <MessageCard
+                                        key={msg.id}
+                                        msg={msg}
+                                        isExpanded={expanded === msg.id}
+                                        copiedId={copiedId}
+                                        holdingDelete={holdingDelete}
+                                        onToggle={handleToggle}
+                                        onCopy={copyContact}
+                                        onResolve={resolveMessage}
+                                        onDeleteStart={startDelete}
+                                        onDeleteCancel={cancelDelete}
+                                    />
+                                ))}
                             </AnimatePresence>
                         </div>
                     </motion.div>

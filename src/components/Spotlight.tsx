@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import type { Subject } from '../types/types'
 import { STATUS_CONFIG } from '../../src/assets/constants'
 import { getEffectiveStatus } from '../App'
@@ -14,7 +14,6 @@ interface Props {
     onSelect: (subject: Subject) => void
     onClose: () => void
 }
-
 
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
@@ -34,27 +33,6 @@ const spotlightVariants: Variants = {
     },
 }
 
-const listVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } },
-    exit: { opacity: 0, transition: { duration: 0.1 } },
-}
-
-const itemVariants: Variants = {
-    hidden: { opacity: 0, x: -6 },
-    visible: (i: number) => ({
-        opacity: 1, x: 0,
-        transition: { delay: i * 0.03, duration: 0.15, ease: 'easeOut' },
-    }),
-}
-
-const emptyVariants: Variants = {
-    hidden: { opacity: 0, y: 4 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
-    exit: { opacity: 0, transition: { duration: 0.1 } },
-}
-
-
 export default function Spotlight({ subjects, currentYear, onClose, onSelect }: Props) {
     const [open, setOpen] = useState(true)
     useScrollLock(open)
@@ -63,7 +41,7 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
     const inputRef = useRef<HTMLInputElement>(null)
     const listRef = useRef<HTMLDivElement>(null)
 
-    const handleClose = () => setOpen(false)
+    const handleClose = useCallback(() => setOpen(false), [])
 
     useEffect(() => { inputRef.current?.focus() }, [])
 
@@ -77,12 +55,12 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
 
     useEffect(() => setCursor(0), [results])
 
-    const handleKey = (e: React.KeyboardEvent) => {
+    const handleKey = useCallback((e: React.KeyboardEvent) => {
         if (e.key === 'ArrowDown') { e.preventDefault(); setCursor(c => Math.min(c + 1, results.length - 1)) }
         if (e.key === 'ArrowUp') { e.preventDefault(); setCursor(c => Math.max(c - 1, 0)) }
         if (e.key === 'Enter' && results[cursor]) { onSelect(results[cursor]); handleClose() }
         if (e.key === 'Escape') handleClose()
-    }
+    }, [results, cursor, onSelect, handleClose])
 
     useEffect(() => {
         const el = listRef.current?.children[cursor] as HTMLElement
@@ -130,64 +108,40 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
                             </motion.button>
                         </div>
 
-                        <AnimatePresence mode="wait">
-                            {results.length > 0 ? (
-                                <motion.div
-                                    key="results"
-                                    className="spotlight__list"
-                                    ref={listRef}
-                                    variants={listVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                >
-                                    {results.map((s, i) => {
-                                        const eff = getEffectiveStatus(s, currentYear, subjects)
-                                        const cfg = STATUS_CONFIG[eff]
-                                        return (
-                                            <motion.button
-                                                key={s.id}
-                                                className={`spotlight__item${i === cursor ? ' spotlight__item--active' : ''}`}
-                                                onMouseEnter={() => setCursor(i)}
-                                                onClick={() => { onSelect(s); handleClose() }}
-                                                variants={itemVariants}
-                                                custom={i}
-                                                initial="hidden"
-                                                animate="visible"
-                                                whileTap={{ scale: 0.98 }}
-                                            >
-                                                <div className="spotlight__item-left">
-                                                    <span className="spotlight__item-dot" style={{ background: cfg.color }} />
-                                                    <div>
-                                                        <div className="spotlight__item-name">{s.name}</div>
-                                                        <div className="spotlight__item-meta">
-                                                            {s.code} · {s.year}° año · {s.semester}° cuatri
-                                                        </div>
-                                                    </div>
+                        <div className="spotlight__list" ref={listRef}>
+                            {results.length > 0 ? results.map((s, i) => {
+                                const eff = getEffectiveStatus(s, currentYear, subjects)
+                                const cfg = STATUS_CONFIG[eff]
+                                return (
+                                    <button
+                                        key={s.id}
+                                        className={`spotlight__item${i === cursor ? ' spotlight__item--active' : ''}`}
+                                        onMouseEnter={() => setCursor(i)}
+                                        onClick={() => { onSelect(s); handleClose() }}
+                                    >
+                                        <div className="spotlight__item-left">
+                                            <span className="spotlight__item-dot" style={{ background: cfg.color }} />
+                                            <div>
+                                                <div className="spotlight__item-name">{s.name}</div>
+                                                <div className="spotlight__item-meta">
+                                                    {s.code} · {s.year}° año · {s.semester}° cuatri
                                                 </div>
-                                                <span
-                                                    className="spotlight__item-badge"
-                                                    style={{ color: cfg.color, background: cfg.bg }}
-                                                >
-                                                    {cfg.label}
-                                                </span>
-                                            </motion.button>
-                                        )
-                                    })}
-                                </motion.div>
-                            ) : query ? (
-                                <motion.div
-                                    key="empty"
-                                    className="spotlight__empty"
-                                    variants={emptyVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    exit="exit"
-                                >
+                                            </div>
+                                        </div>
+                                        <span
+                                            className="spotlight__item-badge"
+                                            style={{ color: cfg.color, background: cfg.bg }}
+                                        >
+                                            {cfg.label}
+                                        </span>
+                                    </button>
+                                )
+                            }) : query ? (
+                                <div className="spotlight__empty">
                                     Sin resultados para "{query}"
-                                </motion.div>
+                                </div>
                             ) : null}
-                        </AnimatePresence>
+                        </div>
 
                         <div className="spotlight__footer">
                             <span>
