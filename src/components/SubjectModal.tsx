@@ -8,7 +8,7 @@ import type { NotionPage } from '../hooks/Usenotion'
 import { ToastContainer } from "./Toast"
 import { useToastSystem, toast } from "../hooks/Usetoast"
 import Ranking from "../Icon/Ranking"
-import { useScrollLock } from '../hooks/useScrollLock'
+import { useScrollLock } from '../hooks/Usescrolllock'
 
 interface SubjectSettings {
   finalAttempts: number

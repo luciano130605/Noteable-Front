@@ -188,17 +188,7 @@ const ctxVariants: Variants = {
   },
 }
 
-const modalVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.97, y: 12 },
-  visible: {
-    opacity: 1, scale: 1, y: 0,
-    transition: { type: 'spring' as const, damping: 26, stiffness: 280 }
-  },
-  exit: {
-    opacity: 0, scale: 0.97, y: 8,
-    transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] as const }
-  },
-}
+
 
 const overlayVariants: Variants = {
   hidden: { opacity: 0 },
