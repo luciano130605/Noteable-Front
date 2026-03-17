@@ -45,16 +45,11 @@ function timeAgo(dateStr: string) {
 
 interface Props { onClose: () => void }
 
+
 const backdropVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
-}
-
-const panelVariants: Variants = {
-    hidden: { x: '100%' },
-    visible: { x: 0, transition: { type: 'spring', damping: 28, stiffness: 280 } },
-    exit: { x: '100%', transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const } },
 }
 
 const panelMobileVariants: Variants = {
@@ -63,10 +58,22 @@ const panelMobileVariants: Variants = {
     exit: { y: '100%', transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] as const } },
 }
 
+const panelDesktopVariants: Variants = {
+    hidden: { opacity: 1 },
+    visible: { opacity: 1 },
+    exit: { opacity: 1 },
+}
+
 const msgVariants: Variants = {
     hidden: { opacity: 0, y: 8, scale: 0.98 },
     visible: { opacity: 1, y: 0, scale: 1 },
     exit: { opacity: 0, scale: 0.95, x: 24, transition: { duration: 0.18 } },
+}
+
+const msgVariantsDesktop: Variants = {
+    hidden: { opacity: 1, y: 0, scale: 1 },
+    visible: { opacity: 1, y: 0, scale: 1 },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 const metaVariants: Variants = {
@@ -75,6 +82,13 @@ const metaVariants: Variants = {
     exit: { opacity: 0, height: 0, transition: { duration: 0.15 } },
 }
 
+const metaVariantsDesktop: Variants = {
+    hidden: { opacity: 0, height: 0 },
+    visible: { opacity: 1, height: 'auto', transition: { duration: 0.12 } },
+    exit: { opacity: 0, height: 0, transition: { duration: 0.1 } },
+}
+
+const cancelDeleteNoop = () => { }
 
 const MessageCard = memo(function MessageCard({
     msg,
@@ -106,14 +120,14 @@ const MessageCard = memo(function MessageCard({
         <motion.div
             key={msg.id}
             className={`adm-msg${isExpanded ? ' adm-msg--expanded' : ''}${msg.status === 'resolved' ? ' adm-msg--resolved' : ''}`}
-            variants={msgVariants}
+            variants={isMobile ? msgVariants : msgVariantsDesktop}
             initial="hidden"
             animate="visible"
             exit="exit"
             transition={{ duration: 0.18 }}
-            layout
+            layout={isMobile}                         
             onClick={() => onToggle(msg.id)}
-            whileTap={{ scale: 0.985 }}
+            whileTap={isMobile ? { scale: 0.985 } : undefined}
         >
             <div className="adm-msg__top">
                 <span className="adm-msg__type-dot" style={{ background: typeMeta.color }} />
@@ -132,7 +146,7 @@ const MessageCard = memo(function MessageCard({
                 {isExpanded && (
                     <motion.div
                         className="adm-msg__meta"
-                        variants={metaVariants}
+                        variants={isMobile ? metaVariants : metaVariantsDesktop}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -155,16 +169,16 @@ const MessageCard = memo(function MessageCard({
                                 <motion.button
                                     className="adm-action-btn adm-action-btn--copy"
                                     onClick={e => { e.stopPropagation(); onCopy(msg.id, msg.contact_value!) }}
-                                    whileTap={{ scale: 0.92 }}
+                                    whileTap={isMobile ? { scale: 0.92 } : undefined}
                                 >
                                     <AnimatePresence mode="wait">
                                         {copiedId === msg.id ? (
                                             <motion.span
                                                 key="copied"
                                                 style={{ display: 'flex', alignItems: 'center', gap: 5 }}
-                                                initial={{ opacity: 0, y: -4 }}
+                                                initial={{ opacity: 0, y: isMobile ? -4 : 0 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 4 }}
+                                                exit={{ opacity: 0, y: isMobile ? 4 : 0 }}
                                             >
                                                 <CopySuccess size={12} color="currentColor" /> Copiado
                                             </motion.span>
@@ -172,9 +186,9 @@ const MessageCard = memo(function MessageCard({
                                             <motion.span
                                                 key="copy"
                                                 style={{ display: 'flex', alignItems: 'center', gap: 5 }}
-                                                initial={{ opacity: 0, y: -4 }}
+                                                initial={{ opacity: 0, y: isMobile ? -4 : 0 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 4 }}
+                                                exit={{ opacity: 0, y: isMobile ? 4 : 0 }}
                                             >
                                                 <Copy size={12} color="currentColor" /> Copiar
                                             </motion.span>
@@ -187,7 +201,7 @@ const MessageCard = memo(function MessageCard({
                                 <motion.button
                                     className="adm-action-btn adm-action-btn--resolve"
                                     onClick={e => { e.stopPropagation(); onResolve(msg.id) }}
-                                    whileTap={{ scale: 0.92 }}
+                                    whileTap={isMobile ? { scale: 0.92 } : undefined}
                                 >
                                     Resolver
                                 </motion.button>
@@ -200,7 +214,7 @@ const MessageCard = memo(function MessageCard({
                                 onMouseLeave={onDeleteCancel}
                                 onTouchStart={e => { e.stopPropagation(); onDeleteStart(msg.id) }}
                                 onTouchEnd={onDeleteCancel}
-                                whileTap={{ scale: 0.88 }}
+                                whileTap={isMobile ? { scale: 0.88 } : undefined}
                             >
                                 <Trash size={12} color="currentColor" />
                             </motion.button>
@@ -220,8 +234,6 @@ const MessageCard = memo(function MessageCard({
         </motion.div>
     )
 })
-
-const cancelDeleteNoop = () => { }
 
 export default function AdminMessagesPanel({ onClose }: Props) {
     const [open, setOpen] = useState(true)
@@ -319,10 +331,10 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                     <motion.div
                         key="backdrop"
                         className="adm-backdrop"
-                        variants={backdropVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
+                        variants={isMobile ? backdropVariants : undefined}
+                        initial={isMobile ? "hidden" : false}
+                        animate={isMobile ? "visible" : undefined}
+                        exit={isMobile ? "exit" : undefined}
                         transition={{ duration: 0.22 }}
                         onClick={handleClose}
                         data-menu-portal="true"
@@ -331,7 +343,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                     <motion.div
                         key="panel"
                         className="adm-panel"
-                        variants={isMobile ? panelMobileVariants : panelVariants}
+                        variants={isMobile ? panelMobileVariants : panelDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -341,8 +353,8 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                             <div className="adm-header__left">
                                 <motion.div
                                     className="adm-header__icon"
-                                    initial={{ scale: 0.7, opacity: 0 }}
-                                    animate={{ scale: 1, opacity: 1 }}
+                                    initial={isMobile ? { scale: 0.7, opacity: 0 } : false}
+                                    animate={isMobile ? { scale: 1, opacity: 1 } : undefined}
                                     transition={{ delay: 0.12, type: 'spring', stiffness: 300 }}
                                 >
                                     <Mail size={13} />
@@ -357,7 +369,7 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                                     className="adm-icon-btn"
                                     onClick={fetchMessages}
                                     title="Recargar"
-                                    whileTap={{ rotate: 180, scale: 0.9 }}
+                                    whileTap={isMobile ? { rotate: 180, scale: 0.9 } : undefined}
                                     transition={{ duration: 0.3 }}
                                 >
                                     <RefreshCw size={13} className={loading ? 'adm-spin' : ''} />
@@ -365,8 +377,8 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                                 <motion.button
                                     className="modal__close"
                                     onClick={handleClose}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
+                                    whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                    whileTap={isMobile ? { scale: 0.9 } : undefined}
                                 >
                                     <X size={14} />
                                 </motion.button>
@@ -379,15 +391,15 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                                     key={f}
                                     className={`adm-filter-btn${filter === f ? ' adm-filter-btn--active' : ''}`}
                                     onClick={() => setFilter(f)}
-                                    whileTap={{ scale: 0.93 }}
+                                    whileTap={isMobile ? { scale: 0.93 } : undefined}
                                 >
                                     {f === 'all' ? 'Todos' : TYPE_META[f].label}
                                     {counts[f] > 0 && (
                                         <motion.span
                                             className="adm-filter-count"
                                             key={counts[f]}
-                                            initial={{ scale: 1.4 }}
-                                            animate={{ scale: 1 }}
+                                            initial={isMobile ? { scale: 1.4 } : false}
+                                            animate={isMobile ? { scale: 1 } : undefined}
                                             transition={{ type: 'spring', stiffness: 400 }}
                                         >
                                             {counts[f]}
@@ -415,13 +427,12 @@ export default function AdminMessagesPanel({ onClose }: Props) {
                             {!loading && !error && filtered.length === 0 && (
                                 <motion.div
                                     className="adm-state"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
+                                    initial={isMobile ? { opacity: 0 } : false}
+                                    animate={isMobile ? { opacity: 1 } : undefined}
                                 >
                                     <span>No hay mensajes{filter !== 'all' ? ' en esta categoría' : ''}.</span>
                                 </motion.div>
                             )}
-
 
                             <AnimatePresence mode="popLayout">
                                 {!loading && !error && filtered.map(msg => (

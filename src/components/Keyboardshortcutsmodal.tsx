@@ -43,6 +43,9 @@ interface Props {
     onClose: () => void
 }
 
+const isMobile = window.innerWidth <= 768
+
+
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
@@ -51,14 +54,14 @@ const overlayVariants: Variants = {
 
 const modalVariants: Variants = {
     hidden: { opacity: 0, scale: 0.96, y: 16 },
-    visible: {
-        opacity: 1, scale: 1, y: 0,
-        transition: { type: 'spring', damping: 26, stiffness: 280 },
-    },
-    exit: {
-        opacity: 0, scale: 0.96, y: 12,
-        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 26, stiffness: 280 } },
+    exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } },
+}
+
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 const groupVariants: Variants = {
@@ -69,6 +72,11 @@ const groupVariants: Variants = {
     }),
 }
 
+const groupDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
+}
+
 const itemVariants: Variants = {
     hidden: { opacity: 0, x: -8 },
     visible: (i: number) => ({
@@ -77,12 +85,22 @@ const itemVariants: Variants = {
     }),
 }
 
+const itemDesktopVariants: Variants = {
+    hidden: { opacity: 1, x: 0 },
+    visible: { opacity: 1, x: 0 },
+}
+
 const kbdVariants: Variants = {
     hidden: { opacity: 0, scale: 0.75 },
     visible: (i: number) => ({
         opacity: 1, scale: 1,
         transition: { delay: i * 0.05, type: 'spring', damping: 16, stiffness: 320 },
     }),
+}
+
+const kbdDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1 },
+    visible: { opacity: 1, scale: 1 },
 }
 
 export default function KeyboardShortcutsModal({ onClose }: Props) {
@@ -102,16 +120,16 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
             {open && (
                 <motion.div
                     className="ks-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     transition={{ duration: 0.2 }}
                     onClick={e => e.target === e.currentTarget && handleClose()}
                 >
                     <motion.div
                         className="ks-modal"
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -122,8 +140,8 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
                             <motion.button
                                 className="auth-modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={15} />
                             </motion.button>
@@ -133,7 +151,7 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
                             {GROUPS.map((group, gi) => (
                                 <motion.div
                                     key={group.title}
-                                    variants={groupVariants}
+                                    variants={isMobile ? groupVariants : groupDesktopVariants}
                                     custom={gi}
                                     initial="hidden"
                                     animate="visible"
@@ -145,7 +163,7 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
                                             <motion.div
                                                 key={ii}
                                                 className="ks-item"
-                                                variants={itemVariants}
+                                                variants={isMobile ? itemVariants : itemDesktopVariants}
                                                 custom={ii}
                                                 initial="hidden"
                                                 animate="visible"
@@ -156,7 +174,7 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
                                                     {item.keys.map((k, ki) => (
                                                         <motion.span
                                                             key={ki}
-                                                            variants={kbdVariants}
+                                                            variants={isMobile ? kbdVariants : kbdDesktopVariants}
                                                             custom={ki}
                                                             initial="hidden"
                                                             animate="visible"
@@ -174,8 +192,8 @@ export default function KeyboardShortcutsModal({ onClose }: Props) {
 
                         <motion.div
                             className="ks-footer"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            initial={isMobile ? { opacity: 0 } : false}
+                            animate={isMobile ? { opacity: 1 } : undefined}
                             transition={{ delay: 0.35, duration: 0.2 }}
                         >
                             Presioná <kbd className="ks-kbd-footer">Esc</kbd> para cerrar

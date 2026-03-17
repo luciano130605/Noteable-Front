@@ -24,6 +24,8 @@ interface Props {
     onClose: () => void
 }
 
+const isMobile = window.innerWidth <= 768
+
 function parseCode(raw: string): { code: string; year: number; semester: number } | null {
     const match = raw.match(/(\d+)\.(\d+)\.(\d+)/)
     if (!match) return null
@@ -45,6 +47,7 @@ function parseDate(raw: string): string {
     return ''
 }
 
+
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.2 } },
@@ -53,26 +56,26 @@ const overlayVariants: Variants = {
 
 const modalVariants: Variants = {
     hidden: { opacity: 0, scale: 0.96, y: 16 },
-    visible: {
-        opacity: 1, scale: 1, y: 0,
-        transition: { type: 'spring', damping: 26, stiffness: 280 },
-    },
-    exit: {
-        opacity: 0, scale: 0.96, y: 12,
-        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 26, stiffness: 280 } },
+    exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } },
+}
+
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 const stepVariants: Variants = {
     enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 32 : -32 }),
-    center: {
-        opacity: 1, x: 0,
-        transition: { type: 'spring', damping: 22, stiffness: 300 },
-    },
-    exit: (dir: number) => ({
-        opacity: 0, x: dir > 0 ? -24 : 24,
-        transition: { duration: 0.15, ease: 'easeIn' },
-    }),
+    center: { opacity: 1, x: 0, transition: { type: 'spring', damping: 22, stiffness: 300 } },
+    exit: (dir: number) => ({ opacity: 0, x: dir > 0 ? -24 : 24, transition: { duration: 0.15, ease: 'easeIn' } }),
+}
+
+const stepDesktopVariants: Variants = {
+    enter: { opacity: 0, x: 0 },
+    center: { opacity: 1, x: 0, transition: { duration: 0.12 } },
+    exit: { opacity: 0, x: 0, transition: { duration: 0.08 } },
 }
 
 const errorVariants: Variants = {
@@ -91,6 +94,12 @@ const footerVariants: Variants = {
     hidden: { opacity: 0, y: 6 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.18, ease: 'easeOut' } },
     exit: { opacity: 0, y: 6, transition: { duration: 0.12 } },
+}
+
+const footerDesktopVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.1 } },
+    exit: { opacity: 0, transition: { duration: 0.08 } },
 }
 
 export default function SiuImporter({ onImport, onClose }: Props) {
@@ -215,15 +224,15 @@ export default function SiuImporter({ onImport, onClose }: Props) {
             {open && (
                 <motion.div
                     className="siu-importer-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     onClick={e => e.target === e.currentTarget && handleClose()}
                 >
                     <motion.div
                         className="siu-importer-modal"
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -241,8 +250,8 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                             <motion.button
                                 className="modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>
@@ -254,7 +263,7 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                     key="upload"
                                     className="siu-importer-body"
                                     custom={stepDir}
-                                    variants={stepVariants}
+                                    variants={isMobile ? stepVariants : stepDesktopVariants}
                                     initial="enter"
                                     animate="center"
                                     exit="exit"
@@ -267,8 +276,8 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                     >
                                         <motion.div
                                             className="siu-dropzone-icon"
-                                            initial={{ scale: 0.8, opacity: 0 }}
-                                            animate={{ scale: 1, opacity: 1 }}
+                                            initial={isMobile ? { scale: 0.8, opacity: 0 } : false}
+                                            animate={isMobile ? { scale: 1, opacity: 1 } : undefined}
                                             transition={{ type: 'spring', damping: 18, stiffness: 280, delay: 0.1 }}
                                         >
                                             <Xls size={32} strokeColor="currentColor" />
@@ -323,7 +332,7 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                     key="preview"
                                     className="siu-importer-body"
                                     custom={stepDir}
-                                    variants={stepVariants}
+                                    variants={isMobile ? stepVariants : stepDesktopVariants}
                                     initial="enter"
                                     animate="center"
                                     exit="exit"
@@ -418,12 +427,12 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                     <motion.button
                                         className="btn"
                                         onClick={() => { goToStep('upload'); setPreview([]); setError(null) }}
-                                        variants={footerVariants}
+                                        variants={isMobile ? footerVariants : footerDesktopVariants}
                                         initial="hidden"
                                         animate="visible"
                                         exit="exit"
-                                        whileTap={{ scale: 0.96 }}
-                                        layout
+                                        whileTap={isMobile ? { scale: 0.96 } : undefined}
+                                        layout={isMobile}
                                     >
                                         Volver
                                     </motion.button>
@@ -433,8 +442,8 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                             <motion.button
                                 className="btn"
                                 onClick={handleClose}
-                                whileTap={{ scale: 0.96 }}
-                                layout
+                                whileTap={isMobile ? { scale: 0.96 } : undefined}
+                                layout={isMobile}
                             >
                                 Cancelar
                             </motion.button>
@@ -444,12 +453,12 @@ export default function SiuImporter({ onImport, onClose }: Props) {
                                     <motion.button
                                         className="btn btn--primary"
                                         onClick={() => { onImport(preview); handleClose() }}
-                                        variants={footerVariants}
+                                        variants={isMobile ? footerVariants : footerDesktopVariants}
                                         initial="hidden"
                                         animate="visible"
                                         exit="exit"
-                                        whileTap={{ scale: 0.96 }}
-                                        layout
+                                        whileTap={isMobile ? { scale: 0.96 } : undefined}
+                                        layout={isMobile}
                                     >
                                         Importar {preview.length} materias
                                     </motion.button>

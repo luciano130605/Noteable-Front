@@ -17,6 +17,7 @@ interface Props {
     onClose: () => void
 }
 
+const isMobile = window.innerWidth <= 768
 
 function dotColor(n: number) {
     if (n >= 7) return '#4ade80'
@@ -57,6 +58,12 @@ const modalVariants: Variants = {
     },
 }
 
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+}
+
 const confirmVariants: Variants = {
     hidden: { opacity: 0, scale: 0.94, y: 8 },
     visible: {
@@ -69,12 +76,23 @@ const confirmVariants: Variants = {
     },
 }
 
+const confirmDesktopVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.15 } },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
+}
+
 const cardVariants: Variants = {
     hidden: { opacity: 0, y: 10 },
     visible: (i: number) => ({
         opacity: 1, y: 0,
         transition: { delay: i * 0.05, duration: 0.22, ease: 'easeOut' as const }
     }),
+}
+
+const cardDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
 }
 
 export default function CloseSemesterWizard({
@@ -86,7 +104,6 @@ export default function CloseSemesterWizard({
     const pendingFinal = subjects.filter(s =>
         s.status === 'pending_final' || s.status === 'failed_final'
     )
-
 
     const [open, setOpen] = useState(true)
     const [showConfirm, setShowConfirm] = useState(false)
@@ -189,17 +206,17 @@ export default function CloseSemesterWizard({
             {open && (
                 <motion.div
                     className="modal-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     transition={{ duration: 0.2 }}
                     onClick={e => e.target === e.currentTarget && handleClose()}
                 >
                     <motion.div
                         className="modal"
                         style={{ maxWidth: 580 }}
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -211,8 +228,8 @@ export default function CloseSemesterWizard({
                                 type="button"
                                 className="modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>
@@ -235,7 +252,7 @@ export default function CloseSemesterWizard({
                                             <motion.div
                                                 key={s.id}
                                                 className="csw-card"
-                                                variants={cardVariants}
+                                                variants={isMobile ? cardVariants : cardDesktopVariants}
                                                 custom={i}
                                                 initial="hidden"
                                                 animate="visible"
@@ -335,7 +352,7 @@ export default function CloseSemesterWizard({
                                             <motion.div
                                                 key={s.id}
                                                 className="csw-card"
-                                                variants={cardVariants}
+                                                variants={isMobile ? cardVariants : cardDesktopVariants}
                                                 custom={i}
                                                 initial="hidden"
                                                 animate="visible"
@@ -419,22 +436,31 @@ export default function CloseSemesterWizard({
                                 >
                                     <motion.div
                                         className="confirm-modal"
-                                        variants={confirmVariants}
+                                        variants={isMobile ? confirmVariants : confirmDesktopVariants}
                                         initial="hidden"
                                         animate="visible"
                                         exit="exit"
                                     >
                                         <h3>Confirmar cierre de cuatrimestre</h3>
-
                                         <p>
                                             Se actualizarán {changesCount} materia{changesCount !== 1 ? 's' : ''} y
                                             avanzarás al {nextSemester}° cuatrimestre · {nextYear}° año.
                                         </p>
-
                                         <div className="confirm-actions">
-                                            <motion.button className="btn" onClick={() => setShowConfirm(false)} whileTap={{ scale: 0.96 }}>Cancelar</motion.button>
-
-                                            <motion.button className="btn btn--primary" onClick={() => { setShowConfirm(false); handleConfirm() }} whileTap={{ scale: 0.96 }}>Confirmar cierre</motion.button>
+                                            <motion.button
+                                                className="btn"
+                                                onClick={() => setShowConfirm(false)}
+                                                whileTap={isMobile ? { scale: 0.96 } : undefined}
+                                            >
+                                                Cancelar
+                                            </motion.button>
+                                            <motion.button
+                                                className="btn btn--primary"
+                                                onClick={() => { setShowConfirm(false); handleConfirm() }}
+                                                whileTap={isMobile ? { scale: 0.96 } : undefined}
+                                            >
+                                                Confirmar cierre
+                                            </motion.button>
                                         </div>
                                     </motion.div>
                                 </motion.div>

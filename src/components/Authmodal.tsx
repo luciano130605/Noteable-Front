@@ -35,6 +35,8 @@ interface Props {
     onSignInWithOAuth: (provider: 'github' | 'discord' | 'google') => Promise<string | null>
 }
 
+const isMobile = window.innerWidth <= 768
+
 
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
@@ -54,6 +56,12 @@ const modalVariants: Variants = {
     },
 }
 
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+}
+
 const stepVariants: Variants = {
     hidden: { opacity: 0, x: 18 },
     visible: {
@@ -64,6 +72,12 @@ const stepVariants: Variants = {
         opacity: 0, x: -18,
         transition: { duration: 0.14 }
     },
+}
+
+const stepDesktopVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.12 } },
+    exit: { opacity: 0, transition: { duration: 0.08 } },
 }
 
 async function searchUniversities(query: string): Promise<UniversityResult[]> {
@@ -259,16 +273,16 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
             {!isClosing && (
                 <motion.div
                     className="auth-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     transition={{ duration: 0.2 }}
                     onClick={e => e.target === e.currentTarget && handleClose()}
                 >
                     <motion.div
                         className="auth-modal"
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -278,8 +292,8 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                             <motion.button
                                 className="auth-modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>
@@ -318,7 +332,7 @@ export default function AuthModal({ onClose, onResetPassword, initialMode = 'log
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={success ? 'success' : `${mode}-${registerStep}`}
-                                    variants={stepVariants}
+                                    variants={isMobile ? stepVariants : stepDesktopVariants}
                                     initial="hidden"
                                     animate="visible"
                                     exit="exit"

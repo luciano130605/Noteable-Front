@@ -44,6 +44,8 @@ const SUBJECT_COLORS = [
     { bg: "#134e4a", border: "#2dd4bf", text: "#ccfbf1" },
 ]
 
+const isMobile = window.innerWidth <= 768
+
 function timeToMin(t: string) {
     const [h, m] = t.split(":").map(Number)
     return h * 60 + m
@@ -53,6 +55,7 @@ function formatHour(h: number) {
     return `${String(h).padStart(2, "0")}:00`
 }
 
+
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.2 } },
@@ -61,14 +64,14 @@ const overlayVariants: Variants = {
 
 const drawerVariants: Variants = {
     hidden: { opacity: 0, y: '100%' },
-    visible: {
-        opacity: 1, y: 0,
-        transition: { type: 'spring', damping: 30, stiffness: 280 },
-    },
-    exit: {
-        opacity: 0, y: '100%',
-        transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] },
-    },
+    visible: { opacity: 1, y: 0, transition: { type: 'spring', damping: 30, stiffness: 280 } },
+    exit: { opacity: 0, y: '100%', transition: { duration: 0.22, ease: [0.32, 0.72, 0, 1] } },
+}
+
+const drawerDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.12 } },
 }
 
 const dayVariants: Variants = {
@@ -77,6 +80,11 @@ const dayVariants: Variants = {
         opacity: 1, y: 0,
         transition: { delay: 0.08 + i * 0.06, duration: 0.22, ease: 'easeOut' },
     }),
+}
+
+const dayDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
 }
 
 const blockVariants: Variants = {
@@ -126,7 +134,6 @@ export default function ScheduleExport({
         })
         return result
     }, [subjects])
-
 
     const { visibleMin, gridHeight, activeDays, hourLabels } = useMemo(() => {
         const occupiedMins = blocks
@@ -184,15 +191,15 @@ export default function ScheduleExport({
             {open && (
                 <motion.div
                     className="schedule-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     onClick={handleClose}
                 >
                     <motion.div
                         className="schedule-drawer"
-                        variants={drawerVariants}
+                        variants={isMobile ? drawerVariants : drawerDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -211,7 +218,7 @@ export default function ScheduleExport({
                                     className="schedule-download"
                                     onClick={handleDownload}
                                     disabled={downloading}
-                                    whileTap={!downloading ? { scale: 0.96 } : {}}
+                                    whileTap={isMobile && !downloading ? { scale: 0.96 } : undefined}
                                 >
                                     {downloading ? 'Exportando…' : 'Descargar'}
                                 </motion.button>
@@ -219,8 +226,8 @@ export default function ScheduleExport({
                                 <motion.button
                                     className="modal__close"
                                     onClick={handleClose}
-                                    whileHover={{ scale: 1.1 }}
-                                    whileTap={{ scale: 0.9 }}
+                                    whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                    whileTap={isMobile ? { scale: 0.9 } : undefined}
                                 >
                                     <X size={16} />
                                 </motion.button>
@@ -253,7 +260,7 @@ export default function ScheduleExport({
                                                 <motion.div
                                                     key={day}
                                                     className="schedule-day"
-                                                    variants={dayVariants}
+                                                    variants={isMobile ? dayVariants : dayDesktopVariants}
                                                     custom={di}
                                                     initial="hidden"
                                                     animate="visible"

@@ -15,6 +15,9 @@ interface Props {
     onClose: () => void
 }
 
+const isMobile = window.innerWidth <= 768
+
+
 const overlayVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { duration: 0.15 } },
@@ -23,14 +26,14 @@ const overlayVariants: Variants = {
 
 const spotlightVariants: Variants = {
     hidden: { opacity: 0, scale: 0.97, y: -12 },
-    visible: {
-        opacity: 1, scale: 1, y: 0,
-        transition: { duration: 0.18, ease: [0.25, 0.1, 0.25, 1] },
-    },
-    exit: {
-        opacity: 0, scale: 0.97, y: -8,
-        transition: { duration: 0.13, ease: 'easeIn' },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.18, ease: [0.25, 0.1, 0.25, 1] } },
+    exit: { opacity: 0, scale: 0.97, y: -8, transition: { duration: 0.13, ease: 'easeIn' } },
+}
+
+const spotlightDesktopVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.1 } },
+    exit: { opacity: 0, transition: { duration: 0.08 } },
 }
 
 export default function Spotlight({ subjects, currentYear, onClose, onSelect }: Props) {
@@ -72,15 +75,15 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
             {open && (
                 <motion.div
                     className="spotlight-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     onClick={handleClose}
                 >
                     <motion.div
                         className="spotlight"
-                        variants={spotlightVariants}
+                        variants={isMobile ? spotlightVariants : spotlightDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -101,8 +104,8 @@ export default function Spotlight({ subjects, currentYear, onClose, onSelect }: 
                             <motion.button
                                 className="modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>

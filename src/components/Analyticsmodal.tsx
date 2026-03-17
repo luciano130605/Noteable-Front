@@ -8,7 +8,6 @@ import CharAverage from '../Icon/CharAverage'
 import PinLocation from '../Icon/PinLocation'
 import { useScrollLock } from '../hooks/Usescrolllock'
 
-
 interface Props {
     subjects: Subject[]
     careerName: string
@@ -17,6 +16,8 @@ interface Props {
     totalSubjects?: number
     onClose: () => void
 }
+
+const isMobile = window.innerWidth <= 768
 
 function avg(nums: number[]) {
     if (!nums.length) return null
@@ -61,12 +62,23 @@ const modalVariants: Variants = {
     },
 }
 
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+}
+
 const kpiVariants: Variants = {
     hidden: { opacity: 0, y: 12 },
     visible: (i: number) => ({
         opacity: 1, y: 0,
         transition: { delay: i * 0.06, duration: 0.3, ease: 'easeOut' as const }
     }),
+}
+
+const kpiDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
 }
 
 const sectionVariants: Variants = {
@@ -77,6 +89,11 @@ const sectionVariants: Variants = {
     }),
 }
 
+const sectionDesktopVariants: Variants = {
+    hidden: { opacity: 1, y: 0 },
+    visible: { opacity: 1, y: 0 },
+}
+
 const barVariants: Variants = {
     hidden: { scaleY: 0 },
     visible: (i: number) => ({
@@ -85,12 +102,22 @@ const barVariants: Variants = {
     }),
 }
 
+const barDesktopVariants: Variants = {
+    hidden: { scaleY: 1 },
+    visible: { scaleY: 1 },
+}
+
 const rankVariants: Variants = {
     hidden: { opacity: 0, x: -10 },
     visible: (i: number) => ({
         opacity: 1, x: 0,
         transition: { delay: i * 0.05, duration: 0.25, ease: 'easeOut' as const }
     }),
+}
+
+const rankDesktopVariants: Variants = {
+    hidden: { opacity: 1, x: 0 },
+    visible: { opacity: 1, x: 0 },
 }
 
 
@@ -141,8 +168,8 @@ function Donut({ segments }: { segments: { label: string; value: number; color: 
                     <motion.div
                         key={i}
                         className="an-legend-item"
-                        initial={{ opacity: 0, x: -8 }}
-                        animate={{ opacity: 1, x: 0 }}
+                        initial={isMobile ? { opacity: 0, x: -8 } : false}
+                        animate={isMobile ? { opacity: 1, x: 0 } : undefined}
                         transition={{ delay: 0.2 + i * 0.06, duration: 0.25 }}
                     >
                         <span className="an-legend-dot" style={{ background: arc.color }} />
@@ -174,11 +201,11 @@ function GradeHistogram({ grades }: { grades: number[] }) {
                         <motion.div
                             className="an-hist-bar"
                             style={{ background: b.color, originY: 1 }}
-                            variants={barVariants}
+                            variants={isMobile ? barVariants : barDesktopVariants}
                             custom={i}
                             initial="hidden"
                             animate="visible"
-                            whileHover={{ scaleX: 1.08 }}
+                            whileHover={isMobile ? { scaleX: 1.08 } : undefined}
                         />
                         <motion.div
                             className="an-hist-bar"
@@ -188,8 +215,8 @@ function GradeHistogram({ grades }: { grades: number[] }) {
                                 originY: 1,
                                 position: 'absolute', bottom: 0, left: 0, right: 0,
                             }}
-                            initial={{ scaleY: 0 }}
-                            animate={{ scaleY: 1 }}
+                            initial={isMobile ? { scaleY: 0 } : false}
+                            animate={isMobile ? { scaleY: 1 } : undefined}
                             transition={{ delay: 0.2 + i * 0.05, duration: 0.45, ease: 'easeOut' as const }}
                         />
                     </div>
@@ -198,8 +225,8 @@ function GradeHistogram({ grades }: { grades: number[] }) {
                         <motion.span
                             className="an-hist-count"
                             style={{ color: b.color }}
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
+                            initial={isMobile ? { opacity: 0 } : false}
+                            animate={isMobile ? { opacity: 1 } : undefined}
                             transition={{ delay: 0.4 + i * 0.05 }}
                         >
                             {counts[i]}
@@ -234,8 +261,8 @@ function ProgressRing({ value, max, label, color = '#6366f1' }: { value: number;
                     x={cx} y={cy + 2}
                     textAnchor="middle" fill="var(--text)"
                     fontSize="14" fontWeight="700" fontFamily="DM Sans"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
+                    initial={isMobile ? { opacity: 0 } : false}
+                    animate={isMobile ? { opacity: 1 } : undefined}
                     transition={{ delay: 0.4 }}
                 >
                     {Math.round(pct * 100)}%
@@ -296,9 +323,6 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
         }
     }, [subjects])
 
-
-
-
     const totalForProgress = cfgTotal && cfgTotal > 0 ? cfgTotal : stats.total
     const donutSegments = Object.entries(stats.statusMap)
         .filter(([, v]) => v > 0)
@@ -319,16 +343,16 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
             {!isClosing && (
                 <motion.div
                     className="an-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     transition={{ duration: 0.22 }}
                     onClick={e => e.target === e.currentTarget && handleClose()}
                 >
                     <motion.div
                         className="an-modal"
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -342,8 +366,8 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                             <motion.button
                                 className="an-close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>
@@ -356,7 +380,7 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                     <motion.div
                                         key={i}
                                         className="an-kpi"
-                                        variants={kpiVariants}
+                                        variants={isMobile ? kpiVariants : kpiDesktopVariants}
                                         custom={i}
                                         initial="hidden"
                                         animate="visible"
@@ -367,7 +391,13 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                 ))}
                             </div>
 
-                            <motion.div className="an-section" variants={sectionVariants} custom={0} initial="hidden" animate="visible">
+                            <motion.div
+                                className="an-section"
+                                variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                custom={0}
+                                initial="hidden"
+                                animate="visible"
+                            >
                                 <h3 className="an-section-title">Progreso general</h3>
                                 <div className="an-rings-row">
                                     <ProgressRing value={stats.approved} max={totalForProgress} label="Avance carrera" color="#6366f1" />
@@ -378,11 +408,23 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                             </motion.div>
 
                             <div className="an-grid-2">
-                                <motion.div className="an-section" variants={sectionVariants} custom={1} initial="hidden" animate="visible">
+                                <motion.div
+                                    className="an-section"
+                                    variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                    custom={1}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     <h3 className="an-section-title">Distribución de estados</h3>
                                     <Donut segments={donutSegments} />
                                 </motion.div>
-                                <motion.div className="an-section" variants={sectionVariants} custom={2} initial="hidden" animate="visible">
+                                <motion.div
+                                    className="an-section"
+                                    variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                    custom={2}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     <h3 className="an-section-title">Distribución de notas</h3>
                                     {stats.grades.length > 0
                                         ? <GradeHistogram grades={stats.grades} />
@@ -392,8 +434,8 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                         <motion.div
                                             className="an-gpa-chip"
                                             style={{ color: gradeColor(stats.gpa), borderColor: gradeColor(stats.gpa) + '33' }}
-                                            initial={{ opacity: 0, scale: 0.9 }}
-                                            animate={{ opacity: 1, scale: 1 }}
+                                            initial={isMobile ? { opacity: 0, scale: 0.9 } : false}
+                                            animate={isMobile ? { opacity: 1, scale: 1 } : undefined}
                                             transition={{ delay: 0.5 }}
                                         >
                                             Promedio general: <strong>{stats.gpa}</strong>
@@ -403,7 +445,13 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                             </div>
 
                             {stats.velocity.some(v => v > 0) && (
-                                <motion.div className="an-section" variants={sectionVariants} custom={3} initial="hidden" animate="visible">
+                                <motion.div
+                                    className="an-section"
+                                    variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                    custom={3}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     <h3 className="an-section-title">Aprobadas por cuatrimestre</h3>
                                     <div className="an-velocity-row">
                                         {stats.recentSems.map((k, i) => {
@@ -414,8 +462,8 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                                     <motion.span
                                                         className="an-vel-count"
                                                         style={{ color: val > 0 ? 'var(--accent)' : 'var(--muted-deep)' }}
-                                                        initial={{ opacity: 0 }}
-                                                        animate={{ opacity: 1 }}
+                                                        initial={isMobile ? { opacity: 0 } : false}
+                                                        animate={isMobile ? { opacity: 1 } : undefined}
                                                         transition={{ delay: 0.3 + i * 0.05 }}
                                                     >
                                                         {val}
@@ -438,7 +486,13 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                             )}
 
                             {years.length > 0 && (
-                                <motion.div className="an-section" variants={sectionVariants} custom={4} initial="hidden" animate="visible">
+                                <motion.div
+                                    className="an-section"
+                                    variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                    custom={4}
+                                    initial="hidden"
+                                    animate="visible"
+                                >
                                     <h3 className="an-section-title">Progreso por año</h3>
                                     <div className="an-year-list">
                                         {years.map((y, i) => {
@@ -450,8 +504,8 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                                 <motion.div
                                                     key={y}
                                                     className={`an-year-row${isActive ? ' an-year-row--active' : ''}`}
-                                                    initial={{ opacity: 0, x: -12 }}
-                                                    animate={{ opacity: 1, x: 0 }}
+                                                    initial={isMobile ? { opacity: 0, x: -12 } : false}
+                                                    animate={isMobile ? { opacity: 1, x: 0 } : undefined}
                                                     transition={{ delay: 0.15 + i * 0.06, duration: 0.3 }}
                                                 >
                                                     <div className="an-year-meta">
@@ -487,18 +541,24 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                             {(stats.best5.length > 0 || stats.worst5.length > 0) && (
                                 <div className="an-grid-2">
                                     {stats.best5.length > 0 && (
-                                        <motion.div className="an-section movil" variants={sectionVariants} custom={5} initial="hidden" animate="visible">
+                                        <motion.div
+                                            className="an-section movil"
+                                            variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                            custom={5}
+                                            initial="hidden"
+                                            animate="visible"
+                                        >
                                             <h3 className="an-section-title"><TrendUp size={14} color="currentColor" /> Mejores notas</h3>
                                             <div className="an-rank-list">
                                                 {stats.best5.map((s, i) => (
                                                     <motion.div
                                                         key={s.id}
                                                         className="an-rank-row"
-                                                        variants={rankVariants}
+                                                        variants={isMobile ? rankVariants : rankDesktopVariants}
                                                         custom={i}
                                                         initial="hidden"
                                                         animate="visible"
-                                                        whileHover={{ x: 4 }}
+                                                        whileHover={isMobile ? { x: 4 } : undefined}
                                                     >
                                                         <span className="an-rank-pos">{i + 1}</span>
                                                         <span className="an-rank-name">{s.name}</span>
@@ -509,18 +569,24 @@ export default function AnalyticsModal({ subjects, careerName, currentYear, tota
                                         </motion.div>
                                     )}
                                     {stats.worst5.length > 0 && stats.worst5[0]?.id !== stats.best5[0]?.id && (
-                                        <motion.div className="an-section movil" variants={sectionVariants} custom={6} initial="hidden" animate="visible">
+                                        <motion.div
+                                            className="an-section movil"
+                                            variants={isMobile ? sectionVariants : sectionDesktopVariants}
+                                            custom={6}
+                                            initial="hidden"
+                                            animate="visible"
+                                        >
                                             <h3 className="an-section-title"><TrendDown size={14} color="currentColor" /> Notas más bajas</h3>
                                             <div className="an-rank-list">
                                                 {stats.worst5.map((s, i) => (
                                                     <motion.div
                                                         key={s.id}
                                                         className="an-rank-row"
-                                                        variants={rankVariants}
+                                                        variants={isMobile ? rankVariants : rankDesktopVariants}
                                                         custom={i}
                                                         initial="hidden"
                                                         animate="visible"
-                                                        whileHover={{ x: 4 }}
+                                                        whileHover={isMobile ? { x: 4 } : undefined}
                                                     >
                                                         <span className="an-rank-pos">{i + 1}</span>
                                                         <span className="an-rank-name">{s.name}</span>

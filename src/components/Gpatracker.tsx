@@ -13,6 +13,8 @@ interface Props {
     onClose: () => void
 }
 
+const isMobile = window.innerWidth <= 768
+
 function getGpaColor(gpa: number): string {
     if (gpa >= 9) return '#4ade80'
     if (gpa >= 7) return '#86efac'
@@ -48,14 +50,14 @@ const overlayVariants: Variants = {
 
 const modalVariants: Variants = {
     hidden: { opacity: 0, scale: 0.96, y: 16 },
-    visible: {
-        opacity: 1, scale: 1, y: 0,
-        transition: { type: 'spring', damping: 26, stiffness: 280 },
-    },
-    exit: {
-        opacity: 0, scale: 0.96, y: 12,
-        transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] },
-    },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', damping: 26, stiffness: 280 } },
+    exit: { opacity: 0, scale: 0.96, y: 12, transition: { duration: 0.18, ease: [0.32, 0.72, 0, 1] } },
+}
+
+const modalDesktopVariants: Variants = {
+    hidden: { opacity: 1, scale: 1, y: 0 },
+    visible: { opacity: 1, scale: 1, y: 0 },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
 }
 
 const rowVariants: Variants = {
@@ -64,6 +66,11 @@ const rowVariants: Variants = {
         opacity: 1, x: 0,
         transition: { delay: 0.15 + i * 0.06, duration: 0.22, ease: 'easeOut' },
     }),
+}
+
+const rowDesktopVariants: Variants = {
+    hidden: { opacity: 1, x: 0 },
+    visible: { opacity: 1, x: 0 },
 }
 
 const barVariants: Variants = {
@@ -87,7 +94,6 @@ const copyLabelVariants: Variants = {
     visible: { opacity: 1, y: 0, transition: { duration: 0.15 } },
     exit: { opacity: 0, y: -6, transition: { duration: 0.1 } },
 }
-
 
 export default function GpaModal({ subjects, careerName, onClose }: Props) {
     const cardRef = useRef<HTMLDivElement>(null)
@@ -168,16 +174,16 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
             {open && (
                 <motion.div
                     className="gpa-overlay"
-                    variants={overlayVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
+                    variants={isMobile ? overlayVariants : undefined}
+                    initial={isMobile ? "hidden" : false}
+                    animate={isMobile ? "visible" : undefined}
+                    exit={isMobile ? "exit" : undefined}
                     transition={{ duration: 0.2 }}
                     onClick={handleClose}
                 >
                     <motion.div
                         className="gpa-modal"
-                        variants={modalVariants}
+                        variants={isMobile ? modalVariants : modalDesktopVariants}
                         initial="hidden"
                         animate="visible"
                         exit="exit"
@@ -191,8 +197,8 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                             <motion.button
                                 className="modal__close"
                                 onClick={handleClose}
-                                whileHover={{ scale: 1.1 }}
-                                whileTap={{ scale: 0.9 }}
+                                whileHover={isMobile ? { scale: 1.1 } : undefined}
+                                whileTap={isMobile ? { scale: 0.9 } : undefined}
                             >
                                 <X size={16} />
                             </motion.button>
@@ -211,7 +217,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                                                     <motion.span
                                                         className="gpa-card__avg"
                                                         style={{ color: getGpaColor(avg) }}
-                                                        initial={{ opacity: 0, scale: 0.7 }}
+                                                        initial={{ opacity: 0, scale: isMobile ? 0.7 : 0.9 }}
                                                         animate={{ opacity: 1, scale: 1 }}
                                                         transition={{ type: 'spring', damping: 18, stiffness: 260, delay: 0.05 }}
                                                     >
@@ -223,7 +229,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                                                     <motion.span
                                                         className="gpa-card__label-text"
                                                         style={{ color: getGpaColor(avg) }}
-                                                        initial={{ opacity: 0, y: 6 }}
+                                                        initial={{ opacity: 0, y: isMobile ? 6 : 0 }}
                                                         animate={{ opacity: 1, y: 0 }}
                                                         transition={{ delay: 0.12, duration: 0.2 }}
                                                     >
@@ -280,7 +286,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                                                         <motion.div
                                                             key={s.id}
                                                             className="gpa-card__top-row"
-                                                            variants={rowVariants}
+                                                            variants={isMobile ? rowVariants : rowDesktopVariants}
                                                             custom={i}
                                                             initial="hidden"
                                                             animate="visible"
@@ -325,7 +331,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                             <motion.button
                                 className={`btn share-copy-btn${copied ? ' share-copy-btn--copied' : ''}`}
                                 onClick={handleCopy}
-                                whileTap={{ scale: 0.96 }}
+                                whileTap={isMobile ? { scale: 0.96 } : undefined}
                             >
                                 <AnimatePresence mode="wait">
                                     {copied ? (
@@ -354,7 +360,11 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                                 </AnimatePresence>
                             </motion.button>
 
-                            <motion.button className="btn" onClick={handleShare} whileTap={{ scale: 0.96 }}>
+                            <motion.button
+                                className="btn"
+                                onClick={handleShare}
+                                whileTap={isMobile ? { scale: 0.96 } : undefined}
+                            >
                                 <Share size={16} color="currentColor" /> Compartir
                             </motion.button>
 
@@ -362,7 +372,7 @@ export default function GpaModal({ subjects, careerName, onClose }: Props) {
                                 className="btn btn--primary"
                                 onClick={handleDownload}
                                 disabled={loading}
-                                whileTap={!loading ? { scale: 0.96 } : {}}
+                                whileTap={isMobile && !loading ? { scale: 0.96 } : undefined}
                             >
                                 {loading ? 'Generando...' : 'Descargar imagen'}
                             </motion.button>
