@@ -295,14 +295,10 @@ body {
 
 
 .app {
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
     background: var(--bg);
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
 }
 
 .app::-webkit-scrollbar {
@@ -806,15 +802,12 @@ body {
 .main {
     display: flex;
     flex: 1;
-    overflow: hidden;
 }
 
 .main__content {
     flex: 1;
     padding: 24px 28px;
-    overflow-y: auto;
     background: var(--bg);
-    scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.06) transparent;
 }
 
