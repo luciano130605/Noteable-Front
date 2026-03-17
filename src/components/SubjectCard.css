@@ -1685,6 +1685,7 @@
 
   .dm-overlay {
     padding: 0;
+    background: var(--overlay-bg) !important;
     align-items: flex-end;
   }
 
